@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JARVIS 3440 Mockup</title>
+  <style>
+    :root {
+      --bg: #02060f;
+      --panel: rgba(5, 18, 34, .86);
+      --panel2: rgba(8, 28, 50, .80);
+      --line: rgba(83, 194, 255, .16);
+      --line-strong: rgba(83, 194, 255, .36);
+      --cyan: #05d8ff;
+      --cyan2: #7ee7ff;
+      --blue: #0877d8;
+      --text: #d9f6ff;
+      --muted: #83aabd;
+      --green: #45e89b;
+      --red: #ff3f67;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .stage {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 3440px;
+      height: 1440px;
+      transform: translate(-50%, -50%) scale(var(--scale));
+      transform-origin: center center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 64% 46%, rgba(0, 118, 220, .17), transparent 26%),
+        radial-gradient(circle at 64% 46%, rgba(0, 72, 160, .10), transparent 44%),
+        linear-gradient(180deg, #020713 0%, #02050c 100%);
+      box-shadow: 0 0 90px rgba(0, 0, 0, .9);
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(126,231,255,.024) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(126,231,255,.018) 1px, transparent 1px),
+        radial-gradient(circle at 64% 46%, transparent 0 384px, rgba(5,216,255,.12) 386px, transparent 388px),
+        radial-gradient(circle at 64% 46%, transparent 0 560px, rgba(5,216,255,.05) 562px, transparent 564px);
+      background-size: 64px 64px, 64px 64px, 100% 100%, 100% 100%;
+      opacity: .85;
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent, rgba(5,216,255,.16), transparent) 0 46% / 100% 1px no-repeat,
+        linear-gradient(0deg, transparent, rgba(5,216,255,.12), transparent) 64% 0 / 1px 100% no-repeat;
+      opacity: .72;
+    }
+
+    .topbar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3440px;
+      height: 108px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(2, 9, 18, .92);
+      backdrop-filter: blur(20px);
+      display: grid;
+      grid-template-columns: 470px 1fr 980px;
+      align-items: center;
+      padding: 0 48px;
+      z-index: 20;
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .mini-orb {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(5,216,255,.55);
+      background:
+        radial-gradient(circle, #dffcff 0 4px, #05d8ff 5px, transparent 9px),
+        repeating-conic-gradient(from 20deg, rgba(5,216,255,.75) 0 6deg, transparent 7deg 20deg);
+      box-shadow: 0 0 24px rgba(5,216,255,.36);
+      animation: spin 8s linear infinite;
+    }
+
+    .brand-title {
+      font-family: Georgia, serif;
+      letter-spacing: 26px;
+      font-size: 31px;
+      color: #e6fbff;
+      text-shadow: 0 0 18px rgba(126,231,255,.65);
+    }
+
+    .brand-sub {
+      margin-top: 8px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #76a8bd;
+      text-transform: uppercase;
+    }
+
+    .system-status {
+      justify-self: center;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c9e9f5;
+    }
+
+    .system-status::before {
+      content: "● ◦";
+      color: var(--cyan);
+      margin-right: 9px;
+      text-shadow: 0 0 12px rgba(5,216,255,.7);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 230px;
+      align-items: center;
+      gap: 0;
+      justify-self: end;
+      width: 980px;
+    }
+
+    .metric {
+      padding: 0 28px;
+      border-left: 1px solid var(--line);
+    }
+
+    .metric span {
+      display: block;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      color: #7aa7bb;
+      text-transform: uppercase;
+    }
+
+    .metric b {
+      display: block;
+      margin-top: 8px;
+      font-size: 21px;
+      color: var(--cyan);
+      font-weight: 700;
+      text-shadow: 0 0 12px rgba(5,216,255,.35);
+    }
+
+    .window-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 30px;
+      padding-left: 28px;
+      border-left: 1px solid var(--line);
+      font-size: 24px;
+      color: #d9f6ff;
+    }
+
+    .sidebar {
+      position: absolute;
+      left: 0;
+      top: 108px;
+      width: 300px;
+      height: 1332px;
+      padding: 42px 20px 28px;
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(5,18,32,.96), rgba(2,8,16,.90));
+      z-index: 16;
+    }
+
+    .nav-section {
+      margin: 0 0 28px;
+      color: #6e9caf;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 18px;
+      margin: 6px 0;
+      color: rgba(222, 244, 255, .78);
+      font-size: 18px;
+      border-radius: 10px;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease;
+    }
+
+    .nav-item .ico {
+      width: 25px;
+      text-align: center;
+      color: #8bdcff;
+      opacity: .9;
+      font-size: 21px;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(0, 132, 255, .86), rgba(0, 82, 165, .58));
+      box-shadow: inset 3px 0 0 #05d8ff, 0 0 32px rgba(0,138,255,.34);
+      color: #fff;
+    }
+
+    .nav-item:hover {
+      transform: translateX(8px) scale(1.02);
+      background: linear-gradient(90deg, rgba(5,216,255,.18), rgba(0,92,180,.12));
+      box-shadow: inset 0 0 0 1px rgba(126,231,255,.36), 0 0 32px rgba(5,216,255,.24);
+      color: #fff;
+    }
+
+    .user-card {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 28px;
+      height: 94px;
+      display: grid;
+      grid-template-columns: 64px 1fr 30px;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid rgba(126,231,255,.10);
+      padding-top: 16px;
+    }
+
+    .user-orb {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 1px solid rgba(5,216,255,.55);
+      background: radial-gradient(circle, #fff 0 3px, #05d8ff 4px, transparent 8px), repeating-conic-gradient(rgba(5,216,255,.70) 0 4deg, transparent 5deg 14deg);
+      box-shadow: 0 0 26px rgba(5,216,255,.34);
+    }
+
+    .user-name { color: #fff; font-size: 18px; }
+    .user-small { color: #7aa7bb; font-size: 13px; margin-bottom: 5px; text-transform: uppercase; }
+    .user-clearance { color: #9fbed0; font-size: 13px; margin-top: 5px; }
+
+    .main {
+      position: absolute;
+      left: 330px;
+      top: 108px;
+      width: 2240px;
+      height: 1112px;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 950px 1fr;
+      gap: 42px;
+      padding: 38px 0 0 0;
+    }
+
+    .chat-col {
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .chat-head {
+      height: 92px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      align-items: start;
+    }
+
+    .chat-title {
+      font-size: 24px;
+      color: var(--cyan);
+      font-weight: 650;
+      text-shadow: 0 0 16px rgba(5,216,255,.28);
+    }
+
+    .chat-sub {
+      margin-top: 10px;
+      font-size: 17px;
+      color: #a4c7d5;
+    }
+
+    .chat-sub::before { content: "●"; color: var(--green); margin-right: 8px; }
+
+    .head-actions {
+      display: flex;
+      gap: 18px;
+      justify-content: flex-end;
+      padding-top: 6px;
+    }
+
+    .head-btn {
+      height: 52px;
+      min-width: 108px;
+      padding: 0 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(126,231,255,.14);
+      background: rgba(3,12,22,.58);
+      color: rgba(222,244,255,.88);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      letter-spacing: 1.2px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .head-btn:hover {
+      transform: translateY(-4px);
+      border-color: rgba(5,216,255,.55);
+      box-shadow: 0 0 34px rgba(5,216,255,.24);
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      height: 980px;
+      overflow: hidden;
+      padding-right: 8px;
+    }
+
+    .msg {
+      position: relative;
+      min-height: 118px;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 22px;
+      padding: 22px 28px;
+      border: 1px solid rgba(126,231,255,.13);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(9,28,48,.86), rgba(4,13,24,.72));
+      box-shadow: 0 14px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.03);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .msg:hover {
+      transform: translateY(-6px) scale(1.012);
+      border-color: rgba(5,216,255,.56);
+      background: linear-gradient(180deg, rgba(12,42,72,.92), rgba(4,16,30,.76));
+      box-shadow: 0 26px 64px rgba(0,0,0,.46), 0 0 44px rgba(5,216,255,.25);
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.72);
+      color: #26313d;
+      font-size: 26px;
+    }
+
+    .avatar.jarvis {
+      background: radial-gradient(circle, #dffcff 0 3px, #05d8ff 5px, transparent 9px), repeating-conic-gradient(rgba(5,216,255,.75) 0 4deg, transparent 5deg 13deg);
+      border: 1px solid rgba(5,216,255,.60);
+      box-shadow: 0 0 26px rgba(5,216,255,.32);
+      color: transparent;
+    }
+
+    .msg-meta {
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: #89aabd;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .msg-meta b { color: var(--cyan); margin-right: 20px; }
+    .msg-meta .operator { color: #a8b8c4; }
+
+    .msg-text {
+      font-size: 19px;
+      line-height: 1.46;
+      color: rgba(235, 250, 255, .92);
+    }
+
+    .msg-link {
+      margin-top: 18px;
+      color: var(--cyan);
+      font-size: 14px;
+      letter-spacing: 1.3px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .dots {
+      position: absolute;
+      right: 26px;
+      top: 22px;
+      letter-spacing: 4px;
+      color: #8bdcff;
+      font-size: 19px;
+    }
+
+    .file-row {
+      margin-top: 16px;
+      height: 58px;
+      display: grid;
+      grid-template-columns: 44px 1fr 94px;
+      align-items: center;
+      padding: 0 18px;
+      border: 1px solid rgba(126,231,255,.13);
+      border-radius: 10px;
+      background: rgba(3,12,22,.48);
+      color: #cfefff;
+      font-size: 16px;
+    }
+
+    .core-col {
+      position: relative;
+      min-width: 0;
+    }
+
+    .orb-wrap {
+      position: absolute;
+      left: 52%;
+      top: 46%;
+      width: 760px;
+      height: 760px;
+      transform: translate(-50%, -50%);
+    }
+
+    .orb {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #f4ffff 0 1.5%, #79e7ff 2.5%, rgba(5,216,255,.64) 8%, rgba(0,90,210,.28) 25%, transparent 48%),
+        repeating-radial-gradient(circle, transparent 0 42px, rgba(5,216,255,.19) 44px, transparent 46px),
+        repeating-conic-gradient(from 0deg, rgba(5,216,255,.25) 0 .4deg, transparent .55deg 5deg);
+      filter: drop-shadow(0 0 42px rgba(5,216,255,.44));
+      animation: orbBreath 3s ease-in-out infinite;
+    }
+
+    .orb::before,
+    .orb::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      inset: 8%;
+      border: 2px solid rgba(5,216,255,.72);
+      box-shadow: 0 0 28px rgba(5,216,255,.32), inset 0 0 34px rgba(5,216,255,.10);
+    }
+
+    .orb::before {
+      background: repeating-conic-gradient(from 0deg, rgba(5,216,255,.82) 0 1.4deg, transparent 1.7deg 6deg);
+      mask-image: radial-gradient(circle, transparent 0 64%, black 65% 68%, transparent 69%);
+      animation: spin 18s linear infinite;
+    }
+
+    .orb::after {
+      inset: 20%;
+      border-style: dashed;
+      opacity: .68;
+      animation: spinReverse 14s linear infinite;
+    }
+
+    .orb-ring {
+      position: absolute;
+      inset: 3%;
+      border-radius: 50%;
+      border: 1px solid rgba(5,216,255,.22);
+      animation: pulseRing 3s ease-in-out infinite;
+    }
+
+    .orb-grid-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(5,216,255,.55), transparent);
+      transform-origin: center;
+    }
+
+    .orb-grid-line.v { transform: rotate(90deg); }
+    .orb-grid-line.d1 { transform: rotate(45deg); opacity: .45; }
+    .orb-grid-line.d2 { transform: rotate(-45deg); opacity: .45; }
+
+    .orb-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 178px;
+      height: 178px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0 10%, #7ee7ff 18%, #088be8 45%, rgba(5,216,255,.18) 68%, transparent 100%);
+      box-shadow: 0 0 42px rgba(126,231,255,.72), 0 0 120px rgba(5,216,255,.42), inset 0 0 34px rgba(255,255,255,.25);
+      animation: corePulse 1.8s ease-in-out infinite;
+    }
+
+    .core-label {
+      position: absolute;
+      left: 52%;
+      top: 74%;
+      transform: translateX(-50%);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .core-label h2 {
+      margin: 0;
+      color: var(--cyan);
+      font-size: 24px;
+      text-shadow: 0 0 18px rgba(5,216,255,.34);
+    }
+
+    .core-label p {
+      margin: 12px 0 0;
+      color: #86b1c1;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-transform: none;
+    }
+
+    .wave {
+      width: 360px;
+      height: 28px;
+      margin: 22px auto 0;
+      background: linear-gradient(90deg, transparent, rgba(5,216,255,.55), transparent);
+      clip-path: polygon(0 50%,5% 44%,8% 58%,12% 36%,15% 62%,18% 44%,22% 60%,26% 38%,30% 64%,34% 46%,38% 58%,42% 40%,46% 66%,50% 34%,54% 64%,58% 42%,62% 60%,66% 36%,70% 58%,75% 44%,80% 62%,85% 42%,90% 56%,95% 46%,100% 50%);
+      opacity: .68;
+    }
+
+    .right-col {
+      position: absolute;
+      right: 34px;
+      top: 128px;
+      width: 560px;
+      height: 1100px;
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      border: 1px solid rgba(126,231,255,.14);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(5,18,32,.88), rgba(2,8,15,.72));
+      box-shadow: 0 16px 44px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.03);
+      padding: 26px;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.012);
+      border-color: rgba(5,216,255,.42);
+      background: linear-gradient(180deg, rgba(9,31,54,.92), rgba(3,13,26,.78));
+      box-shadow: 0 28px 68px rgba(0,0,0,.42), 0 0 44px rgba(5,216,255,.20);
+    }
+
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--cyan);
+      font-size: 18px;
+      font-weight: 750;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .card-title small {
+      font-size: 14px;
+      color: var(--cyan);
+    }
+
+    .context-row {
+      display: grid;
+      grid-template-columns: 26px 1fr 100px;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0;
+      color: rgba(220,240,255,.75);
+      font-size: 16px;
+    }
+
+    .context-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 12px rgba(5,216,255,.52);
+    }
+
+    .action {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 17px;
+      margin-bottom: 13px;
+      border: 1px solid rgba(126,231,255,.11);
+      border-radius: 13px;
+      background: rgba(9,28,48,.62);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .action:hover {
+      transform: translateX(8px) scale(1.018);
+      border-color: rgba(5,216,255,.38);
+      box-shadow: 0 0 34px rgba(5,216,255,.20);
+      background: rgba(12,42,72,.76);
+    }
+
+    .action-ico {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(0,138,255,.20);
+      color: var(--cyan2);
+      font-size: 24px;
+    }
+
+    .action b { display: block; font-size: 16px; color: #edfaff; }
+    .action small { display: block; margin-top: 6px; color: #7fa9bb; font-size: 13px; }
+
+    .snapshot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .snapshot-grid div,
+    .network-box {
+      padding: 17px;
+      border: 1px solid rgba(126,231,255,.11);
+      border-radius: 12px;
+      background: rgba(2,9,18,.44);
+    }
+
+    .snapshot-grid span,
+    .network-box span { display: block; color: #7fa9bb; font-size: 13px; }
+    .snapshot-grid b,
+    .network-box b { display: block; margin-top: 10px; color: var(--cyan); font-size: 23px; }
+
+    .diag-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(126,231,255,.07);
+      color: #84adbe;
+      font-size: 14px;
+    }
+
+    .diag-row b { color: var(--green); }
+
+    .bottom-bar {
+      position: absolute;
+      left: 330px;
+      bottom: 24px;
+      width: 1665px;
+      height: 138px;
+      z-index: 18;
+      border: 1px solid rgba(126,231,255,.14);
+      border-radius: 20px;
+      background: rgba(3,12,22,.86);
+      box-shadow: 0 18px 56px rgba(0,0,0,.36);
+      padding: 18px 24px;
+    }
+
+    .input-row {
+      height: 58px;
+      display: grid;
+      grid-template-columns: 58px 1fr 58px 66px;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .round-btn, .send-btn {
+      height: 54px;
+      border-radius: 50%;
+      border: 1px solid rgba(126,231,255,.18);
+      background: rgba(5,18,32,.82);
+      color: #dff8ff;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .send-btn {
+      background: linear-gradient(180deg, #0c8cff, #0658b5);
+      border-color: rgba(126,231,255,.38);
+    }
+
+    .round-btn:hover, .send-btn:hover {
+      transform: translateY(-4px) scale(1.06);
+      border-color: rgba(5,216,255,.62);
+      box-shadow: 0 0 42px rgba(5,216,255,.38);
+    }
+
+    .input {
+      height: 54px;
+      border: 1px solid rgba(126,231,255,.12);
+      border-radius: 13px;
+      background: rgba(7,22,38,.76);
+      color: #6f9bae;
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      font-size: 18px;
+      transition: box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .input:hover {
+      border-color: rgba(5,216,255,.72);
+      background: rgba(9,32,55,.86);
+      box-shadow: 0 0 34px rgba(5,216,255,.30), inset 0 0 0 1px rgba(126,231,255,.12);
+    }
+
+    .chips {
+      display: flex;
+      gap: 22px;
+      margin-top: 18px;
+    }
+
+    .chip {
+      height: 36px;
+      padding: 0 26px;
+      border: 1px solid rgba(126,231,255,.12);
+      border-radius: 999px;
+      background: rgba(4,14,26,.62);
+      color: #87d9ff;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .chip:hover {
+      transform: translateY(-3px);
+      border-color: rgba(5,216,255,.46);
+      box-shadow: 0 0 28px rgba(5,216,255,.20);
+      background: rgba(12,42,72,.72);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spinReverse { to { transform: rotate(-360deg); } }
+    @keyframes pulseRing { 0%,100% { transform: scale(1); opacity: .54; } 50% { transform: scale(1.035); opacity: 1; } }
+    @keyframes orbBreath { 0%,100% { filter: drop-shadow(0 0 42px rgba(5,216,255,.38)) brightness(1); transform: scale(1); } 50% { filter: drop-shadow(0 0 62px rgba(5,216,255,.58)) brightness(1.18); transform: scale(1.025); } }
+    @keyframes corePulse { 0%,100% { transform: translate(-50%, -50%) scale(.95); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <div class="stage" id="stage">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mini-orb"></div>
+          <div>
+            <div class="brand-title">JARVIS</div>
+            <div class="brand-sub">AI Assistant Interface v2.1.4</div>
+          </div>
+        </div>
+        <div class="system-status">System Status: <b style="color:var(--cyan)">Optimal</b></div>
+        <div class="metrics">
+          <div class="metric"><span>CPU</span><b>18%</b></div>
+          <div class="metric"><span>Memory</span><b>6.2 / 12.0 GB</b></div>
+          <div class="metric"><span>Temp</span><b>34.2 °C</b></div>
+          <div class="metric"><span>Network</span><b>1.2 GB/s</b></div>
+          <div class="window-buttons"><span>↻</span><span>⚙</span><span>−</span><span>□</span><span>×</span></div>
+        </div>
+      </header>
+
+      <aside class="sidebar">
+        <div class="nav-section">Main</div>
+        <div class="nav-item"><span class="ico">⌂</span>Home</div>
+        <div class="nav-item active"><span class="ico">☏</span>Conversations <span style="margin-left:auto">›</span></div>
+        <div class="nav-item"><span class="ico">▤</span>Knowledge Base</div>
+        <div class="nav-item"><span class="ico">⌘</span>Data Streams</div>
+        <div class="nav-item"><span class="ico">☷</span>Tasks & Automation</div>
+        <div class="nav-section" style="margin-top:36px">System</div>
+        <div class="nav-item"><span class="ico">♡</span>Diagnostics</div>
+        <div class="nav-item"><span class="ico">⌁</span>Neural Network</div>
+        <div class="nav-item"><span class="ico">⌬</span>Memory Banks</div>
+        <div class="nav-item"><span class="ico">▣</span>Core Systems</div>
+        <div class="nav-item"><span class="ico">⬡</span>Security Center</div>
+        <div class="nav-section" style="margin-top:36px">Tools</div>
+        <div class="nav-item"><span class="ico">{}</span>Code Interpreter</div>
+        <div class="nav-item"><span class="ico">⌁</span>Data Analyzer</div>
+        <div class="nav-item"><span class="ico">□</span>File Manager</div>
+        <div class="nav-item"><span class="ico">◎</span>Web Search</div>
+        <div class="nav-item"><span class="ico">▧</span>API Console</div>
+        <div class="user-card">
+          <div class="user-orb"></div>
+          <div><div class="user-small">User</div><div class="user-name">Operator</div><div class="user-clearance">Clearance: Alpha-1</div></div>
+          <div style="color:#8bdcff;font-size:22px">•••</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="chat-col">
+          <div class="chat-head">
+            <div><div class="chat-title">Conversation with JARVIS</div><div class="chat-sub">Online&nbsp;&nbsp;•&nbsp;&nbsp;Ready to assist</div></div>
+            <div class="head-actions"><div class="head-btn">✧ PIN</div><div class="head-btn">⊕ NEW CHAT</div></div>
+          </div>
+          <div class="messages">
+            <article class="msg"><div class="avatar">●</div><div><div class="msg-meta"><span class="operator">OPERATOR</span> 11:42 AM</div><div class="msg-text">Give me a summary of today’s system performance<br>and any important alerts.</div></div><div class="dots">•••</div></article>
+            <article class="msg"><div class="avatar jarvis"></div><div><div class="msg-meta"><b>JARVIS</b> 11:42 AM</div><div class="msg-text">All systems are operating within normal parameters.<br>CPU usage is at 18%, memory usage at 52%.<br>No critical alerts. 2 informational notifications.</div><div class="msg-link">VIEW DETAILS</div></div><div class="dots">•••</div></article>
+            <article class="msg"><div class="avatar">●</div><div><div class="msg-meta"><span class="operator">OPERATOR</span> 11:43 AM</div><div class="msg-text">Show me the latest data from the neural network training<br>pipeline and any anomalies.</div></div><div class="dots">•••</div></article>
+            <article class="msg"><div class="avatar jarvis"></div><div><div class="msg-meta"><b>JARVIS</b> 11:43 AM</div><div class="msg-text">Training pipeline is running smoothly. Latest model accuracy: 97.3%.<br>No anomalies detected. All metrics are within expected ranges.</div><div class="msg-link">VIEW PIPELINE DASHBOARD</div></div><div class="dots">•••</div></article>
+            <article class="msg"><div class="avatar">●</div><div><div class="msg-meta"><span class="operator">OPERATOR</span> 11:44 AM</div><div class="msg-text">Draft a report on system optimization opportunities<br>based on current diagnostics.</div></div><div class="dots">•••</div></article>
+            <article class="msg"><div class="avatar jarvis"></div><div><div class="msg-meta"><b>JARVIS</b> 11:44 AM</div><div class="msg-text">Report generated. Identified 3 optimization opportunities<br>that could improve efficiency by up to 12%.</div><div class="file-row"><div style="color:var(--cyan);font-size:25px">▤</div><div><b>system_optimization_report.pdf</b><br><span style="color:#84adbe;font-size:13px">2.4 MB • PDF Document</span></div><div style="color:#8bdcff;text-align:right;font-size:24px">⇩ ↗</div></div></div><div class="dots">•••</div></article>
+          </div>
+        </section>
+
+        <section class="core-col">
+          <div class="orb-wrap">
+            <div class="orb-ring"></div>
+            <div class="orb"><div class="orb-grid-line"></div><div class="orb-grid-line v"></div><div class="orb-grid-line d1"></div><div class="orb-grid-line d2"></div><div class="orb-core"></div></div>
+          </div>
+          <div class="core-label"><h2>JARVIS CORE</h2><p>Adaptive&nbsp;&nbsp;•&nbsp;&nbsp;Proactive&nbsp;&nbsp;•&nbsp;&nbsp;Reliable</p><div class="wave"></div></div>
+        </section>
+      </main>
+
+      <aside class="right-col">
+        <section class="card" style="height:260px"><div class="card-title">Conversation Context <small>• View All</small></div><div class="context-row"><div class="context-dot"></div><div>System Performance Summary</div><div>11:42 AM</div></div><div class="context-row"><div class="context-dot"></div><div>Neural Network Pipeline</div><div>11:43 AM</div></div><div class="context-row"><div class="context-dot"></div><div>Optimization Report</div><div>11:44 AM</div></div></section>
+        <section class="card" style="height:420px"><div class="card-title">Quick Actions</div><div class="action"><div class="action-ico">▣</div><div><b>Run System Diagnostics</b><small>Full system health check</small></div></div><div class="action"><div class="action-ico">⌘</div><div><b>Analyze Data Stream</b><small>Real-time data analysis</small></div></div><div class="action"><div class="action-ico">⌬</div><div><b>Search Knowledge Base</b><small>Find information quickly</small></div></div><div class="action"><div class="action-ico">▤</div><div><b>Generate Report</b><small>Create detailed reports</small></div></div><div class="action" style="grid-template-columns:1fr 20px"><div><b>Custom Command</b></div><div>›</div></div></section>
+        <section class="card" style="height:420px"><div class="card-title">System Snapshot <small>• Live</small></div><div class="snapshot-grid"><div><span>CPU</span><b>18%</b></div><div><span>Memory</span><b>52%</b></div><div><span>Storage</span><b>68%</b></div></div><div style="display:grid;grid-template-columns:170px 1fr;gap:14px"><div class="network-box"><span>Network</span><b>1.2 GB/s</b></div><div><div class="diag-row"><span>Active Processes</span><b>142</b></div><div class="diag-row"><span>System Uptime</span><b>3d 14h 28m</b></div><div class="diag-row"><span>Temperature</span><b>34.2 °C</b></div><div class="diag-row"><span>Power Status</span><b>Optimal</b></div></div></div></section>
+      </aside>
+
+      <section class="bottom-bar">
+        <div class="input-row"><div class="round-btn">≋</div><div class="input">Type your command or question...</div><div class="round-btn">＋</div><div class="send-btn">➤</div></div>
+        <div class="chips"><div class="chip">⊙ Summarize recent activity</div><div class="chip">⌘ Check security status</div><div class="chip">⌁ Analyze performance</div><div class="chip">▣ Help me with coding</div><div class="chip">◎ Search knowledge base</div></div>
+      </section>
+    </div>
+  </div>
+  <script>
+    function resizeStage() {
+      const scale = Math.min(window.innerWidth / 3440, window.innerHeight / 1440);
+      document.getElementById('stage').style.setProperty('--scale', scale);
+    }
+    window.addEventListener('resize', resizeStage);
+    resizeStage();
+  </script>
+</body>
+</html>
