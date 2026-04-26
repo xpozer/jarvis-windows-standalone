@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JARVIS Statische Diagnose</title>
+  <style>
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at center,#06233b 0%,#02040a 58%,#000 100%); color:#e8f6ff; font-family:Consolas,"Courier New",monospace; padding:24px; box-sizing:border-box; }
+    .card { max-width:1000px; margin:0 auto; border:1px solid rgba(0,190,255,.45); border-radius:18px; padding:24px; background:rgba(0,10,22,.86); box-shadow:0 0 60px rgba(0,180,255,.18); }
+    h1 { color:#7ee7ff; margin-top:0; }
+    button { background:rgba(0,180,255,.18); color:#e8f6ff; border:1px solid rgba(0,180,255,.45); border-radius:10px; padding:10px 14px; cursor:pointer; margin:6px 6px 0 0; }
+    textarea { width:100%; box-sizing:border-box; background:#010309; color:#dff8ff; border:1px solid rgba(0,190,255,.25); border-radius:12px; padding:12px; min-height:260px; white-space:pre-wrap; }
+    .row { line-height:1.8; margin:12px 0; }
+    .ok { color:#9cffc7; } .err { color:#ff9bb5; } .warn { color:#ffd38a; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>JARVIS Statische Diagnose</h1>
+    <div class="row">
+      <div>Frontend HTML: <span class="ok">geladen</span></div>
+      <div>Aktuelle URL: <span id="url"></span></div>
+      <div>Backend /docs: <span id="backend">noch nicht getestet</span></div>
+      <div>Vite Client: <span id="vite">prüfe...</span></div>
+    </div>
+    <button onclick="testBackend()">Backend testen</button>
+    <button onclick="testVite()">Vite prüfen</button>
+    <button onclick="location.href='/?safe=1'">React Safe Mode öffnen</button>
+    <button onclick="location.href='/?diag=1'">Normale UI mit Diagnose öffnen</button>
+    <button onclick="clearAll()">Storage löschen</button>
+    <button onclick="copyLog()">Log kopieren</button>
+    <button onclick="downloadLog()">Log speichern</button>
+    <h3>Log</h3>
+    <textarea id="log" readonly></textarea>
+  </div>
+<script>
+const lines=[];
+function add(level,msg){ const line='['+new Date().toLocaleTimeString()+'] ['+level+'] '+msg; lines.push(line); render(); }
+function render(){ document.getElementById('log').value = lines.join('\n') + '\n\n--- localStorage boot log ---\n' + (localStorage.getItem('jarvis_static_boot_log') || ''); }
+window.onerror=(m,s,l,c,e)=>add('ERROR', m+' @ '+s+':'+l+':'+c+'\n'+(e&&e.stack?e.stack:''));
+window.onunhandledrejection=e=>add('PROMISE', e.reason && (e.reason.stack || e.reason.message) || String(e.reason));
+document.getElementById('url').textContent=location.href;
+add('INFO','diagnose.html geladen, ohne React');
+async function testBackend(){
+  const el=document.getElementById('backend'); el.textContent='prüfe...'; el.className='warn';
+  try { const r=await fetch('http://127.0.0.1:8000/docs',{cache:'no-store'}); el.textContent=r.status+' '+(r.ok?'OK':'Fehler'); el.className=r.ok?'ok':'err'; add(r.ok?'OK':'WARN', 'Backend /docs Status '+r.status); }
+  catch(e){ el.textContent='nicht erreichbar'; el.className='err'; add('ERROR', 'Backend nicht erreichbar: '+(e.stack||e)); }
+}
+async function testVite(){
+  const el=document.getElementById('vite'); el.textContent='prüfe...'; el.className='warn';
+  try { const r=await fetch('/src/main.tsx',{cache:'no-store'}); const text=await r.text(); el.textContent=r.status+', main.tsx '+text.length+' Zeichen'; el.className=r.ok?'ok':'err'; add(r.ok?'OK':'WARN', 'Vite main.tsx Status '+r.status+', Länge '+text.length); }
+  catch(e){ el.textContent='nicht erreichbar'; el.className='err'; add('ERROR', 'Vite Test fehlgeschlagen: '+(e.stack||e)); }
+}
+function clearAll(){ localStorage.clear(); sessionStorage.clear(); add('OK','localStorage und sessionStorage gelöscht'); }
+async function copyLog(){ const t=document.getElementById('log').value; try{ await navigator.clipboard.writeText(t); add('OK','Log kopiert'); } catch(e){ add('ERROR','Kopieren fehlgeschlagen: '+e); } }
+function downloadLog(){ const blob=new Blob([document.getElementById('log').value],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='jarvis_static_diagnose.log'; a.click(); }
+testVite(); testBackend(); render();
+</script>
+</body>
+</html>
