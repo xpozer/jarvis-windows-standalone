@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,7 +47,13 @@ classify_agent = core.classify_agent
 ollama_online = core.ollama_online
 
 
-app = FastAPI(title="JARVIS Windows Standalone API", version=core.app_version())
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await on_startup()
+    yield
+
+
+app = FastAPI(title="JARVIS Windows Standalone API", version=core.app_version(), lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,7 +64,6 @@ app.add_middleware(
 )
 
 
-@app.on_event("startup")
 async def on_startup():
     write_json(AGENT_STATUS_FILE, {
         "active": None,

@@ -33,13 +33,14 @@ class AgentMemory:
         self._data: dict = self._load()
 
     def _load(self) -> dict:
-        if self.file.exists():
-            try:
-                with open(self.file, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                return {"_created": datetime.now().isoformat(), "_entries": {}}
-        return {"_created": datetime.now().isoformat(), "_entries": {}}
+        with _lock:
+            if self.file.exists():
+                try:
+                    with open(self.file, "r", encoding="utf-8") as f:
+                        return json.load(f)
+                except Exception:
+                    return {"_created": datetime.now().isoformat(), "_entries": {}}
+            return {"_created": datetime.now().isoformat(), "_entries": {}}
 
     def _save(self):
         self._data["_updated"] = datetime.now().isoformat()

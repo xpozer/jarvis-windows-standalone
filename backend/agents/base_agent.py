@@ -5,9 +5,10 @@ Gemeinsame Basis fuer alle Sub-Agenten.
 
 import json
 import urllib.request
-import os
 from typing import Generator
 from dataclasses import dataclass, field
+
+from config import OLLAMA_OPENAI
 
 
 @dataclass
@@ -38,7 +39,7 @@ class BaseAgent:
             "stream": False, "temperature": temperature,
         }).encode()
         req = urllib.request.Request(
-            os.environ.get("JARVIS_OLLAMA_BASE", "http://127.0.0.1:11434").rstrip("/") + "/v1/chat/completions", data=payload,
+            OLLAMA_OPENAI, data=payload,
             headers={"Content-Type": "application/json"}, method="POST"
         )
         try:
@@ -54,7 +55,7 @@ class BaseAgent:
             "stream": True, "temperature": temperature,
         }).encode()
         req = urllib.request.Request(
-            os.environ.get("JARVIS_OLLAMA_BASE", "http://127.0.0.1:11434").rstrip("/") + "/v1/chat/completions", data=payload,
+            OLLAMA_OPENAI, data=payload,
             headers={"Content-Type": "application/json"}, method="POST"
         )
         try:
@@ -76,7 +77,7 @@ class BaseAgent:
         if text.startswith("```"):
             parts = text.split("```")
             text = parts[1] if len(parts) > 1 else text
-            if text.startswith("json"): text = text[4:]
+            if text.startswith("json"): text = text[4:].lstrip("\n")
         try:
             return json.loads(text.strip())
         except Exception:

@@ -13,15 +13,20 @@ Julien: Arbeitsplaner Elektro, Bayer/Tectrion Leverkusen, SAP PM, VDE-Normen,
 IM-Prüfung (BwHa, MIKP, ZIB, NTG), Path of Exile.
 Direkt zur Antwort. Deutsch. Kein KI-Ton."""
 
+
 class GeneralAgent(BaseAgent):
-    name        = "general"
+    name = "general"
     description = "Allgemeine Fragen, Gespräch, Fallback"
 
     def run(self, ctx: AgentContext) -> AgentResult:
-        self.pmem = AgentMemory("general")
-        pmem_summary = self.pmem.get_summary()
+        pmem = AgentMemory("general")
+        pmem_summary = pmem.get_summary()
         mem = "\n".join(f"- {f}" for f in ctx.memory_facts) if ctx.memory_facts else ""
-        sys_content = SYSTEM + (f"\n\nGedächtnis:\n{mem}" if mem else "")
+        sys_content = SYSTEM
+        if pmem_summary:
+            sys_content += f"\n\nPersistentes Gedächtnis:\n{pmem_summary}"
+        if mem:
+            sys_content += f"\n\nGedächtnis:\n{mem}"
         messages = [
             {"role": "system", "content": sys_content},
             *[{"role": m["role"], "content": m["content"]} for m in ctx.history[-6:]],
@@ -31,8 +36,14 @@ class GeneralAgent(BaseAgent):
         return AgentResult(agent=self.name, content=content, tool_log=["General-Fallback"])
 
     def run_stream(self, ctx):
+        pmem = AgentMemory("general")
+        pmem_summary = pmem.get_summary()
         mem = "\n".join(f"- {f}" for f in ctx.memory_facts) if ctx.memory_facts else ""
-        sys_content = SYSTEM + (f"\n\nGedächtnis:\n{mem}" if mem else "")
+        sys_content = SYSTEM
+        if pmem_summary:
+            sys_content += f"\n\nPersistentes Gedächtnis:\n{pmem_summary}"
+        if mem:
+            sys_content += f"\n\nGedächtnis:\n{mem}"
         messages = [
             {"role": "system", "content": sys_content},
             *[{"role": m["role"], "content": m["content"]} for m in ctx.history[-6:]],

@@ -5,12 +5,14 @@ Wird beim Start initialisiert und zur Laufzeit aktualisiert.
 """
 from __future__ import annotations
 import json
+import threading
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 REGISTRY_FILE = Path(__file__).resolve().parent.parent / "data" / "agents.json"
+_registry_lock = threading.Lock()
 
 # Statische Agentendefinitionen — Grundwahrheit
 AGENT_DEFINITIONS: list[dict] = [
@@ -166,7 +168,7 @@ def _save_registry(agents: list[dict]) -> None:
     tmp.replace(REGISTRY_FILE)
 
 
-def init_registry() -> list[dict]:
+def _init_registry_unlocked() -> list[dict]:
     """Initialisiert Registry aus Definitionen, bewahrt gespeicherten Status."""
     saved = {a["id"]: a for a in _load_registry()}
     agents = []
@@ -191,6 +193,11 @@ def init_registry() -> list[dict]:
     return agents
 
 
+def init_registry() -> list[dict]:
+    with _registry_lock:
+        return _init_registry_unlocked()
+
+
 def get_all() -> list[dict]:
     agents = _load_registry()
     if not agents:
@@ -208,25 +215,31 @@ def update_status(
     last_action: Optional[str] = None,
     error: bool = False,
 ) -> Optional[dict]:
-    agents = get_all()
-    for agent in agents:
-        if agent["id"] == agent_id:
-            agent["status"] = status
-            if last_action:
-                agent["last_action"] = last_action
-                agent["last_ts"] = datetime.now().isoformat(timespec="seconds")
-            if error:
-                agent["error_count"] = agent.get("error_count", 0) + 1
-            agent["call_count"] = agent.get("call_count", 0) + 1
-            _save_registry(agents)
-            return agent
-    return None
+    with _registry_lock:
+        agents = _load_registry()
+        if not agents:
+            agents = _init_registry_unlocked()
+        for agent in agents:
+            if agent["id"] == agent_id:
+                agent["status"] = status
+                if last_action:
+                    agent["last_action"] = last_action
+                    agent["last_ts"] = datetime.now().isoformat(timespec="seconds")
+                if error:
+                    agent["error_count"] = agent.get("error_count", 0) + 1
+                agent["call_count"] = agent.get("call_count", 0) + 1
+                _save_registry(agents)
+                return agent
+        return None
 
 
 def reset_all_status() -> None:
     """Beim Backend-Start: alle Agenten auf idle setzen."""
-    agents = get_all()
-    for agent in agents:
-        if agent.get("status") not in ("idle", "disabled"):
-            agent["status"] = "idle"
-    _save_registry(agents)
+    with _registry_lock:
+        agents = _load_registry()
+        if not agents:
+            agents = _init_registry_unlocked()
+        for agent in agents:
+            if agent.get("status") not in ("idle", "disabled"):
+                agent["status"] = "idle"
+        _save_registry(agents)

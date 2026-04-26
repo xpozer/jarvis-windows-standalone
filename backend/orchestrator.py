@@ -72,7 +72,7 @@ confidence: 0.0-1.0
 
 def route(user_input: str, ctx: AgentContext) -> dict:
     """Bestimmt per LLM welcher Agent zustaendig ist."""
-    dummy = GeneralAgent()
+    agent = AGENTS["general"]
     # Awareness-Kontext fuer besseres Routing
     awareness_ctx = ""
     if _HAS_AWARENESS:
@@ -87,8 +87,8 @@ def route(user_input: str, ctx: AgentContext) -> dict:
         {"role": "system", "content": ROUTER_SYSTEM},
         {"role": "user",   "content": routing_input},
     ]
-    raw = dummy.llm(messages, ctx, temperature=0.1)
-    result = dummy.extract_json(raw)
+    raw = agent.llm(messages, ctx, temperature=0.1)
+    result = agent.extract_json(raw)
     # Fallback wenn JSON kaputt
     if "agent" not in result or result["agent"] not in AGENTS:
         return {"agent": "general", "confidence": 0.5, "reason": "Fallback"}
@@ -103,8 +103,8 @@ def orchestrate_stream(
     user_input:   str,
     api_url:      str   = "http://localhost:8000",
     model:        str   = "qwen3:8b",
-    memory_facts: list  = [],
-    history:      list  = [],
+    memory_facts: list | None = None,
+    history:      list | None = None,
 ) -> Generator[str, None, None]:
     """
     Streamt SSE-Events:
@@ -114,6 +114,9 @@ def orchestrate_stream(
       {event:"done",     agent:"...", tool_log:[...]}
       {event:"error",    message:"..."}
     """
+    memory_facts = memory_facts or []
+    history = history or []
+
     # Awareness in Extra-Kontext
     extra = {}
     if _HAS_AWARENESS:
