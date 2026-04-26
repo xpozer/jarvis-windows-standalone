@@ -35,6 +35,7 @@ from routes.skills import router as skills_router
 from routes.system import router as system_router
 from routes.email import router as email_router
 from routes.export import router as export_router
+from routes.metrics import router as metrics_router
 
 from services import _runtime as core
 
@@ -110,6 +111,7 @@ app.include_router(skills_router)
 app.include_router(system_router)
 app.include_router(email_router)
 app.include_router(export_router)
+app.include_router(metrics_router)
 
 
 @app.get("/", include_in_schema=False)
