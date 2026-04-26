@@ -4,11 +4,32 @@ import "./runtime-control-panel.css";
 type RuntimeStatus = {
   ok?: boolean;
   primitives?: Record<string, { status?: string; facts?: number; events?: number; requests?: number; pending_approval?: number; agents?: number }>;
+  awareness_runtime?: AwarenessStatus;
   workflow_runtime?: { workflows?: number; runs?: number; sidecars?: number; self_healing?: string; authority_gating?: string; nodes?: { count?: number } };
   goals?: number;
   workflow_nodes?: number;
   authority_gating?: string;
   local_first?: boolean;
+};
+
+type AwarenessSnapshot = {
+  ok?: boolean;
+  captured_at?: string;
+  host?: string;
+  os?: string;
+  active_window?: { process_name?: string; window_title?: string; pid?: number; platform?: string; error?: string };
+  activity?: { category?: string; summary?: string; confidence?: number };
+  privacy?: { mode?: string; screenshots_saved?: boolean; ocr_enabled?: boolean; cloud_vision?: boolean };
+  processes?: Array<{ image?: string; pid?: string; memory?: string }>;
+};
+
+type AwarenessStatus = {
+  ok?: boolean;
+  mode?: string;
+  capture?: string;
+  ocr?: string;
+  screen_vision?: string;
+  current?: { current?: { payload?: AwarenessSnapshot; summary?: string; app_name?: string; window_title?: string; created_at?: string } };
 };
 
 type Fact = { id: string; fact_text: string; source_type?: string; importance?: number; confidence?: number; created_at?: string; tags?: string[] };
@@ -54,9 +75,15 @@ function prettyDate(value?: string) {
   try { return new Date(value).toLocaleString(); } catch { return value; }
 }
 
+function pct(value?: number) {
+  return typeof value === "number" ? `${Math.round(value * 100)}%` : "n/a";
+}
+
 export function RuntimeControlPanel({ onSend }: Props) {
   const [data, setData] = useState<PanelData>({ facts: [], actions: [], goals: [], workflows: [], sidecars: [] });
+  const [awareness, setAwareness] = useState<AwarenessSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const [error, setError] = useState("");
   const [factText, setFactText] = useState("");
   const [goalTitle, setGoalTitle] = useState("");
@@ -67,15 +94,18 @@ export function RuntimeControlPanel({ onSend }: Props) {
     setLoading(true);
     setError("");
     try {
-      const [status, facts, actions, goals, workflows, sidecars] = await Promise.all([
+      const [status, facts, actions, goals, workflows, sidecars, awarenessStatus] = await Promise.all([
         api<RuntimeStatus>("/api/runtime/status"),
         api<{ facts: Fact[] }>("/api/runtime/memory/facts?limit=12"),
         api<{ actions: ActionRequest[] }>("/api/runtime/actions?limit=12"),
         api<{ goals: Goal[] }>("/api/runtime/goals?limit=12"),
         api<{ workflows: Workflow[] }>("/api/runtime/workflows?limit=12"),
         api<{ sidecars: Sidecar[] }>("/api/runtime/sidecars?limit=12"),
+        api<AwarenessStatus>("/api/runtime/awareness/current"),
       ]);
       setData({ status, facts: facts.facts || [], actions: actions.actions || [], goals: goals.goals || [], workflows: workflows.workflows || [], sidecars: sidecars.sidecars || [] });
+      const payload = awarenessStatus.current?.current?.payload || status.awareness_runtime?.current?.current?.payload || null;
+      if (payload) setAwareness(payload);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -88,6 +118,20 @@ export function RuntimeControlPanel({ onSend }: Props) {
     const id = window.setInterval(() => void refresh(), 6000);
     return () => window.clearInterval(id);
   }, []);
+
+  async function captureAwareness() {
+    setCapturing(true);
+    setError("");
+    try {
+      const snapshot = await api<AwarenessSnapshot>("/api/runtime/awareness/capture", { method: "POST" });
+      setAwareness(snapshot);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCapturing(false);
+    }
+  }
 
   async function addFact() {
     const clean = factText.trim();
@@ -165,6 +209,7 @@ export function RuntimeControlPanel({ onSend }: Props) {
         </div>
         <div className="runtime-control-actions">
           <button onClick={() => onSend("Fasse mir den aktuellen JARVIS Runtime Status zusammen")}>ASK JARVIS</button>
+          <button onClick={() => void captureAwareness()}>{capturing ? "CAPTURING" : "CAPTURE AWARENESS"}</button>
           <button onClick={() => void refresh()}>{loading ? "LÄDT" : "REFRESH"}</button>
         </div>
       </div>
@@ -175,7 +220,7 @@ export function RuntimeControlPanel({ onSend }: Props) {
         {cards.map((card) => <div className="runtime-control-stat" key={card.label}><span>{card.label}</span><b>{card.value}</b><em>{card.sub}</em></div>)}
       </div>
 
-      <div className="runtime-control-grid">
+      <div className="runtime-control-grid runtime-control-grid-awareness">
         <section className="runtime-control-card runtime-control-card-tall">
           <div className="runtime-control-card-title"><h2>Memory</h2><span>semantic facts</span></div>
           <div className="runtime-control-form">
@@ -185,6 +230,21 @@ export function RuntimeControlPanel({ onSend }: Props) {
           <div className="runtime-control-list">
             {data.facts.map((fact) => <article key={fact.id}><b>{fact.fact_text}</b><span>{fact.source_type} · importance {fact.importance ?? 0} · {prettyDate(fact.created_at)}</span></article>)}
             {!data.facts.length && <p className="runtime-control-empty">Noch keine Fakten gespeichert.</p>}
+          </div>
+        </section>
+
+        <section className="runtime-control-card runtime-awareness-card">
+          <div className="runtime-control-card-title"><h2>Awareness</h2><span>local snapshot</span></div>
+          <div className="runtime-awareness-live">
+            <b>{awareness?.active_window?.process_name || "Noch kein Snapshot"}</b>
+            <span>{awareness?.active_window?.window_title || "Klicke Capture Awareness, um aktives Fenster und Kontext lokal zu erfassen."}</span>
+            <em>{awareness?.activity?.category || "idle"} · confidence {pct(awareness?.activity?.confidence)}</em>
+          </div>
+          <div className="runtime-awareness-meta">
+            <div><span>Host</span><b>{awareness?.host || "n/a"}</b></div>
+            <div><span>PID</span><b>{awareness?.active_window?.pid || "n/a"}</b></div>
+            <div><span>Privacy</span><b>{awareness?.privacy?.mode || "local_first"}</b></div>
+            <div><span>OCR</span><b>{awareness?.privacy?.ocr_enabled ? "on" : "off"}</b></div>
           </div>
         </section>
 
