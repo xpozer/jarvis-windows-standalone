@@ -62,6 +62,27 @@ export function SystemCenterPage() {
     await load();
   }
 
+  async function checkGithubUpdate() {
+    setStatus("Pruefe GitHub Release...");
+    const res = await fetch(`${API}/update/github/check`);
+    const data = await res.json();
+    setUpdate(data);
+    setStatus(res.ok ? "GitHub Release geprueft" : `GitHub Fehler: ${data.detail || res.status}`);
+  }
+
+  async function stageGithubUpdate() {
+    setStatus("Stage GitHub Update...");
+    const res = await fetch(`${API}/update/github/stage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json();
+    setUpdate(data);
+    setStatus(res.ok ? "GitHub Update gestaged" : `GitHub Fehler: ${data.detail || res.status}`);
+    await load();
+  }
+
   useEffect(() => { load(); }, []);
 
   return (
@@ -77,6 +98,8 @@ export function SystemCenterPage() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <button className="termin-parse-btn" onClick={createBackup}>BACKUP ERSTELLEN</button>
           <button className="termin-parse-btn" onClick={createDiag}>DIAGNOSE ZIP</button>
+          <button className="termin-parse-btn" onClick={checkGithubUpdate}>GITHUB PRUEFEN</button>
+          <button className="termin-parse-btn" onClick={stageGithubUpdate}>GITHUB UPDATE STAGEN</button>
           <button className="termin-parse-btn" onClick={prepareUpdate}>UPDATE VORBEREITEN</button>
           <button className="termin-parse-btn" onClick={load}>AKTUALISIEREN</button>
         </div>

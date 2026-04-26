@@ -70,7 +70,7 @@ OLLAMA_OPENAI = OLLAMA_BASE.rstrip("/") + "/v1/chat/completions"
 DEFAULT_MODEL = os.environ.get("JARVIS_MODEL", "qwen3:8b")
 
 # B5 Productization
-APP_VERSION = "B5.0.0"
+APP_VERSION = "B6.5.1"
 EXPORT_DIR = BASE_DIR / "exports"
 UPDATE_DIR = BASE_DIR / "updates"
 UPDATE_STAGING_DIR = UPDATE_DIR / "staging"
@@ -80,4 +80,3 @@ INSTALL_STATE_FILE = DATA_DIR / "install_state.json"
 
 for _dir in (EXPORT_DIR, UPDATE_DIR, UPDATE_STAGING_DIR):
     _dir.mkdir(exist_ok=True)
-

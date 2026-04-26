@@ -1,6 +1,6 @@
 {
   "app_name": "JARVIS Windows Standalone",
-  "version": "B6.5.0",
+  "version": "B6.5.1",
   "default_install_dir": "%LOCALAPPDATA%\\JARVIS_WINDOWS_STANDALONE",
   "model": "qwen3:8b",
   "winget_dependencies": [
@@ -45,6 +45,7 @@
     "scripts": [
       "PRODUCT_INSTALLER.bat",
       "UPDATE_JARVIS.bat",
+      "CHECK_GITHUB_UPDATE.bat",
       "REPAIR_JARVIS.bat",
       "UNINSTALL_JARVIS.bat",
       "EXPORT_JARVIS_DATA.bat"
@@ -118,5 +119,9 @@
   "installer_hotfix_6": {
     "fix": "INSTALL_JARVIS.ps1 winget install now uses ProcessStartInfo-based Invoke-NativeLogged instead of 2>&1 | Tee-Object.",
     "reason": "winget can emit non-fatal stderr/progress output; installer should fail only on native ExitCode."
+  },
+  "installer_hotfix_7": {
+    "fix": "Added CHECK_GITHUB_UPDATE.ps1/.bat for private GitHub Release download, staging and optional PRODUCT_INSTALLER update apply.",
+    "reason": "Installed systems need a stable local bootstrapper that can fetch the latest private release without storing tokens in the package."
   }
 }

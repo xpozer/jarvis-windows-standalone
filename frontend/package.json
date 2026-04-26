@@ -1,6 +1,6 @@
 {
   "name": "jarvis-windows-standalone",
-  "version": "1.0.B4",
+  "version": "B6.5.1",
   "description": "JARVIS Windows Standalone - B4 Realized Depth",
   "main": "electron/main.js",
   "scripts": {
