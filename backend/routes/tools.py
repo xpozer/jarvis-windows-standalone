@@ -36,6 +36,18 @@ async def api_actions_confirm_body(req: Request):
         raise HTTPException(400, "action_id fehlt")
     return tools_service.api_actions_confirm(action_id=action_id)
 
+@router.post("/actions/cancel/{action_id}")
+def api_actions_cancel(action_id: str):
+    return tools_service.api_actions_cancel(action_id=action_id)
+
+@router.post("/actions/cancel")
+async def api_actions_cancel_body(req: Request):
+    body = await req.json()
+    action_id = str(body.get("action_id") or body.get("id") or "").strip()
+    if not action_id:
+        raise HTTPException(400, "action_id fehlt")
+    return tools_service.api_actions_cancel(action_id=action_id)
+
 @router.post("/actions/prepare")
 async def api_actions_prepare(req: Request):
     return await tools_service.api_actions_prepare(req=req)

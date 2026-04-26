@@ -1373,11 +1373,28 @@ def execute_pending_action(action_id: str) -> dict:
                     item["status"] = "done"; item["executed_at"] = now_iso()
                     write_json(ACTIONS_FILE, actions)
                     return {"ok": True, "message": f"Datei geschrieben: {dst}", "action": item}
+                if action_type == "tool_run":
+                    result = _run_registry_tool(str(payload.get("tool_id") or ""), payload.get("args") if isinstance(payload.get("args"), dict) else {}, confirmed=True)
+                    item["status"] = "done"; item["executed_at"] = now_iso(); item["result"] = result
+                    write_json(ACTIONS_FILE, actions)
+                    return {"ok": True, "message": "Werkzeug ausgefuehrt.", "action": item, "result": result}
                 raise ValueError(f"Unbekannter Aktionstyp: {action_type}")
             except Exception as e:
                 item["status"] = "error"; item["error"] = str(e); item["executed_at"] = now_iso()
                 write_json(ACTIONS_FILE, actions)
                 return {"ok": False, "error": str(e), "action": item}
+    raise HTTPException(404, "Aktion nicht gefunden")
+
+def cancel_pending_action(action_id: str) -> dict:
+    actions = ensure_list_file(ACTIONS_FILE)
+    for item in actions:
+        if item.get("id") == action_id:
+            if item.get("status") != "pending":
+                return {"ok": False, "error": "Aktion ist nicht mehr offen.", "action": item}
+            item["status"] = "cancelled"
+            item["cancelled_at"] = now_iso()
+            write_json(ACTIONS_FILE, actions)
+            return {"ok": True, "message": "Aktion verworfen.", "action": item}
     raise HTTPException(404, "Aktion nicht gefunden")
 
 def open_web_search(query: str) -> dict:
@@ -2496,14 +2513,21 @@ def _tool_input_path(args: dict) -> str:
         return filename
     return f"downloads/{filename}"
 
-def _run_registry_tool(tool_id: str, args: dict) -> dict:
+def _run_registry_tool(tool_id: str, args: dict, confirmed: bool = False) -> dict:
     tool = tool_registry.get_tool(tool_id)
     if not tool:
         raise HTTPException(404, f"Tool '{tool_id}' nicht gefunden")
     if not tool.get("enabled", True):
         raise HTTPException(409, f"Tool '{tool_id}' ist deaktiviert")
 
-    requires_confirmation = bool(tool.get("requires_confirmation")) or str(tool.get("risk_level", "")).lower() == "high"
+    requires_confirmation = (
+        not confirmed
+        and (
+            bool(tool.get("requires_confirmation"))
+            or str(tool.get("risk_level", "")).lower() == "high"
+            or (tool.get("category") == "windows" and str(tool.get("risk_level", "")).lower() in {"medium", "high"})
+        )
+    )
     if requires_confirmation:
         if tool_id == "text_file_write":
             action = create_pending_action(
@@ -2597,6 +2621,8 @@ def api_actions_pending():
     return {"actions": [a for a in ensure_list_file(ACTIONS_FILE) if a.get("status") == "pending"]}
 def api_actions_confirm(action_id: str):
     return execute_pending_action(action_id)
+def api_actions_cancel(action_id: str):
+    return cancel_pending_action(action_id)
 async def api_actions_prepare(req: Request):
     body = await req.json()
     action_type = str(body.get("type") or "")

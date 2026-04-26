@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AgentToolsPanel } from "./AgentToolsPanel";
 import { OrganizerPanel } from "./OrganizerPanel";
+import { SecurityPanel } from "./SecurityPanel";
 import "./dashboard-modules.css";
 
 type ModuleStatus = "idle" | "loading" | "ok" | "error";
@@ -267,6 +268,10 @@ export function DashboardModules({ activeNav, onSend }: Props) {
 
   if (activeNav === "Aufgaben & Automationen") {
     return <OrganizerPanel onSend={onSend} />;
+  }
+
+  if (activeNav === "Sicherheitszentrale") {
+    return <SecurityPanel onSend={onSend} />;
   }
 
   if (agentToolsModules.has(activeNav)) {

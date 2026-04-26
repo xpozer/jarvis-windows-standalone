@@ -39,3 +39,43 @@ def test_tools_run_prepares_pending_action_for_risky_write(client):
 def test_tools_run_rejects_unknown_registry_tool(client):
     response = client.post("/tools/run", json={"tool_id": "does_not_exist", "args": {}})
     assert response.status_code == 404
+
+
+def test_windows_tool_is_prepared_and_only_runs_after_confirmation(client, monkeypatch, tmp_path):
+    from services import _runtime as core
+
+    monkeypatch.setattr(core, "ACTIONS_FILE", tmp_path / "actions.json")
+
+    def fail_if_called(name: str):
+        raise AssertionError("Windows Tool darf ohne Bestaetigung nicht laufen")
+
+    monkeypatch.setattr(core, "open_windows_app", fail_if_called)
+
+    prepared = client.post("/tools/run", json={"tool_id": "open_app", "args": {"name": "notepad"}})
+    assert prepared.status_code == 200
+    action = prepared.json().get("action")
+    assert prepared.json().get("requires_confirmation") is True
+    assert action["type"] == "tool_run"
+    assert action["status"] == "pending"
+
+    monkeypatch.setattr(core, "open_windows_app", lambda name: {"ok": True, "app": name})
+
+    confirmed = client.post("/actions/confirm", json={"action_id": action["id"]})
+    assert confirmed.status_code == 200
+    data = confirmed.json()
+    assert data["ok"] is True
+    assert data["action"]["status"] == "done"
+    assert data["result"]["result"]["app"] == "notepad"
+
+
+def test_pending_action_can_be_cancelled(client, tmp_path, monkeypatch):
+    from services import _runtime as core
+
+    monkeypatch.setattr(core, "ACTIONS_FILE", tmp_path / "actions.json")
+    prepared = client.post("/actions/prepare", json={"type": "write_text_file", "payload": {"path": "downloads/x.txt", "content": "x"}})
+    assert prepared.status_code == 200
+
+    cancelled = client.post("/actions/cancel", json={"action_id": prepared.json()["id"]})
+    assert cancelled.status_code == 200
+    assert cancelled.json()["ok"] is True
+    assert cancelled.json()["action"]["status"] == "cancelled"

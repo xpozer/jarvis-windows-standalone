@@ -20,6 +20,9 @@ def api_actions_pending():
 def api_actions_confirm(action_id: str):
     return core.api_actions_confirm(action_id=action_id)
 
+def api_actions_cancel(action_id: str):
+    return core.api_actions_cancel(action_id=action_id)
+
 async def api_actions_prepare(req: Request):
     return await core.api_actions_prepare(req=req)
 
