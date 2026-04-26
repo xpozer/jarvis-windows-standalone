@@ -22,6 +22,14 @@ type SystemMetrics = {
   network: { mbps: number | null; label: string; level: Level };
 };
 
+type ChatApiResponse = {
+  ok?: boolean;
+  response?: string;
+  agent?: string;
+  reason?: string;
+  model?: string;
+};
+
 const fallbackMetrics: SystemMetrics = {
   status: "unknown",
   cpu: { percent: null, level: "unknown" },
@@ -71,6 +79,13 @@ function statusLabel(status: Level) {
   return "UNBEKANNT";
 }
 
+function buildHistory(messages: Message[]) {
+  return messages.slice(-10).map((message) => ({
+    role: message.role === "operator" ? "user" : "assistant",
+    content: message.text,
+  }));
+}
+
 export function App() {
   const [activeNav, setActiveNav] = useState("Conversations");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -79,6 +94,7 @@ export function App() {
   const [thinking, setThinking] = useState(false);
   const [listening, setListening] = useState(false);
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
+  const [lastAgent, setLastAgent] = useState("general");
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
   const orbState: OrbState = thinking ? "thinking" : listening ? "listening" : "idle";
@@ -101,15 +117,41 @@ export function App() {
     return () => { alive = false; window.clearInterval(interval); };
   }, []);
 
-  function sendMessage(text = input.trim()) {
-    if (!text) return;
-    setMessages((prev) => [...prev, { role: "operator", time: now, text }]);
+  async function sendMessage(text = input.trim()) {
+    const cleanText = text.trim();
+    if (!cleanText || thinking) return;
+    const sentAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const history = buildHistory(messages);
+    setMessages((prev) => [...prev, { role: "operator", time: sentAt, text: cleanText }]);
     setInput("");
     setThinking(true);
-    window.setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "jarvis", time: now, text: "Command received. Interface module is active and ready for the next function layer." }]);
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: cleanText, history }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const detail = typeof data.detail === "string" ? data.detail : `HTTP ${response.status}`;
+        throw new Error(detail);
+      }
+      const result = data as ChatApiResponse;
+      setLastAgent(result.agent || "general");
+      setMessages((prev) => [...prev, {
+        role: "jarvis",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text: result.response || "Ich habe keine Antwort vom lokalen Modell bekommen.",
+      }]);
+    } catch (error) {
+      setMessages((prev) => [...prev, {
+        role: "jarvis",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text: `Fehler beim lokalen Chat: ${error instanceof Error ? error.message : String(error)}\n\nPrüfe bitte, ob Ollama läuft und das Modell qwen3:8b vorhanden ist.`,
+      }]);
+    } finally {
       setThinking(false);
-    }, 850);
+    }
   }
 
   function quickAction(label: string) {
@@ -149,7 +191,7 @@ export function App() {
         ))}
         <div className="jarvis-user-card">
           <div className="jarvis-user-orb" />
-          <div><small>USER</small><strong>Operator</strong><p>Clearance: Alpha-1</p></div>
+          <div><small>USER</small><strong>Operator</strong><p>Agent: {lastAgent}</p></div>
           <button>•••</button>
         </div>
       </aside>
