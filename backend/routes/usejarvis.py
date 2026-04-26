@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from services import awareness_runtime
 from services import usejarvis_runtime as rt
 from services import usejarvis_workflow as wf
 
@@ -76,6 +77,7 @@ class SidecarIn(BaseModel):
 def status():
     data = rt.runtime_status()
     data["workflow_runtime"] = wf.workflow_runtime_status()
+    data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
 
@@ -112,7 +114,17 @@ def memory_delete_fact(fact_id: str):
 
 @router.get("/awareness/current")
 def awareness_current():
-    return rt.current_awareness()
+    return awareness_runtime.awareness_status()
+
+
+@router.post("/awareness/capture")
+def awareness_capture():
+    return awareness_runtime.capture_snapshot(write_event=True)
+
+
+@router.get("/awareness/snapshot")
+def awareness_snapshot(write_event: bool = False):
+    return awareness_runtime.capture_snapshot(write_event=write_event)
 
 
 @router.post("/awareness/events")
