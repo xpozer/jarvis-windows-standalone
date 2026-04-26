@@ -2439,6 +2439,112 @@ async def api_tools_execute(req: Request):
         write_json(MEMORY_FILE, mem)
         return {"ok": True, "id": item["id"]}
     raise HTTPException(400, f"Tool nicht freigegeben oder unbekannt: {name}")
+
+def _tool_input_path(args: dict) -> str:
+    filename = str(args.get("filename") or args.get("path") or args.get("name") or "jarvis-output.txt").strip()
+    if not filename:
+        filename = "jarvis-output.txt"
+    if any(sep in filename for sep in ("/", "\\")):
+        return filename
+    return f"downloads/{filename}"
+
+def _run_registry_tool(tool_id: str, args: dict) -> dict:
+    tool = tool_registry.get_tool(tool_id)
+    if not tool:
+        raise HTTPException(404, f"Tool '{tool_id}' nicht gefunden")
+    if not tool.get("enabled", True):
+        raise HTTPException(409, f"Tool '{tool_id}' ist deaktiviert")
+
+    requires_confirmation = bool(tool.get("requires_confirmation")) or str(tool.get("risk_level", "")).lower() == "high"
+    if requires_confirmation:
+        if tool_id == "text_file_write":
+            action = create_pending_action(
+                "write_text_file",
+                {"path": _tool_input_path(args), "content": str(args.get("content") or "")},
+                "confirm",
+            )
+        else:
+            action = create_pending_action("tool_run", {"tool_id": tool_id, "args": args}, "confirm")
+        tool_registry.record_use(tool_id)
+        audit.log_action(
+            f"tool_prepare:{tool_id}",
+            agent="tools",
+            tool=tool_id,
+            risk_level=tool.get("risk_level", "high"),
+            requires_confirmation=True,
+            confirmed=False,
+            result=action.get("id"),
+        )
+        return {"ok": True, "tool_id": tool_id, "requires_confirmation": True, "action": action}
+
+    try:
+        if tool_id == "file_search":
+            result = {"results": search_files(str(args.get("query") or args.get("q") or ""), int(args.get("limit", 25)))}
+        elif tool_id == "file_analyze":
+            file_id = str(args.get("file_id") or "").strip()
+            if file_id:
+                result = analyze_imported_file(file_id)
+            else:
+                result = {"ok": False, "error": "file_id fehlt. Nutze zuerst den Datei-Upload oder Datei-Index."}
+        elif tool_id == "knowledge_search":
+            result = knowledge_mod.search(
+                str(args.get("query") or args.get("q") or ""),
+                limit=int(args.get("limit", 10)),
+                category=args.get("category") or None,
+            )
+        elif tool_id == "knowledge_rebuild":
+            result = api_knowledge_rebuild()
+        elif tool_id == "diagnostics_zip":
+            result = create_diagnostics_zip()
+        elif tool_id == "backup_create":
+            result = create_backup(str(args.get("label") or "manual"))
+        elif tool_id == "open_folder":
+            result = open_folder(str(args.get("name") or args.get("folder") or "downloads"))
+        elif tool_id == "open_app":
+            result = open_windows_app(str(args.get("name") or args.get("app") or "notepad"))
+        elif tool_id == "web_search_open":
+            result = open_web_search(str(args.get("query") or args.get("q") or ""))
+        elif tool_id == "mic_status_check":
+            result = api_voice_core()
+        else:
+            result = {
+                "ok": False,
+                "message": "Dieses Registry Tool ist sichtbar, aber noch nicht direkt ausführbar.",
+                "tool_id": tool_id,
+                "input_schema": tool.get("input_schema", {}),
+            }
+        tool_registry.record_use(tool_id, error=not bool(result.get("ok", True)) if isinstance(result, dict) else False)
+        audit.log_action(
+            f"tool_run:{tool_id}",
+            agent="tools",
+            tool=tool_id,
+            risk_level=tool.get("risk_level", "low"),
+            result=json.dumps(result, ensure_ascii=False)[:240] if isinstance(result, dict) else str(result)[:240],
+        )
+        return {"ok": True, "tool_id": tool_id, "requires_confirmation": False, "result": result}
+    except HTTPException:
+        tool_registry.record_use(tool_id, error=True)
+        raise
+    except Exception as exc:
+        tool_registry.record_use(tool_id, error=True)
+        audit.log_action(f"tool_run_error:{tool_id}", agent="tools", tool=tool_id, risk_level=tool.get("risk_level", "low"), error=str(exc))
+        raise HTTPException(500, str(exc))
+
+async def api_tools_run(req: Request):
+    body = await req.json()
+    args = body.get("args") if isinstance(body.get("args"), dict) else {}
+    tool_id = str(body.get("tool_id") or body.get("id") or body.get("tool") or body.get("name") or "").strip()
+    legacy_map = {
+        "windows.search_files": "file_search",
+        "windows.open_folder": "open_folder",
+        "windows.open_app": "open_app",
+        "web.open_search": "web_search_open",
+        "memory.index": "knowledge_rebuild",
+    }
+    tool_id = legacy_map.get(tool_id, tool_id)
+    if not tool_id:
+        raise HTTPException(400, "tool_id fehlt")
+    return _run_registry_tool(tool_id, args)
 def api_actions_pending():
     return {"actions": [a for a in ensure_list_file(ACTIONS_FILE) if a.get("status") == "pending"]}
 def api_actions_confirm(action_id: str):

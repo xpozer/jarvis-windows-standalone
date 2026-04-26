@@ -11,6 +11,9 @@ def api_tools_registry():
 async def api_tools_execute(req: Request):
     return await core.api_tools_execute(req=req)
 
+async def api_tools_run(req: Request):
+    return await core.api_tools_run(req=req)
+
 def api_actions_pending():
     return core.api_actions_pending()
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AgentToolsPanel } from "./AgentToolsPanel";
 import { OrganizerPanel } from "./OrganizerPanel";
 import "./dashboard-modules.css";
 
@@ -187,6 +188,8 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
   },
 };
 
+const agentToolsModules = new Set(["Neural Network", "Core Systems", "Code Interpreter", "Data Analyzer", "API Console"]);
+
 function pretty(value: unknown) {
   if (value === undefined) return "";
   if (typeof value === "string") return value;
@@ -259,6 +262,10 @@ export function DashboardModules({ activeNav, onSend }: Props) {
 
   if (activeNav === "Tasks & Automation") {
     return <OrganizerPanel onSend={onSend} />;
+  }
+
+  if (agentToolsModules.has(activeNav)) {
+    return <AgentToolsPanel activeNav={activeNav} onSend={onSend} />;
   }
 
   return (
