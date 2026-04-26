@@ -4,10 +4,25 @@ import ctypes
 import os
 import platform
 import subprocess
+import threading
+import time
 from datetime import datetime, timezone
 from typing import Any
 
 from services import usejarvis_runtime
+
+_LOOP_LOCK = threading.Lock()
+_LOOP_THREAD: threading.Thread | None = None
+_LOOP_STOP = threading.Event()
+_LOOP_STATE: dict[str, Any] = {
+    "enabled": False,
+    "interval_seconds": 10,
+    "started_at": None,
+    "stopped_at": None,
+    "last_capture_at": None,
+    "last_error": None,
+    "captures": 0,
+}
 
 
 def now_iso() -> str:
@@ -25,7 +40,6 @@ def _run(cmd: list[str], timeout: int = 3) -> tuple[int, str, str]:
 def _active_window_windows() -> dict[str, Any]:
     try:
         user32 = ctypes.windll.user32
-        kernel32 = ctypes.windll.kernel32
         hwnd = user32.GetForegroundWindow()
         length = user32.GetWindowTextLengthW(hwnd)
         buff = ctypes.create_unicode_buffer(length + 1)
@@ -119,6 +133,59 @@ def capture_snapshot(write_event: bool = True) -> dict[str, Any]:
     return snapshot
 
 
+def _loop_worker(interval_seconds: int) -> None:
+    while not _LOOP_STOP.is_set():
+        try:
+            capture_snapshot(write_event=True)
+            with _LOOP_LOCK:
+                _LOOP_STATE["last_capture_at"] = now_iso()
+                _LOOP_STATE["last_error"] = None
+                _LOOP_STATE["captures"] = int(_LOOP_STATE.get("captures") or 0) + 1
+        except Exception as exc:
+            with _LOOP_LOCK:
+                _LOOP_STATE["last_error"] = str(exc)
+            usejarvis_runtime.audit("awareness", "awareness.loop_error", str(exc)[:180], "low", {})
+        _LOOP_STOP.wait(max(3, min(120, int(interval_seconds))))
+
+
+def start_loop(interval_seconds: int = 10) -> dict[str, Any]:
+    global _LOOP_THREAD
+    interval = max(3, min(120, int(interval_seconds or 10)))
+    with _LOOP_LOCK:
+        if _LOOP_THREAD and _LOOP_THREAD.is_alive():
+            _LOOP_STATE["interval_seconds"] = interval
+            return loop_status()
+        _LOOP_STOP.clear()
+        _LOOP_STATE.update({
+            "enabled": True,
+            "interval_seconds": interval,
+            "started_at": now_iso(),
+            "stopped_at": None,
+            "last_error": None,
+        })
+        _LOOP_THREAD = threading.Thread(target=_loop_worker, args=(interval,), daemon=True, name="jarvis-awareness-loop")
+        _LOOP_THREAD.start()
+    usejarvis_runtime.audit("awareness", "awareness.loop_started", f"Awareness Loop gestartet mit {interval}s Intervall", "low", {"interval_seconds": interval})
+    return loop_status()
+
+
+def stop_loop() -> dict[str, Any]:
+    global _LOOP_THREAD
+    with _LOOP_LOCK:
+        _LOOP_STOP.set()
+        _LOOP_STATE["enabled"] = False
+        _LOOP_STATE["stopped_at"] = now_iso()
+    usejarvis_runtime.audit("awareness", "awareness.loop_stopped", "Awareness Loop gestoppt", "low", {})
+    return loop_status()
+
+
+def loop_status() -> dict[str, Any]:
+    with _LOOP_LOCK:
+        state = dict(_LOOP_STATE)
+        state["thread_alive"] = bool(_LOOP_THREAD and _LOOP_THREAD.is_alive())
+    return {"ok": True, "loop": state}
+
+
 def awareness_status() -> dict[str, Any]:
     current = usejarvis_runtime.current_awareness()
     return {
@@ -127,5 +194,6 @@ def awareness_status() -> dict[str, Any]:
         "capture": "active_window_process_snapshot",
         "ocr": "planned",
         "screen_vision": "planned",
+        "loop": loop_status()["loop"],
         "current": current,
     }
