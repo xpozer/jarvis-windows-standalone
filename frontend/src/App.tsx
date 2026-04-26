@@ -1,249 +1,163 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { Orb, OrbState } from "./components/Orb";
-import { Sidebar } from "./components/Sidebar";
-import { ChatLayer, ChatMessage, normalizeMessageContent } from "./components/ChatLayer";
-import { InputBar } from "./components/InputBar";
-import { TopBar } from "./components/TopBar";
-import { TitleBar } from "./components/TitleBar";
-import { ContentRouter } from "./components/ContentRouter";
-import { JarvisHudFrame } from "./components/JarvisHudFrame";
-import { useSpeech } from "./hooks/useSpeech";
-import { useHistory } from "./hooks/useHistory";
-import { useGreeting } from "./hooks/useGreeting";
-import { useBootSound } from "./hooks/useBootSound";
-import { useSettings } from "./hooks/useSettings";
-import { useMemory } from "./hooks/useMemory";
-import { useFileUpload } from "./hooks/useFileUpload";
-import { useWakeWord } from "./hooks/useWakeWord";
-import { getHelpText } from "./hooks/useSlashCommands";
-import { NeuralLog } from "./components/NeuralLog";
-import { AgentStatusBar } from "./components/AgentStatusBar";
-import { useOrchestrator } from "./hooks/useOrchestrator";
-import { useDailyBriefing } from "./hooks/useDailyBriefing";
-import { useAwareness } from "./hooks/useAwareness";
-import { AwarenessBar } from "./components/AwarenessBar";
-import { useProactiveAgent } from "./hooks/useProactiveAgent";
+import { useMemo, useState } from "react";
 import "./App.css";
-import "./jarvis-ui-upgrade.css";
+
+type Role = "operator" | "jarvis";
+
+type Message = {
+  role: Role;
+  time: string;
+  text: string;
+  link?: string;
+  file?: boolean;
+};
+
+const navGroups = [
+  { title: "MAIN", items: [["⌂", "Home"], ["☏", "Conversations"], ["▤", "Knowledge Base"], ["⌘", "Data Streams"], ["☷", "Tasks & Automation"]] },
+  { title: "SYSTEM", items: [["♡", "Diagnostics"], ["⌁", "Neural Network"], ["⌬", "Memory Banks"], ["▣", "Core Systems"], ["⬡", "Security Center"]] },
+  { title: "TOOLS", items: [["{}", "Code Interpreter"], ["⌁", "Data Analyzer"], ["□", "File Manager"], ["◎", "Web Search"], ["▧", "API Console"]] },
+];
+
+const initialMessages: Message[] = [
+  { role: "operator", time: "11:42 AM", text: "Give me a summary of today’s system performance\nand any important alerts." },
+  { role: "jarvis", time: "11:42 AM", text: "All systems are operating within normal parameters.\nCPU usage is at 18%, memory usage at 52%.\nNo critical alerts. 2 informational notifications.", link: "VIEW DETAILS" },
+  { role: "operator", time: "11:43 AM", text: "Show me the latest data from the neural network training\npipeline and any anomalies." },
+  { role: "jarvis", time: "11:43 AM", text: "Training pipeline is running smoothly. Latest model accuracy: 97.3%.\nNo anomalies detected. All metrics are within expected ranges.", link: "VIEW PIPELINE DASHBOARD" },
+  { role: "operator", time: "11:44 AM", text: "Draft a report on system optimization opportunities\nbased on current diagnostics." },
+  { role: "jarvis", time: "11:44 AM", text: "Report generated. Identified 3 optimization opportunities\nthat could improve efficiency by up to 12%.", file: true },
+];
 
 export function App() {
-  const [activeItem, setActiveItem] = useState("Dialog");
-  const [orbState, setOrbState] = useState<OrbState>("idle");
-  const [heatmapActive, setHeatmapActive] = useState(false);
-  const [neuralLogActive, setNeuralLogActive] = useState(false);
-  const [typingActivity, setTypingActivity] = useState(0);
-  const orbRef = useRef<any>(null);
-  const [busy, setBusy] = useState(false);
-  const [wakeWordEnabled, setWakeWordEnabled] = useState(true);
-  const [voiceTrigger, setVoiceTrigger] = useState<number | undefined>(undefined);
+  const [activeNav, setActiveNav] = useState("Conversations");
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [input, setInput] = useState("");
+  const [pinned, setPinned] = useState(false);
+  const [thinking, setThinking] = useState(false);
 
-  const { settings, update, reset } = useSettings();
-  const { messages, addMessage, updateLastAssistant, clearHistory } = useHistory();
-  const {
-    facts, addFact, removeFact, clearFacts,
-    parseExplicitCommand, autoExtract,
-  } = useMemory(settings.apiUrl, settings.model);
-  const { uploadedFile, uploading, uploadError, processFile, clearFile } = useFileUpload();
-  const lastSpokenRef = useRef<number>(-1);
+  const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
 
-  const { state: orchState, run: orchRun } = useOrchestrator({
-    apiUrl:      settings.apiUrl,
-    model:       settings.model,
-    memoryFacts: facts.map((f) => f.text),
-    onOrbState:  setOrbState,
-    onDelta:     (chunk) => updateLastAssistant((prev: string) => {
-      const clean = prev.endsWith("▌") ? prev.slice(0,-1) : prev;
-      return clean + chunk + "▌";
-    }),
-    onDone: (full) => {
-      updateLastAssistant(full);
-      setTimeout(() => setOrbState("idle"), 200);
-      if (full) autoExtract("", full);
-    },
-    onError: (msg) => {
-      updateLastAssistant(`Fehler: ${msg}`);
-      setOrbState("idle");
-      setBusy(false);
-    },
-  });
+  function sendMessage(text = input.trim()) {
+    if (!text) return;
+    setMessages((prev) => [...prev, { role: "operator", time: now, text }]);
+    setInput("");
+    setThinking(true);
+    window.setTimeout(() => {
+      setMessages((prev) => [...prev, { role: "jarvis", time: now, text: "Command received. Interface module is active and ready for the next function layer." }]);
+      setThinking(false);
+    }, 850);
+  }
 
-  const { speak, stop, status: speechStatus } = useSpeech({
-    onStart: () => setOrbState("speaking"),
-    onEnd: () => setOrbState("idle"),
-    settings,
-  });
-
-  const { status: wakeStatus } = useWakeWord({
-    enabled: wakeWordEnabled && activeItem === "Dialog" && !busy,
-    onWakeWord: useCallback(() => {
-      try {
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(1320, ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.12, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.2);
-        setTimeout(() => ctx.close(), 500);
-      } catch { /* ignore */ }
-      setOrbState("listening");
-      setVoiceTrigger(Date.now());
-    }, []),
-  });
-
-  useGreeting(addMessage);
-  useBootSound();
-
-  const { context: desktopContext, online: awarenessOnline } = useAwareness(settings.apiUrl);
-
-  useProactiveAgent({
-    awareness: desktopContext,
-    awarenessOnline: awarenessOnline,
-    enabled: true,
-    onSuggestion: (text) => addMessage({ role: "assistant", content: text, timestamp: Date.now() }),
-  });
-
-  useDailyBriefing({
-    apiUrl: settings.apiUrl,
-    enabled: true,
-    onBriefing: (text) => addMessage({ role: "assistant", content: text, timestamp: Date.now() }),
-    onOrbState: setOrbState,
-  });
-
-  useEffect(() => {
-    if (wakeStatus === "detected") {
-      setTypingActivity(1.0);
-      setTimeout(() => setTypingActivity(0), 600);
-    }
-  }, [wakeStatus]);
-
-  useEffect(() => {
-    const assMsgs = messages.filter((m) => m.role === "assistant");
-    const lastIdx = assMsgs.length - 1;
-    if (lastIdx < 0) return;
-    if (lastIdx === lastSpokenRef.current) return;
-    const spokenText = normalizeMessageContent(assMsgs[lastIdx].content);
-    if (spokenText.endsWith("▌")) return;
-    lastSpokenRef.current = lastIdx;
-    speak(spokenText);
-  }, [messages, speak]);
-
-  const handleListening = useCallback((active: boolean) => {
-    if (busy || speechStatus === "speaking") return;
-    setOrbState(active ? "listening" : "idle");
-  }, [busy, speechStatus]);
-
-  const handleSend = useCallback(async (text: string) => {
-    if (text === "__CLEAR__") { clearHistory(); lastSpokenRef.current = -1; return; }
-    if (text === "__HELP__") {
-      addMessage({ role: "assistant", content: getHelpText(), timestamp: Date.now() });
-      return;
-    }
-
-    const memCmd = parseExplicitCommand(text);
-    if (memCmd.action === "add" && memCmd.fact) {
-      addFact(memCmd.fact, "explicit");
-      addMessage({ role: "assistant", content: `Gespeichert: "${memCmd.fact}"`, timestamp: Date.now() });
-      (orbRef.current as any)?.triggerMemoryFlash?.();
-      return;
-    }
-    if (memCmd.action === "clear") {
-      clearFacts();
-      addMessage({ role: "assistant", content: "Gedaechtnis geloescht.", timestamp: Date.now() });
-      return;
-    }
-
-    stop();
-    const displayText = uploadedFile
-      ? uploadedFile.type === "pdf"
-        ? `${text || "Datei analysieren"}\n[Anhang: ${uploadedFile.name}]\n\n[Dateiinhalt Auszug]\n${uploadedFile.content}`
-        : `${text || "Bild analysieren"}\n[Anhang: ${uploadedFile.name}]\n[Bild wurde lokal geladen. Beschreibung bitte anhand der Nutzerangabe erstellen.]`
-      : text;
-    const userMsg: ChatMessage = { role: "user", content: displayText, timestamp: Date.now() };
-    addMessage(userMsg);
-    setBusy(true);
-    addMessage({ role: "assistant", content: "▌", timestamp: Date.now() });
-
-    const historyForOrch = [...messages, userMsg].map(m => ({role: m.role, content: normalizeMessageContent(m.content)}));
-    await orchRun(displayText, historyForOrch);
-    clearFile();
-    setBusy(false);
-  }, [messages, addMessage, clearHistory, stop, uploadedFile, clearFile, parseExplicitCommand, addFact, clearFacts, orchRun]);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const transcript = (e as CustomEvent).detail?.transcript as string | undefined;
-      if (!transcript?.trim() || busy) return;
-      handleSend(transcript.trim());
-    };
-    window.addEventListener("jarvis-transcript", handler);
-    return () => window.removeEventListener("jarvis-transcript", handler);
-  }, [busy, handleSend]);
-
-  const isDialog = activeItem === "Dialog";
+  function quickAction(label: string) {
+    sendMessage(label);
+  }
 
   return (
-    <div className={`jv-root jv-command-center jv-state-${orbState} ${busy ? "jv-thinking-mode" : ""}`}>
-      <TitleBar />
-      <Orb state={orbState} heatmapActive={heatmapActive} typingActivity={typingActivity} />
-      <JarvisHudFrame
-        activeItem={activeItem}
-        orbState={orbState}
-        busy={busy}
-        memoryCount={facts.length}
-        messageCount={messages.length}
-        awarenessOnline={awarenessOnline}
-      />
-      <TopBar
-        state={orbState}
-        onStopSpeech={stop}
-        isSpeaking={speechStatus === "speaking"}
-        onClearHistory={clearHistory}
-        messageCount={messages.length}
-        wakeWordStatus={wakeStatus}
-        onToggleWakeWord={() => setWakeWordEnabled((e) => !e)}
-        heatmapActive={heatmapActive}
-        onToggleHeatmap={() => setHeatmapActive(h => !h)}
-        neuralLogActive={neuralLogActive}
-        onToggleNeuralLog={() => setNeuralLogActive(l => !l)}
-      />
-      <AgentStatusBar state={orchState} />
-      <AwarenessBar context={desktopContext} online={awarenessOnline} />
-      <Sidebar
-          activeItem={activeItem}
-          onSelect={setActiveItem}
-          orchState={orchState}
-          awareness={desktopContext}
-          awarenessOnline={awarenessOnline}
-          memoryCount={facts.length}
-          messageCount={messages.length}
-        />
-      {isDialog && <ChatLayer messages={messages} isLoading={busy} />}
-      {isDialog && (
-        <InputBar
-          onSend={handleSend}
-          onListening={handleListening}
-          onNavigate={setActiveItem}
-          onFileSelect={processFile}
-          uploadedFile={uploadedFile}
-          uploading={uploading}
-          uploadError={uploadError}
-          onClearFile={clearFile}
-          triggerVoice={voiceTrigger}
-          disabled={busy}
-          onTypingActivity={setTypingActivity}
-        />
-      )}
-      <ContentRouter
-        activeItem={activeItem}
-        settings={settings}
-        onUpdate={update}
-        onReset={reset}
-        memory={{ facts, addFact, removeFact, clearFacts }}
-      />
-      {neuralLogActive && <NeuralLog state={orbState} />}
+    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""}`}>
+      <header className="jarvis-topbar">
+        <div className="jarvis-brand">
+          <div className="jarvis-mini-orb" />
+          <div>
+            <div className="jarvis-brand-title">JARVIS</div>
+            <div className="jarvis-brand-sub">AI ASSISTANT INTERFACE&nbsp;&nbsp;v2.1.4</div>
+          </div>
+        </div>
+        <div className="jarvis-system-status">SYSTEM STATUS: <b>OPTIMAL</b></div>
+        <div className="jarvis-metrics">
+          <div><span>CPU</span><b>18%</b></div>
+          <div><span>MEMORY</span><b>6.2 / 12.0 GB</b></div>
+          <div><span>TEMP</span><b>34.2 °C</b></div>
+          <div><span>NETWORK</span><b>1.2 GB/s</b></div>
+          <nav><button>↻</button><button>⚙</button><button>−</button><button>□</button><button>×</button></nav>
+        </div>
+      </header>
+
+      <aside className="jarvis-sidebar">
+        {navGroups.map((group) => (
+          <section key={group.title}>
+            <h3>{group.title}</h3>
+            {group.items.map(([icon, label]) => (
+              <button key={label} className={`jarvis-nav-item ${activeNav === label ? "active" : ""}`} onClick={() => setActiveNav(label)}>
+                <span>{icon}</span><em>{label}</em>{label === "Conversations" && <b>›</b>}
+              </button>
+            ))}
+          </section>
+        ))}
+        <div className="jarvis-user-card">
+          <div className="jarvis-user-orb" />
+          <div><small>USER</small><strong>Operator</strong><p>Clearance: Alpha-1</p></div>
+          <button>•••</button>
+        </div>
+      </aside>
+
+      <main className="jarvis-main">
+        <section className="jarvis-conversation">
+          <div className="jarvis-conversation-head">
+            <div>
+              <h1>Conversation with JARVIS</h1>
+              <p><span />Online&nbsp;&nbsp;•&nbsp;&nbsp;Ready to assist</p>
+            </div>
+            <div className="jarvis-head-actions">
+              <button className={pinned ? "active" : ""} onClick={() => setPinned(!pinned)}>✧ PIN</button>
+              <button onClick={() => setMessages(initialMessages)}>⊕ NEW CHAT</button>
+            </div>
+          </div>
+          <div className="jarvis-message-list">
+            {messages.map((message, index) => (
+              <article key={`${message.time}-${index}-${message.text}`} className="jarvis-message-card">
+                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "●" : ""}</div>
+                <div className="jarvis-message-body">
+                  <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "OPERATOR"}</b><span>{message.time}</span></div>
+                  <p>{message.text}</p>
+                  {message.link && <button className="jarvis-link-btn" onClick={() => quickAction(message.link!)}>{message.link}<span>›</span></button>}
+                  {message.file && <div className="jarvis-file"><span>▤</span><div><b>system_optimization_report.pdf</b><small>2.4 MB • PDF Document</small></div><button>⇩</button><button>↗</button></div>}
+                </div>
+                <button className="jarvis-dots">•••</button>
+              </article>
+            ))}
+            {thinking && <article className="jarvis-message-card thinking-card"><div className="jarvis-avatar jarvis" /><div className="jarvis-message-body"><div className="jarvis-message-meta"><b className="cyan">JARVIS</b><span>{now}</span></div><p>Processing request...</p></div></article>}
+          </div>
+        </section>
+
+        <section className="jarvis-core-stage">
+          <div className="jarvis-orb-wrap">
+            <div className="jarvis-orb-ring outer" />
+            <div className="jarvis-orb-ring middle" />
+            <div className="jarvis-orb-ring inner" />
+            <div className="jarvis-orb-lines"><i /><i /><i /><i /></div>
+            <div className="jarvis-orb-particles">{Array.from({ length: 58 }).map((_, i) => <span key={i} style={{ ["--i" as string]: i } as React.CSSProperties} />)}</div>
+            <div className="jarvis-orb-core" />
+          </div>
+          <div className="jarvis-core-label"><h2>JARVIS CORE</h2><p>Adaptive&nbsp;&nbsp;•&nbsp;&nbsp;Proactive&nbsp;&nbsp;•&nbsp;&nbsp;Reliable</p><div /></div>
+        </section>
+      </main>
+
+      <aside className="jarvis-right-panel">
+        <section className="jarvis-card context-card">
+          <div className="jarvis-card-title"><h2>CONVERSATION CONTEXT</h2><button>• VIEW ALL</button></div>
+          {[ ["System Performance Summary", "11:42 AM"], ["Neural Network Pipeline", "11:43 AM"], ["Optimization Report", "11:44 AM"] ].map(([label, time]) => <button className="context-row" key={label} onClick={() => quickAction(label)}><span /><em>{label}</em><b>{time}</b></button>)}
+        </section>
+        <section className="jarvis-card quick-card">
+          <div className="jarvis-card-title"><h2>QUICK ACTIONS</h2></div>
+          {[ ["▣", "Run System Diagnostics", "Full system health check"], ["⌘", "Analyze Data Stream", "Real-time data analysis"], ["⌬", "Search Knowledge Base", "Find information quickly"], ["▤", "Generate Report", "Create detailed reports"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
+          <button className="custom-command" onClick={() => quickAction("Custom Command")}>CUSTOM COMMAND <span>›</span></button>
+        </section>
+        <section className="jarvis-card snapshot-card">
+          <div className="jarvis-card-title"><h2>SYSTEM SNAPSHOT</h2><button>• LIVE</button></div>
+          <div className="snapshot-grid"><div><span>CPU</span><b>18%</b></div><div><span>Memory</span><b>52%</b></div><div><span>Storage</span><b>68%</b></div></div>
+          <div className="snapshot-bottom"><div><span>Network</span><b>1.2 GB/s</b></div><ul><li><span>Active Processes</span><b>142</b></li><li><span>System Uptime</span><b>3d 14h 28m</b></li><li><span>Temperature</span><b>34.2 °C</b></li><li><span>Power Status</span><b>Optimal</b></li></ul></div>
+        </section>
+      </aside>
+
+      <section className="jarvis-input-panel">
+        <div className="jarvis-input-row">
+          <button className="voice-btn" onMouseDown={() => setThinking(true)} onMouseUp={() => setThinking(false)}>≋</button>
+          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Type your command or question..." />
+          <button className="plus-btn">＋</button>
+          <button className="send-btn" onClick={() => sendMessage()}>➤</button>
+        </div>
+        <div className="jarvis-chip-row">
+          {['⊙ Summarize recent activity','⌘ Check security status','⌁ Analyze performance','▣ Help me with coding','◎ Search knowledge base'].map((chip) => <button key={chip} onClick={() => quickAction(chip.replace(/^. /, ""))}>{chip}</button>)}
+        </div>
+      </section>
     </div>
   );
 }
