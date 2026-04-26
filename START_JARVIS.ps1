@@ -303,7 +303,7 @@ if(Test-Cmd "ollama"){
 
 if(-not (Test-Port 8000)){
   Jv-Step "Starte Backend auf Port 8000"
-  Start-Process -FilePath "cmd.exe" -ArgumentList "/k cd /d `"$Backend`" && `"$VenvPython`" main.py" -WindowStyle Normal
+  Start-Process -FilePath "cmd.exe" -ArgumentList "/k cd /d `"$Backend`" && `"$VenvPython`" -m uvicorn main:app --host 127.0.0.1 --port 8000" -WindowStyle Normal
   if(-not (Wait-Port 8000 20)){ Jv-Fail "Backend Port 8000 wurde nicht erreichbar" }
 }
 Jv-Ok "Backend erreichbar: http://127.0.0.1:8000"
