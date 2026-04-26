@@ -6,6 +6,7 @@ import { InputBar } from "./components/InputBar";
 import { TopBar } from "./components/TopBar";
 import { TitleBar } from "./components/TitleBar";
 import { ContentRouter } from "./components/ContentRouter";
+import { JarvisHudFrame } from "./components/JarvisHudFrame";
 import { useSpeech } from "./hooks/useSpeech";
 import { useHistory } from "./hooks/useHistory";
 import { useGreeting } from "./hooks/useGreeting";
@@ -40,7 +41,7 @@ export function App() {
   const { messages, addMessage, updateLastAssistant, clearHistory } = useHistory();
   const {
     facts, addFact, removeFact, clearFacts,
-    getMemoryBlock, parseExplicitCommand, autoExtract,
+    parseExplicitCommand, autoExtract,
   } = useMemory(settings.apiUrl, settings.model);
   const { uploadedFile, uploading, uploadError, processFile, clearFile } = useFileUpload();
   const lastSpokenRef = useRef<number>(-1);
@@ -184,9 +185,17 @@ export function App() {
   const isDialog = activeItem === "Dialog";
 
   return (
-    <div className={`jv-root jv-command-center jv-state-${orbState}`}>
+    <div className={`jv-root jv-command-center jv-state-${orbState} ${busy ? "jv-thinking-mode" : ""}`}>
       <TitleBar />
       <Orb state={orbState} heatmapActive={heatmapActive} typingActivity={typingActivity} />
+      <JarvisHudFrame
+        activeItem={activeItem}
+        orbState={orbState}
+        busy={busy}
+        memoryCount={facts.length}
+        messageCount={messages.length}
+        awarenessOnline={awarenessOnline}
+      />
       <TopBar
         state={orbState}
         onStopSpeech={stop}
