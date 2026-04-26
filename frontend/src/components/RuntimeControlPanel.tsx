@@ -35,7 +35,7 @@ type AwarenessStatus = {
 
 type RuntimeStatus = {
   ok?: boolean;
-  primitives?: Record<string, { status?: string; facts?: number; events?: number; requests?: number; pending_approval?: number; agents?: number }>;
+  primitives?: Record<string, { status?: string; facts?: number; events?: number; requests?: number; pending_approval?: number; approved?: number; executed?: number; agents?: number }>;
   awareness_runtime?: AwarenessStatus;
   action_engine?: { tools?: unknown[] };
   workflow_runtime?: { workflows?: number; runs?: number; sidecars?: number; self_healing?: string; authority_gating?: string; nodes?: { count?: number } };
@@ -46,7 +46,7 @@ type RuntimeStatus = {
 };
 
 type Fact = { id: string; fact_text: string; source_type?: string; importance?: number; confidence?: number; created_at?: string; tags?: string[] };
-type ActionRequest = { id: string; action_type: string; summary: string; risk: string; status: string; created_at?: string };
+type ActionRequest = { id: string; action_type: string; summary: string; risk: string; status: string; created_at?: string; result?: unknown };
 type Goal = { id: string; type: string; title: string; status: string; score?: number; due_date?: string | null };
 type Workflow = { id: string; name: string; description?: string; enabled?: boolean; trigger?: unknown; nodes?: unknown[]; authority_policy?: string };
 type Sidecar = { id: string; machine_id: string; name: string; status: string; capabilities?: string[]; last_seen_at?: string };
@@ -146,6 +146,18 @@ export function RuntimeControlPanel({ onSend }: Props) {
     setError("");
     try {
       const result = await api<unknown>("/api/runtime/action-engine/run", { method: "POST", body: JSON.stringify({ tool_id, payload }) });
+      setActionResult(result);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally { setActionBusy(false); }
+  }
+
+  async function executeAction(action: ActionRequest) {
+    setActionBusy(true);
+    setError("");
+    try {
+      const result = await api<unknown>(`/api/runtime/actions/${action.id}/execute`, { method: "POST" });
       setActionResult(result);
       await refresh();
     } catch (err) {
@@ -328,7 +340,7 @@ export function RuntimeControlPanel({ onSend }: Props) {
         <section className="runtime-control-card">
           <div className="runtime-control-card-title"><h2>Authority Gate</h2><span>pending actions</span></div>
           <div className="runtime-control-list compact">
-            {data.actions.map((action) => <article key={action.id} className={`risk-${action.risk}`}><b>{action.action_type}</b><span>{action.summary}</span><em>{action.risk} · {action.status}</em>{action.status === "pending_approval" && <div className="runtime-control-row-actions"><button onClick={() => void approve(action, true)}>APPROVE</button><button onClick={() => void approve(action, false)}>REJECT</button></div>}</article>)}
+            {data.actions.map((action) => <article key={action.id} className={`risk-${action.risk}`}><b>{action.action_type}</b><span>{action.summary}</span><em>{action.risk} · {action.status}</em>{action.status === "pending_approval" && <div className="runtime-control-row-actions"><button onClick={() => void approve(action, true)}>APPROVE</button><button onClick={() => void approve(action, false)}>REJECT</button></div>}{action.status === "approved" && <div className="runtime-control-row-actions"><button onClick={() => void executeAction(action)}>EXECUTE</button></div>}</article>)}
             {!data.actions.length && <p className="runtime-control-empty">Keine Actions vorhanden.</p>}
           </div>
         </section>
