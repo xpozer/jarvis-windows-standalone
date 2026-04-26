@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
+import { Orb, OrbState } from "./components/Orb";
 import "./jarvis-dashboard.css";
+import "./orb-legacy.css";
 
 type Role = "operator" | "jarvis";
 
@@ -32,8 +34,11 @@ export function App() {
   const [input, setInput] = useState("");
   const [pinned, setPinned] = useState(false);
   const [thinking, setThinking] = useState(false);
+  const [listening, setListening] = useState(false);
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
+  const orbState: OrbState = thinking ? "thinking" : listening ? "listening" : "idle";
+  const typingActivity = Math.min(1, input.length / 80);
 
   function sendMessage(text = input.trim()) {
     if (!text) return;
@@ -118,13 +123,8 @@ export function App() {
         </section>
 
         <section className="jarvis-core-stage">
-          <div className="jarvis-orb-wrap">
-            <div className="jarvis-orb-ring outer" />
-            <div className="jarvis-orb-ring middle" />
-            <div className="jarvis-orb-ring inner" />
-            <div className="jarvis-orb-lines"><i /><i /><i /><i /></div>
-            <div className="jarvis-orb-particles">{Array.from({ length: 58 }).map((_, i) => <span key={i} style={{ ["--i" as string]: i } as React.CSSProperties} />)}</div>
-            <div className="jarvis-orb-core" />
+          <div className="jarvis-legacy-orb-wrap">
+            <Orb state={orbState} typingActivity={typingActivity} heatmapActive={thinking} />
           </div>
           <div className="jarvis-core-label"><h2>JARVIS CORE</h2><p>Adaptive&nbsp;&nbsp;•&nbsp;&nbsp;Proactive&nbsp;&nbsp;•&nbsp;&nbsp;Reliable</p><div /></div>
         </section>
@@ -149,7 +149,7 @@ export function App() {
 
       <section className="jarvis-input-panel">
         <div className="jarvis-input-row">
-          <button className="voice-btn" onMouseDown={() => setThinking(true)} onMouseUp={() => setThinking(false)}>≋</button>
+          <button className="voice-btn" onMouseDown={() => setListening(true)} onMouseUp={() => setListening(false)} onMouseLeave={() => setListening(false)}>≋</button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Type your command or question..." />
           <button className="plus-btn">＋</button>
           <button className="send-btn" onClick={() => sendMessage()}>➤</button>
