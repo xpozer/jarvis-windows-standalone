@@ -193,3 +193,5 @@ function installDiagnosticsBridge() {
 }
 
 installDiagnosticsBridge();
+
+export {};

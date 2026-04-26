@@ -25,8 +25,15 @@ interface SpeechRecognitionInstance extends EventTarget {
   onerror: ((e: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null; onstart: (() => void) | null;
 }
-declare global { interface Window { SpeechRecognition?: new () => SpeechRecognitionInstance; webkitSpeechRecognition?: new () => SpeechRecognitionInstance; } }
-function getSR() { return window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null; }
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+type SpeechRecognitionWindow = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+};
+function getSR() {
+  const browserWindow = window as SpeechRecognitionWindow;
+  return browserWindow.SpeechRecognition ?? browserWindow.webkitSpeechRecognition ?? null;
+}
 
 export function InputBar({ onSend, onListening, onNavigate, onFileSelect, uploadedFile, uploading, uploadError, onClearFile, triggerVoice, disabled, onTypingActivity }: InputBarProps) {
   const [text, setText] = useState("");

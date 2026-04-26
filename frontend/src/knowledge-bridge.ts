@@ -241,3 +241,5 @@ function installKnowledgeBridge() {
 }
 
 installKnowledgeBridge();
+
+export {};

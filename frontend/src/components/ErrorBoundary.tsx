@@ -12,7 +12,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    addJarvisLog("error", "react-error-boundary", error, { componentStack: info.componentStack });
+    addJarvisLog("error", "react-error-boundary", `${error.name}: ${error.message}\n${error.stack ?? ""}\n${info.componentStack}`);
     this.setState({ error, info });
   }
 
