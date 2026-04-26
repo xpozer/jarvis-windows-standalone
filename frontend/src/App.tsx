@@ -14,7 +14,6 @@ import { useSettings } from "./hooks/useSettings";
 import { useMemory } from "./hooks/useMemory";
 import { useFileUpload } from "./hooks/useFileUpload";
 import { useWakeWord } from "./hooks/useWakeWord";
-import { detectIntent, executeTool } from "./hooks/useTools";
 import { getHelpText } from "./hooks/useSlashCommands";
 import { NeuralLog } from "./components/NeuralLog";
 import { AgentStatusBar } from "./components/AgentStatusBar";
@@ -46,8 +45,7 @@ export function App() {
   const { uploadedFile, uploading, uploadError, processFile, clearFile } = useFileUpload();
   const lastSpokenRef = useRef<number>(-1);
 
-  // ── Orchestrator ──────────────────────────────────────────────────
-  const { state: orchState, run: orchRun, abort: orchAbort } = useOrchestrator({
+  const { state: orchState, run: orchRun } = useOrchestrator({
     apiUrl:      settings.apiUrl,
     model:       settings.model,
     memoryFacts: facts.map((f) => f.text),
@@ -97,10 +95,8 @@ export function App() {
   useGreeting(addMessage);
   useBootSound();
 
-  // Awareness Pipeline
   const { context: desktopContext, online: awarenessOnline } = useAwareness(settings.apiUrl);
 
-  // Proaktiver Agent
   useProactiveAgent({
     awareness: desktopContext,
     awarenessOnline: awarenessOnline,
@@ -108,7 +104,6 @@ export function App() {
     onSuggestion: (text) => addMessage({ role: "assistant", content: text, timestamp: Date.now() }),
   });
 
-  // Daily Briefing (einmal pro Tag)
   useDailyBriefing({
     apiUrl: settings.apiUrl,
     enabled: true,
@@ -116,7 +111,6 @@ export function App() {
     onOrbState: setOrbState,
   });
 
-  // Wake word visual flash
   useEffect(() => {
     if (wakeStatus === "detected") {
       setTypingActivity(1.0);
@@ -124,7 +118,6 @@ export function App() {
     }
   }, [wakeStatus]);
 
-  // Auto-speak neue Assistenten-Nachrichten
   useEffect(() => {
     const assMsgs = messages.filter((m) => m.role === "assistant");
     const lastIdx = assMsgs.length - 1;
@@ -135,17 +128,6 @@ export function App() {
     lastSpokenRef.current = lastIdx;
     speak(spokenText);
   }, [messages, speak]);
-
-  // Voice Interface: Transkript aus Push-to-Talk direkt als Chat-Nachricht senden
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const transcript = (e as CustomEvent).detail?.transcript as string | undefined;
-      if (!transcript?.trim() || busy) return;
-      handleSend(transcript.trim());
-    };
-    window.addEventListener("jarvis-transcript", handler);
-    return () => window.removeEventListener("jarvis-transcript", handler);
-  }, [busy, handleSend]);
 
   const handleListening = useCallback((active: boolean) => {
     if (busy || speechStatus === "speaking") return;
@@ -183,13 +165,21 @@ export function App() {
     setBusy(true);
     addMessage({ role: "assistant", content: "▌", timestamp: Date.now() });
 
-    // Orchestrator übernimmt Routing + Streaming
     const historyForOrch = [...messages, userMsg].map(m => ({role: m.role, content: normalizeMessageContent(m.content)}));
     await orchRun(displayText, historyForOrch);
     clearFile();
     setBusy(false);
-  }, [messages, addMessage, updateLastAssistant, clearHistory, stop, settings,
-      uploadedFile, clearFile, getMemoryBlock, parseExplicitCommand, addFact, clearFacts, autoExtract]);
+  }, [messages, addMessage, clearHistory, stop, uploadedFile, clearFile, parseExplicitCommand, addFact, clearFacts, orchRun]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const transcript = (e as CustomEvent).detail?.transcript as string | undefined;
+      if (!transcript?.trim() || busy) return;
+      handleSend(transcript.trim());
+    };
+    window.addEventListener("jarvis-transcript", handler);
+    return () => window.removeEventListener("jarvis-transcript", handler);
+  }, [busy, handleSend]);
 
   const isDialog = activeItem === "Dialog";
 
