@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { ActionEngineCard } from "../features/runtime/ActionEngineCard";
+import { AwarenessCard } from "../features/runtime/AwarenessCard";
+import { MemoryCard } from "../features/runtime/MemoryCard";
 import {
   addRuntimeFact,
   addRuntimeGoal,
@@ -13,6 +16,7 @@ import {
   startRuntimeAwarenessLoop,
   stopRuntimeAwarenessLoop,
 } from "../features/runtime/runtimeApi";
+import { safeCount, prettyDate } from "../features/runtime/runtimeFormat";
 import type {
   ActionRequest,
   AwarenessLoopState,
@@ -23,33 +27,6 @@ import type {
 import "./runtime-control-panel.css";
 
 type Props = { onSend: (message: string) => void };
-
-function safeCount(value: unknown) {
-  return typeof value === "number" ? value : 0;
-}
-
-function prettyDate(value?: string | null) {
-  if (!value) return "";
-  try {
-    return new Date(value).toLocaleString();
-  } catch {
-    return value;
-  }
-}
-
-function pct(value?: number) {
-  return typeof value === "number" ? `${Math.round(value * 100)}%` : "n/a";
-}
-
-function pretty(value: unknown) {
-  if (value === undefined || value === null) return "";
-  if (typeof value === "string") return value;
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
 
 export function RuntimeControlPanel({ onSend }: Props) {
   const [data, setData] = useState<RuntimePanelData>({ facts: [], actions: [], goals: [], workflows: [], sidecars: [] });
@@ -95,11 +72,11 @@ export function RuntimeControlPanel({ onSend }: Props) {
     return () => window.clearInterval(id);
   }, []);
 
-  async function runAction(tool_id: string, payload: Record<string, unknown> = {}) {
+  async function runAction(toolId: string, payload: Record<string, unknown> = {}) {
     setActionBusy(true);
     setError("");
     try {
-      const result = await runRuntimeAction(tool_id, payload);
+      const result = await runRuntimeAction(toolId, payload);
       setActionResult(result);
       await refresh();
     } catch (err) {
@@ -236,56 +213,27 @@ export function RuntimeControlPanel({ onSend }: Props) {
       </div>
 
       <div className="runtime-control-grid runtime-control-grid-awareness">
-        <section className="runtime-control-card runtime-control-card-tall">
-          <div className="runtime-control-card-title"><h2>Memory</h2><span>semantic facts</span></div>
-          <div className="runtime-control-form">
-            <input value={factText} onChange={(e) => setFactText(e.target.value)} placeholder="Fakt speichern, z.B. JARVIS soll lokal first bleiben" onKeyDown={(e) => e.key === "Enter" && addFact()} />
-            <button onClick={() => void addFact()}>SAVE</button>
-          </div>
-          <div className="runtime-control-list">
-            {data.facts.map((fact) => <article key={fact.id}><b>{fact.fact_text}</b><span>{fact.source_type} · importance {fact.importance ?? 0} · {prettyDate(fact.created_at)}</span></article>)}
-            {!data.facts.length && <p className="runtime-control-empty">Noch keine Fakten gespeichert.</p>}
-          </div>
-        </section>
+        <MemoryCard facts={data.facts} factText={factText} onFactTextChange={setFactText} onAddFact={addFact} />
 
-        <section className="runtime-control-card runtime-awareness-card">
-          <div className="runtime-control-card-title"><h2>Awareness</h2><span>{loop?.enabled ? "loop active" : "local snapshot"}</span></div>
-          <div className="runtime-awareness-live">
-            <b>{awareness?.active_window?.process_name || "Noch kein Snapshot"}</b>
-            <span>{awareness?.active_window?.window_title || "Klicke Capture Awareness oder starte den Loop, um aktives Fenster und Kontext lokal zu erfassen."}</span>
-            <em>{awareness?.activity?.category || "idle"} · confidence {pct(awareness?.activity?.confidence)}</em>
-          </div>
-          <div className="runtime-awareness-loop">
-            <input type="number" min={3} max={120} value={awarenessInterval} onChange={(e) => setAwarenessInterval(Number(e.target.value || 10))} />
-            <button onClick={() => void startAwarenessLoop()}>{loopBusy ? "..." : "START LOOP"}</button>
-            <button onClick={() => void stopAwarenessLoop()}>{loopBusy ? "..." : "STOP"}</button>
-          </div>
-          <div className="runtime-awareness-meta">
-            <div><span>Loop</span><b>{loop?.enabled ? "on" : "off"}</b></div>
-            <div><span>Captures</span><b>{loop?.captures ?? 0}</b></div>
-            <div><span>Last</span><b>{prettyDate(loop?.last_capture_at) || "n/a"}</b></div>
-            <div><span>OCR</span><b>{awareness?.privacy?.ocr_enabled ? "on" : "off"}</b></div>
-          </div>
-        </section>
+        <AwarenessCard
+          awareness={awareness}
+          loop={loop}
+          awarenessInterval={awarenessInterval}
+          loopBusy={loopBusy}
+          onAwarenessIntervalChange={setAwarenessInterval}
+          onStartLoop={startAwarenessLoop}
+          onStopLoop={stopAwarenessLoop}
+        />
 
-        <section className="runtime-control-card runtime-action-card">
-          <div className="runtime-control-card-title"><h2>Action Engine</h2><span>level 1 safe tools</span></div>
-          <div className="runtime-action-toolbar">
-            <button onClick={() => void runAction("system.info")}>{actionBusy ? "..." : "SYSTEM"}</button>
-            <button onClick={() => void runAction("git.status")}>GIT STATUS</button>
-            <button onClick={() => void runAction("git.branch")}>BRANCH</button>
-            <button onClick={() => void runAction("process.list", { limit: 25 })}>PROCESSES</button>
-          </div>
-          <div className="runtime-control-form runtime-action-path">
-            <input value={actionPath} onChange={(e) => setActionPath(e.target.value)} placeholder="Pfad optional, leer = Projektordner" />
-            <button onClick={() => void runAction("filesystem.list_dir", { path: actionPath || undefined, limit: 60 })}>LIST</button>
-          </div>
-          <div className="runtime-control-form runtime-action-path">
-            <input value={actionUrl} onChange={(e) => setActionUrl(e.target.value)} placeholder="URL für Browser Action" />
-            <button onClick={() => void runAction("browser.open_url", { url: actionUrl })}>PREPARE URL</button>
-          </div>
-          <pre className="runtime-action-result">{actionResult ? pretty(actionResult) : "Noch kein Action Ergebnis."}</pre>
-        </section>
+        <ActionEngineCard
+          actionBusy={actionBusy}
+          actionPath={actionPath}
+          actionUrl={actionUrl}
+          actionResult={actionResult}
+          onActionPathChange={setActionPath}
+          onActionUrlChange={setActionUrl}
+          onRunAction={runAction}
+        />
 
         <section className="runtime-control-card">
           <div className="runtime-control-card-title"><h2>Authority Gate</h2><span>pending actions</span></div>
