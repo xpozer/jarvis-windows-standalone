@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import "./runtime-control-panel.css";
 
+type AwarenessLoopState = {
+  enabled?: boolean;
+  interval_seconds?: number;
+  started_at?: string | null;
+  stopped_at?: string | null;
+  last_capture_at?: string | null;
+  last_error?: string | null;
+  captures?: number;
+  thread_alive?: boolean;
+};
+
 type RuntimeStatus = {
   ok?: boolean;
   primitives?: Record<string, { status?: string; facts?: number; events?: number; requests?: number; pending_approval?: number; agents?: number }>;
@@ -29,6 +40,7 @@ type AwarenessStatus = {
   capture?: string;
   ocr?: string;
   screen_vision?: string;
+  loop?: AwarenessLoopState;
   current?: { current?: { payload?: AwarenessSnapshot; summary?: string; app_name?: string; window_title?: string; created_at?: string } };
 };
 
@@ -70,7 +82,7 @@ function safeCount(value: unknown) {
   return typeof value === "number" ? value : 0;
 }
 
-function prettyDate(value?: string) {
+function prettyDate(value?: string | null) {
   if (!value) return "";
   try { return new Date(value).toLocaleString(); } catch { return value; }
 }
@@ -82,13 +94,16 @@ function pct(value?: number) {
 export function RuntimeControlPanel({ onSend }: Props) {
   const [data, setData] = useState<PanelData>({ facts: [], actions: [], goals: [], workflows: [], sidecars: [] });
   const [awareness, setAwareness] = useState<AwarenessSnapshot | null>(null);
+  const [loop, setLoop] = useState<AwarenessLoopState | null>(null);
   const [loading, setLoading] = useState(false);
   const [capturing, setCapturing] = useState(false);
+  const [loopBusy, setLoopBusy] = useState(false);
   const [error, setError] = useState("");
   const [factText, setFactText] = useState("");
   const [goalTitle, setGoalTitle] = useState("");
   const [workflowName, setWorkflowName] = useState("Morning Review Demo");
   const [sidecarName, setSidecarName] = useState("Julien Windows PC");
+  const [awarenessInterval, setAwarenessInterval] = useState(10);
 
   async function refresh() {
     setLoading(true);
@@ -105,7 +120,12 @@ export function RuntimeControlPanel({ onSend }: Props) {
       ]);
       setData({ status, facts: facts.facts || [], actions: actions.actions || [], goals: goals.goals || [], workflows: workflows.workflows || [], sidecars: sidecars.sidecars || [] });
       const payload = awarenessStatus.current?.current?.payload || status.awareness_runtime?.current?.current?.payload || null;
+      const loopState = awarenessStatus.loop || status.awareness_runtime?.loop || null;
       if (payload) setAwareness(payload);
+      if (loopState) {
+        setLoop(loopState);
+        if (typeof loopState.interval_seconds === "number") setAwarenessInterval(loopState.interval_seconds);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -130,6 +150,34 @@ export function RuntimeControlPanel({ onSend }: Props) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setCapturing(false);
+    }
+  }
+
+  async function startAwarenessLoop() {
+    setLoopBusy(true);
+    setError("");
+    try {
+      const result = await api<{ loop: AwarenessLoopState }>("/api/runtime/awareness/loop/start", { method: "POST", body: JSON.stringify({ interval_seconds: awarenessInterval }) });
+      setLoop(result.loop);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoopBusy(false);
+    }
+  }
+
+  async function stopAwarenessLoop() {
+    setLoopBusy(true);
+    setError("");
+    try {
+      const result = await api<{ loop: AwarenessLoopState }>("/api/runtime/awareness/loop/stop", { method: "POST" });
+      setLoop(result.loop);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoopBusy(false);
     }
   }
 
@@ -191,13 +239,13 @@ export function RuntimeControlPanel({ onSend }: Props) {
     const status = data.status;
     return [
       { label: "Memory", value: safeCount(status?.primitives?.memory?.facts), sub: "Fakten" },
-      { label: "Awareness", value: safeCount(status?.primitives?.awareness?.events), sub: "Events" },
+      { label: "Awareness", value: safeCount(status?.primitives?.awareness?.events), sub: loop?.enabled ? "Loop aktiv" : "Events" },
       { label: "Actions", value: safeCount(status?.primitives?.action?.pending_approval), sub: "offen" },
       { label: "Agents", value: safeCount(status?.primitives?.orchestration?.agents), sub: "Rollen" },
       { label: "Workflows", value: safeCount(status?.workflow_runtime?.workflows), sub: "gespeichert" },
       { label: "Sidecars", value: safeCount(status?.workflow_runtime?.sidecars), sub: "Maschinen" },
     ];
-  }, [data.status]);
+  }, [data.status, loop?.enabled]);
 
   return (
     <section className="runtime-control-shell">
@@ -234,16 +282,21 @@ export function RuntimeControlPanel({ onSend }: Props) {
         </section>
 
         <section className="runtime-control-card runtime-awareness-card">
-          <div className="runtime-control-card-title"><h2>Awareness</h2><span>local snapshot</span></div>
+          <div className="runtime-control-card-title"><h2>Awareness</h2><span>{loop?.enabled ? "loop active" : "local snapshot"}</span></div>
           <div className="runtime-awareness-live">
             <b>{awareness?.active_window?.process_name || "Noch kein Snapshot"}</b>
-            <span>{awareness?.active_window?.window_title || "Klicke Capture Awareness, um aktives Fenster und Kontext lokal zu erfassen."}</span>
+            <span>{awareness?.active_window?.window_title || "Klicke Capture Awareness oder starte den Loop, um aktives Fenster und Kontext lokal zu erfassen."}</span>
             <em>{awareness?.activity?.category || "idle"} · confidence {pct(awareness?.activity?.confidence)}</em>
           </div>
+          <div className="runtime-awareness-loop">
+            <input type="number" min={3} max={120} value={awarenessInterval} onChange={(e) => setAwarenessInterval(Number(e.target.value || 10))} />
+            <button onClick={() => void startAwarenessLoop()}>{loopBusy ? "..." : "START LOOP"}</button>
+            <button onClick={() => void stopAwarenessLoop()}>{loopBusy ? "..." : "STOP"}</button>
+          </div>
           <div className="runtime-awareness-meta">
-            <div><span>Host</span><b>{awareness?.host || "n/a"}</b></div>
-            <div><span>PID</span><b>{awareness?.active_window?.pid || "n/a"}</b></div>
-            <div><span>Privacy</span><b>{awareness?.privacy?.mode || "local_first"}</b></div>
+            <div><span>Loop</span><b>{loop?.enabled ? "on" : "off"}</b></div>
+            <div><span>Captures</span><b>{loop?.captures ?? 0}</b></div>
+            <div><span>Last</span><b>{prettyDate(loop?.last_capture_at) || "n/a"}</b></div>
             <div><span>OCR</span><b>{awareness?.privacy?.ocr_enabled ? "on" : "off"}</b></div>
           </div>
         </section>
