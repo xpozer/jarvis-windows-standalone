@@ -1,96 +1,58 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  addRuntimeFact,
+  addRuntimeGoal,
+  approveRuntimeAction,
+  captureRuntimeAwareness,
+  createDemoRuntimeWorkflow,
+  executeRuntimeAction,
+  loadRuntimePanelData,
+  registerRuntimeSidecar,
+  runRuntimeAction,
+  runRuntimeWorkflow,
+  startRuntimeAwarenessLoop,
+  stopRuntimeAwarenessLoop,
+} from "../features/runtime/runtimeApi";
+import type {
+  ActionRequest,
+  AwarenessLoopState,
+  AwarenessSnapshot,
+  RuntimePanelData,
+  Workflow,
+} from "../features/runtime/runtimeTypes";
 import "./runtime-control-panel.css";
-
-type AwarenessLoopState = {
-  enabled?: boolean;
-  interval_seconds?: number;
-  started_at?: string | null;
-  stopped_at?: string | null;
-  last_capture_at?: string | null;
-  last_error?: string | null;
-  captures?: number;
-  thread_alive?: boolean;
-};
-
-type AwarenessSnapshot = {
-  ok?: boolean;
-  captured_at?: string;
-  host?: string;
-  os?: string;
-  active_window?: { process_name?: string; window_title?: string; pid?: number; platform?: string; error?: string };
-  activity?: { category?: string; summary?: string; confidence?: number };
-  privacy?: { mode?: string; screenshots_saved?: boolean; ocr_enabled?: boolean; cloud_vision?: boolean };
-  processes?: Array<{ image?: string; pid?: string; memory?: string }>;
-};
-
-type AwarenessStatus = {
-  ok?: boolean;
-  mode?: string;
-  capture?: string;
-  ocr?: string;
-  screen_vision?: string;
-  loop?: AwarenessLoopState;
-  current?: { current?: { payload?: AwarenessSnapshot; summary?: string; app_name?: string; window_title?: string; created_at?: string } };
-};
-
-type RuntimeStatus = {
-  ok?: boolean;
-  primitives?: Record<string, { status?: string; facts?: number; events?: number; requests?: number; pending_approval?: number; approved?: number; executed?: number; agents?: number }>;
-  awareness_runtime?: AwarenessStatus;
-  action_engine?: { tools?: unknown[] };
-  workflow_runtime?: { workflows?: number; runs?: number; sidecars?: number; self_healing?: string; authority_gating?: string; nodes?: { count?: number } };
-  goals?: number;
-  workflow_nodes?: number;
-  authority_gating?: string;
-  local_first?: boolean;
-};
-
-type Fact = { id: string; fact_text: string; source_type?: string; importance?: number; confidence?: number; created_at?: string; tags?: string[] };
-type ActionRequest = { id: string; action_type: string; summary: string; risk: string; status: string; created_at?: string; result?: unknown };
-type Goal = { id: string; type: string; title: string; status: string; score?: number; due_date?: string | null };
-type Workflow = { id: string; name: string; description?: string; enabled?: boolean; trigger?: unknown; nodes?: unknown[]; authority_policy?: string };
-type Sidecar = { id: string; machine_id: string; name: string; status: string; capabilities?: string[]; last_seen_at?: string };
-
-type PanelData = {
-  status?: RuntimeStatus;
-  facts: Fact[];
-  actions: ActionRequest[];
-  goals: Goal[];
-  workflows: Workflow[];
-  sidecars: Sidecar[];
-};
 
 type Props = { onSend: (message: string) => void };
 
-async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...(init?.headers || {}),
-    },
-  });
-  const text = await response.text();
-  let data: unknown = text;
-  try { data = text ? JSON.parse(text) : {}; } catch {}
-  if (!response.ok) throw new Error(typeof data === "string" ? data : JSON.stringify(data));
-  return data as T;
+function safeCount(value: unknown) {
+  return typeof value === "number" ? value : 0;
 }
 
-function safeCount(value: unknown) { return typeof value === "number" ? value : 0; }
 function prettyDate(value?: string | null) {
   if (!value) return "";
-  try { return new Date(value).toLocaleString(); } catch { return value; }
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return value;
+  }
 }
-function pct(value?: number) { return typeof value === "number" ? `${Math.round(value * 100)}%` : "n/a"; }
+
+function pct(value?: number) {
+  return typeof value === "number" ? `${Math.round(value * 100)}%` : "n/a";
+}
+
 function pretty(value: unknown) {
   if (value === undefined || value === null) return "";
   if (typeof value === "string") return value;
-  try { return JSON.stringify(value, null, 2); } catch { return String(value); }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
 }
 
 export function RuntimeControlPanel({ onSend }: Props) {
-  const [data, setData] = useState<PanelData>({ facts: [], actions: [], goals: [], workflows: [], sidecars: [] });
+  const [data, setData] = useState<RuntimePanelData>({ facts: [], actions: [], goals: [], workflows: [], sidecars: [] });
   const [awareness, setAwareness] = useState<AwarenessSnapshot | null>(null);
   const [loop, setLoop] = useState<AwarenessLoopState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -111,18 +73,10 @@ export function RuntimeControlPanel({ onSend }: Props) {
     setLoading(true);
     setError("");
     try {
-      const [status, facts, actions, goals, workflows, sidecars, awarenessStatus] = await Promise.all([
-        api<RuntimeStatus>("/api/runtime/status"),
-        api<{ facts: Fact[] }>("/api/runtime/memory/facts?limit=12"),
-        api<{ actions: ActionRequest[] }>("/api/runtime/actions?limit=12"),
-        api<{ goals: Goal[] }>("/api/runtime/goals?limit=12"),
-        api<{ workflows: Workflow[] }>("/api/runtime/workflows?limit=12"),
-        api<{ sidecars: Sidecar[] }>("/api/runtime/sidecars?limit=12"),
-        api<AwarenessStatus>("/api/runtime/awareness/current"),
-      ]);
-      setData({ status, facts: facts.facts || [], actions: actions.actions || [], goals: goals.goals || [], workflows: workflows.workflows || [], sidecars: sidecars.sidecars || [] });
-      const payload = awarenessStatus.current?.current?.payload || status.awareness_runtime?.current?.current?.payload || null;
-      const loopState = awarenessStatus.loop || status.awareness_runtime?.loop || null;
+      const result = await loadRuntimePanelData();
+      setData(result.data);
+      const payload = result.awarenessStatus.current?.current?.payload || result.data.status?.awareness_runtime?.current?.current?.payload || null;
+      const loopState = result.awarenessStatus.loop || result.data.status?.awareness_runtime?.loop || null;
       if (payload) setAwareness(payload);
       if (loopState) {
         setLoop(loopState);
@@ -145,63 +99,76 @@ export function RuntimeControlPanel({ onSend }: Props) {
     setActionBusy(true);
     setError("");
     try {
-      const result = await api<unknown>("/api/runtime/action-engine/run", { method: "POST", body: JSON.stringify({ tool_id, payload }) });
+      const result = await runRuntimeAction(tool_id, payload);
       setActionResult(result);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-    } finally { setActionBusy(false); }
+    } finally {
+      setActionBusy(false);
+    }
   }
 
   async function executeAction(action: ActionRequest) {
     setActionBusy(true);
     setError("");
     try {
-      const result = await api<unknown>(`/api/runtime/actions/${action.id}/execute`, { method: "POST" });
+      const result = await executeRuntimeAction(action.id);
       setActionResult(result);
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-    } finally { setActionBusy(false); }
+    } finally {
+      setActionBusy(false);
+    }
   }
 
   async function captureAwareness() {
     setCapturing(true);
     setError("");
     try {
-      const snapshot = await api<AwarenessSnapshot>("/api/runtime/awareness/capture", { method: "POST" });
+      const snapshot = await captureRuntimeAwareness();
       setAwareness(snapshot);
       await refresh();
-    } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
-    finally { setCapturing(false); }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCapturing(false);
+    }
   }
 
   async function startAwarenessLoop() {
     setLoopBusy(true);
     setError("");
     try {
-      const result = await api<{ loop: AwarenessLoopState }>("/api/runtime/awareness/loop/start", { method: "POST", body: JSON.stringify({ interval_seconds: awarenessInterval }) });
+      const result = await startRuntimeAwarenessLoop(awarenessInterval);
       setLoop(result.loop);
       await refresh();
-    } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
-    finally { setLoopBusy(false); }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoopBusy(false);
+    }
   }
 
   async function stopAwarenessLoop() {
     setLoopBusy(true);
     setError("");
     try {
-      const result = await api<{ loop: AwarenessLoopState }>("/api/runtime/awareness/loop/stop", { method: "POST" });
+      const result = await stopRuntimeAwarenessLoop();
       setLoop(result.loop);
       await refresh();
-    } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
-    finally { setLoopBusy(false); }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoopBusy(false);
+    }
   }
 
   async function addFact() {
     const clean = factText.trim();
     if (!clean) return;
-    await api("/api/runtime/memory/facts", { method: "POST", body: JSON.stringify({ fact_text: clean, source_type: "ui", importance: 4, tags: ["ui"] }) });
+    await addRuntimeFact(clean);
     setFactText("");
     await refresh();
   }
@@ -209,46 +176,29 @@ export function RuntimeControlPanel({ onSend }: Props) {
   async function addGoal() {
     const clean = goalTitle.trim();
     if (!clean) return;
-    await api("/api/runtime/goals", { method: "POST", body: JSON.stringify({ type: "objective", title: clean, description: "Über das JARVIS Runtime Panel erstellt" }) });
+    await addRuntimeGoal(clean);
     setGoalTitle("");
     await refresh();
   }
 
   async function createDemoWorkflow() {
     const clean = workflowName.trim() || "Runtime Demo Workflow";
-    await api("/api/runtime/workflows", {
-      method: "POST",
-      body: JSON.stringify({
-        name: clean,
-        description: "Demo Workflow mit Memory Write und Goal Update",
-        trigger: { type: "manual" },
-        nodes: [
-          { id: "memory_1", type: "memory_write", config: { fact: `Workflow ${clean} wurde erfolgreich aus dem Runtime Panel erstellt.`, importance: 3 } },
-          { id: "goal_1", type: "goal_update", config: { title: `Review ${clean}` } },
-        ],
-        edges: [],
-        authority_policy: "high_requires_approval",
-      }),
-    });
+    await createDemoRuntimeWorkflow(clean);
     await refresh();
   }
 
   async function runWorkflow(workflow: Workflow) {
-    await api(`/api/runtime/workflows/${workflow.id}/run`, { method: "POST", body: JSON.stringify({ input: { source: "runtime_panel" } }) });
+    await runRuntimeWorkflow(workflow.id);
     await refresh();
   }
 
   async function registerSidecar() {
-    const machineId = sidecarName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "local-windows-pc";
-    await api("/api/runtime/sidecars/register", {
-      method: "POST",
-      body: JSON.stringify({ machine_id: machineId, name: sidecarName || "Local Windows PC", capabilities: ["terminal", "filesystem", "browser", "desktop", "screenshot", "clipboard"], token_hint: "local-dev" }),
-    });
+    await registerRuntimeSidecar(sidecarName);
     await refresh();
   }
 
   async function approve(action: ActionRequest, approveAction: boolean) {
-    await api(`/api/runtime/actions/${action.id}/${approveAction ? "approve" : "reject"}`, { method: "POST" });
+    await approveRuntimeAction(action.id, approveAction);
     await refresh();
   }
 
