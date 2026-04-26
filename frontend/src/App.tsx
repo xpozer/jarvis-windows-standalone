@@ -41,7 +41,7 @@ const fallbackMetrics: SystemMetrics = {
 
 const navGroups = [
   { title: "MAIN", items: [["⌂", "Home"], ["☏", "Conversations"], ["▤", "Knowledge Base"], ["⌘", "Data Streams"], ["☷", "Tasks & Automation"]] },
-  { title: "SYSTEM", items: [["♡", "Diagnostics"], ["⌁", "Neural Network"], ["⌬", "Memory Banks"], ["▣", "Core Systems"], ["⬡", "Security Center"]] },
+  { title: "SYSTEM", items: [["◈", "JARVIS Runtime"], ["♡", "Diagnostics"], ["⌁", "Neural Network"], ["⌬", "Memory Banks"], ["▣", "Core Systems"], ["⬡", "Security Center"]] },
   { title: "TOOLS", items: [["{}", "Code Interpreter"], ["⌁", "Data Analyzer"], ["□", "File Manager"], ["◎", "Web Search"], ["▧", "API Console"]] },
 ];
 
