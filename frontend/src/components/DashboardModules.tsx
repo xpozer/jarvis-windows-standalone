@@ -18,7 +18,7 @@ type Props = {
 
 type ResultState = Record<string, { status: ModuleStatus; data?: unknown; error?: string }>;
 
-const moduleMap: Record<string, { title: string; subtitle: string; folder: string; endpoints: EndpointCard[]; prompts: string[] }> = {
+const moduleMap: Record<string, { title: string; subtitle: string; folder: string; endpoints: EndpointCard[]; prompts: string[]; searchMode?: "knowledge" | "research" }> = {
   Home: {
     folder: "Command Center",
     title: "Home Overview",
@@ -34,6 +34,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     folder: "Knowledge",
     title: "Knowledge Base",
     subtitle: "Dokumente, Kategorien, lokale Suche und Antworten aus dem Wissensspeicher.",
+    searchMode: "knowledge",
     endpoints: [
       { title: "Knowledge Stats", description: "Indexgröße, Dokumentanzahl und Status.", endpoint: "/knowledge/stats" },
       { title: "Documents", description: "Zeigt importierte Dokumente und Quellen.", endpoint: "/knowledge/documents" },
@@ -161,8 +162,11 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
   "Web Search": {
     folder: "Research",
     title: "Web Search",
-    subtitle: "Research Agent und Websuche. DuckDuckGo muss danach noch sauber ersetzt werden.",
+    subtitle: "Reparierter Research Agent mit HTML Suche und Ollama Zusammenfassung.",
+    searchMode: "research",
     endpoints: [
+      { title: "Research Health", description: "Testet den neuen Research Endpoint mit einer kurzen Suche.", endpoint: "/api/research/search?q=FastAPI%20Windows%20Ollama&limit=3" },
+      { title: "Research Answer", description: "Sucht Web Treffer und lässt Ollama zusammenfassen.", endpoint: "/api/research/answer?q=Ollama%20qwen3%208b%20FastAPI&limit=4" },
       { title: "Agent Registry", description: "Prüft, ob ein Research Agent registriert ist.", endpoint: "/agents/registry" },
       { title: "Tool Registry", description: "Prüft, ob Web oder Search Tools registriert sind.", endpoint: "/tools/registry/full" },
     ],
@@ -196,7 +200,7 @@ function countHint(data: unknown) {
   if (Array.isArray(data)) return `${data.length} Einträge`;
   if (data && typeof data === "object") {
     const obj = data as Record<string, unknown>;
-    for (const key of ["items", "files", "documents", "agents", "tools", "tasks", "notes", "reminders", "categories"]) {
+    for (const key of ["items", "files", "documents", "agents", "tools", "tasks", "notes", "reminders", "categories", "results"]) {
       if (Array.isArray(obj[key])) return `${(obj[key] as unknown[]).length} Einträge`;
     }
     return `${Object.keys(obj).length} Felder`;
@@ -235,10 +239,13 @@ export function DashboardModules({ activeNav, onSend }: Props) {
     }
   }
 
-  async function searchKnowledge() {
+  async function runSearch() {
     const q = query.trim();
-    if (!q) return;
-    const endpoint: EndpointCard = { title: `Suche: ${q}`, description: "Knowledge Suche", endpoint: `/knowledge/search?q=${encodeURIComponent(q)}&limit=8` };
+    if (!q || !module) return;
+    const isResearch = module.searchMode === "research";
+    const endpoint: EndpointCard = isResearch
+      ? { title: `Research: ${q}`, description: "Web Research mit Zusammenfassung", endpoint: `/api/research/answer?q=${encodeURIComponent(q)}&limit=6` }
+      : { title: `Suche: ${q}`, description: "Knowledge Suche", endpoint: `/knowledge/search?q=${encodeURIComponent(q)}&limit=8` };
     await runEndpoint(endpoint);
   }
 
@@ -286,8 +293,8 @@ export function DashboardModules({ activeNav, onSend }: Props) {
             {module.prompts.map((prompt) => <button key={prompt} onClick={() => onSend(prompt)}>{prompt}</button>)}
           </div>
           <div className="jv-module-search">
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Knowledge Suche..." onKeyDown={(e) => e.key === "Enter" && searchKnowledge()} />
-            <button onClick={searchKnowledge}>SUCHEN</button>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={module.searchMode === "research" ? "Web Research..." : "Knowledge Suche..."} onKeyDown={(e) => e.key === "Enter" && runSearch()} />
+            <button onClick={runSearch}>{module.searchMode === "research" ? "RESEARCH" : "SUCHEN"}</button>
           </div>
         </div>
 
