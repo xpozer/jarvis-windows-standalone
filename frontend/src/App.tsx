@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import "./App.css";
+import "./jarvis-dashboard.css";
 
 type Role = "operator" | "jarvis";
 
