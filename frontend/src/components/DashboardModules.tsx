@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AgentToolsPanel } from "./AgentToolsPanel";
 import { OrganizerPanel } from "./OrganizerPanel";
+import { RuntimeControlPanel } from "./RuntimeControlPanel";
 import "./dashboard-modules.css";
 
 type ModuleStatus = "idle" | "loading" | "ok" | "error";
@@ -27,6 +28,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     subtitle: "Zentrale Übersicht. Hier bleiben nur die wichtigsten Statuspunkte sichtbar.",
     endpoints: [
       { title: "Chat Health", description: "Prüft, ob Ollama und das lokale Modell erreichbar sind.", endpoint: "/api/chat/health" },
+      { title: "Runtime Status", description: "Lokaler JARVIS Runtime Kern mit Memory, Actions und Workflows.", endpoint: "/api/runtime/status" },
       { title: "System Metrics", description: "Live Werte für CPU, RAM, Temperatur und Netzwerk.", endpoint: "/system/metrics" },
       { title: "Self Check", description: "Backend Selbsttest und wichtige Runtime Informationen.", endpoint: "/self-check" },
     ],
@@ -39,6 +41,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     searchMode: "knowledge",
     endpoints: [
       { title: "Knowledge Stats", description: "Indexgröße, Dokumentanzahl und Status.", endpoint: "/knowledge/stats" },
+      { title: "Runtime Memory", description: "Persistente Fakten aus der lokalen Runtime.", endpoint: "/api/runtime/memory/facts?limit=12" },
       { title: "Documents", description: "Zeigt importierte Dokumente und Quellen.", endpoint: "/knowledge/documents" },
       { title: "Categories", description: "Zeigt vorhandene Wissenskategorien.", endpoint: "/knowledge/categories" },
       { title: "Uploaded Files", description: "Dateien, die über die UI hochgeladen wurden.", endpoint: "/api/files" },
@@ -51,6 +54,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     subtitle: "Live Telemetrie, Systemwerte und tiefer Backend Status.",
     endpoints: [
       { title: "Live Metrics", description: "Aktuelle CPU, RAM, Temperatur und Netzwerkdaten.", endpoint: "/system/metrics" },
+      { title: "Runtime Awareness", description: "Aktueller Awareness Kontext der lokalen Runtime.", endpoint: "/api/runtime/awareness/current" },
       { title: "Deep Status", description: "Tiefer Backend Zustand und interne Diagnosewerte.", endpoint: "/deep/status" },
       { title: "Context Pack", description: "Gesammelter Kontext für Diagnose und Reparatur.", endpoint: "/deep/context-pack" },
     ],
@@ -63,6 +67,8 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     endpoints: [
       { title: "Notes", description: "Lokale Notizen abrufen.", endpoint: "/notes" },
       { title: "Tasks", description: "Aufgaben abrufen.", endpoint: "/tasks" },
+      { title: "Runtime Goals", description: "OKR Ziele aus der lokalen Runtime.", endpoint: "/api/runtime/goals" },
+      { title: "Runtime Workflows", description: "Gespeicherte Runtime Workflows.", endpoint: "/api/runtime/workflows" },
       { title: "Reminders", description: "Erinnerungen abrufen.", endpoint: "/reminders" },
       { title: "Automations", description: "Automationen und geplante Abläufe anzeigen.", endpoint: "/automation/list" },
       { title: "Folder Watch", description: "Überwachte Ordner anzeigen.", endpoint: "/folder-watch/list" },
@@ -75,6 +81,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     subtitle: "Selbsttest, Ports, Logs, Dependencies und Reparaturplan.",
     endpoints: [
       { title: "Self Check", description: "Gesamter Backend Selbsttest.", endpoint: "/self-check" },
+      { title: "Runtime Status", description: "Status der lokalen JARVIS Runtime.", endpoint: "/api/runtime/status" },
       { title: "Dependencies", description: "Prüft Python Pakete, Node und wichtige Abhängigkeiten.", endpoint: "/diagnostic/dependencies" },
       { title: "Ports", description: "Prüft relevante Ports wie 8000 und 11434.", endpoint: "/diagnostic/ports" },
       { title: "Logs", description: "Verfügbare Backend Logs anzeigen.", endpoint: "/diagnostic/logs/list" },
@@ -88,6 +95,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     subtitle: "LLM Zustand, Orchestrator Agents und Modell Verbindung.",
     endpoints: [
       { title: "LLM Health", description: "Prüft Ollama und das konfigurierte Modell.", endpoint: "/api/chat/health" },
+      { title: "Runtime Agents", description: "Spezialisierte Agentenrollen der lokalen Runtime.", endpoint: "/api/runtime/orchestration/agents" },
       { title: "Orchestrator Agents", description: "Liste der verfügbaren Orchestrator Agents.", endpoint: "/orchestrate/agents" },
       { title: "Agent Matrix", description: "Matrix der Agent Fähigkeiten.", endpoint: "/agents/matrix" },
       { title: "Agent Registry", description: "Registrierte Agenten und Statusdaten.", endpoint: "/agents/registry" },
@@ -97,8 +105,10 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
   "Memory Banks": {
     folder: "Memory",
     title: "Memory Banks",
-    subtitle: "Knowledge Speicher, Upload Index und lokale Datenquellen.",
+    subtitle: "Knowledge Speicher, Runtime Memory, Upload Index und lokale Datenquellen.",
     endpoints: [
+      { title: "Runtime Memory Facts", description: "Persistente Fakten aus SQLite Runtime Memory.", endpoint: "/api/runtime/memory/facts?limit=20" },
+      { title: "Runtime Search", description: "Leere Suche über Runtime Memory als Funktionscheck.", endpoint: "/api/runtime/memory/search?q=jarvis&limit=10" },
       { title: "Knowledge Stats", description: "Speicherstatus der Knowledge Base.", endpoint: "/knowledge/stats" },
       { title: "Knowledge Categories", description: "Kategorien im Speicher.", endpoint: "/knowledge/categories" },
       { title: "Uploaded Files", description: "Datei Index aus Uploads.", endpoint: "/api/files" },
@@ -110,6 +120,7 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     title: "Core Systems",
     subtitle: "Backend, Runtime, Agents, Tools und Systemmetriken.",
     endpoints: [
+      { title: "Runtime Status", description: "UseJARVIS ähnlicher lokaler Runtime Kern.", endpoint: "/api/runtime/status" },
       { title: "Self Check", description: "Kernprüfung des Systems.", endpoint: "/self-check" },
       { title: "Tools Registry", description: "Registrierte Tools.", endpoint: "/tools/registry" },
       { title: "Agent Registry", description: "Agentenstatus und Registry.", endpoint: "/agents/registry" },
@@ -120,9 +131,11 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
   "Security Center": {
     folder: "Security",
     title: "Security Center",
-    subtitle: "Status, Audit, offene Aktionen und sichere Tool Ausführung.",
+    subtitle: "Status, Authority Gate, Audit, offene Aktionen und sichere Tool Ausführung.",
     endpoints: [
+      { title: "Runtime Actions", description: "Alle Runtime Action Requests mit Risiko und Status.", endpoint: "/api/runtime/actions?limit=20" },
       { title: "Pending Actions", description: "Aktionen, die auf Bestätigung warten.", endpoint: "/actions/pending" },
+      { title: "Security Permissions", description: "Berechtigungen inklusive Authority Gate Status.", endpoint: "/security/permissions" },
       { title: "Diagnostics Package", description: "Diagnosepaket für Sicherheitsprüfung.", endpoint: "/diagnostics/package" },
       { title: "Ports", description: "Offene und relevante Ports prüfen.", endpoint: "/diagnostic/ports" },
     ],
@@ -179,6 +192,8 @@ const moduleMap: Record<string, { title: string; subtitle: string; folder: strin
     title: "API Console",
     subtitle: "Direkter Überblick über Backend Routen, Tools und Systemchecks.",
     endpoints: [
+      { title: "Runtime Status", description: "Lokale Runtime API Übersicht.", endpoint: "/api/runtime/status" },
+      { title: "Runtime Workflow Nodes", description: "Workflow Node Registry.", endpoint: "/api/runtime/workflows/nodes" },
       { title: "OpenAPI", description: "FastAPI OpenAPI Spezifikation.", endpoint: "/openapi.json" },
       { title: "Tools Registry", description: "Registrierte Tools.", endpoint: "/tools/registry" },
       { title: "Agents Registry", description: "Registrierte Agents.", endpoint: "/agents/registry" },
@@ -204,7 +219,7 @@ function countHint(data: unknown) {
   if (Array.isArray(data)) return `${data.length} Einträge`;
   if (data && typeof data === "object") {
     const obj = data as Record<string, unknown>;
-    for (const key of ["items", "files", "documents", "agents", "tools", "tasks", "notes", "reminders", "categories", "results"]) {
+    for (const key of ["items", "files", "documents", "agents", "tools", "tasks", "notes", "reminders", "categories", "results", "facts", "actions", "goals", "workflows", "sidecars", "runtime_agents"]) {
       if (Array.isArray(obj[key])) return `${(obj[key] as unknown[]).length} Einträge`;
     }
     return `${Object.keys(obj).length} Felder`;
@@ -220,7 +235,7 @@ export function DashboardModules({ activeNav, onSend }: Props) {
   const visible = Boolean(module) && activeNav !== "Conversations";
 
   useEffect(() => {
-    if (!visible || !module || activeNav === "Tasks & Automation") return;
+    if (!visible || !module || activeNav === "Tasks & Automation" || activeNav === "JARVIS Runtime") return;
     setResults({});
     module.endpoints.slice(0, 2).forEach((endpoint) => void runEndpoint(endpoint));
   }, [activeNav]);
@@ -257,6 +272,10 @@ export function DashboardModules({ activeNav, onSend }: Props) {
     const ok = Object.values(results).find((item) => item.status === "ok");
     return ok?.data;
   }, [results]);
+
+  if (activeNav === "JARVIS Runtime") {
+    return <RuntimeControlPanel onSend={onSend} />;
+  }
 
   if (!visible || !module) return null;
 
