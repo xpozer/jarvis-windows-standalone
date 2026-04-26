@@ -34,6 +34,10 @@ class AwarenessIn(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
+class AwarenessLoopIn(BaseModel):
+    interval_seconds: int = 10
+
+
 class ActionIn(BaseModel):
     action_type: str = Field(min_length=1)
     summary: str = Field(min_length=1)
@@ -125,6 +129,21 @@ def awareness_capture():
 @router.get("/awareness/snapshot")
 def awareness_snapshot(write_event: bool = False):
     return awareness_runtime.capture_snapshot(write_event=write_event)
+
+
+@router.get("/awareness/loop")
+def awareness_loop_status():
+    return awareness_runtime.loop_status()
+
+
+@router.post("/awareness/loop/start")
+def awareness_loop_start(req: AwarenessLoopIn = AwarenessLoopIn()):
+    return awareness_runtime.start_loop(interval_seconds=req.interval_seconds)
+
+
+@router.post("/awareness/loop/stop")
+def awareness_loop_stop():
+    return awareness_runtime.stop_loop()
 
 
 @router.post("/awareness/events")
