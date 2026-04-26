@@ -184,6 +184,16 @@ def action_reject(action_id: str):
     return result
 
 
+@router.post("/actions/{action_id}/execute")
+def action_execute(action_id: str):
+    result = action_engine.execute_approved_action(action_id)
+    if result.get("error") == "not_found":
+        raise HTTPException(status_code=404, detail="Action not found")
+    if result.get("error") == "not_approved":
+        raise HTTPException(status_code=409, detail=f"Action is not approved. Current status: {result.get('status')}")
+    return result
+
+
 @router.get("/action-engine/tools")
 def action_engine_tools():
     return action_engine.tool_registry()
