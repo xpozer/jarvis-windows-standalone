@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { OrganizerPanel } from "./OrganizerPanel";
 import "./dashboard-modules.css";
 
 type ModuleStatus = "idle" | "loading" | "ok" | "error";
@@ -216,7 +217,7 @@ export function DashboardModules({ activeNav, onSend }: Props) {
   const visible = Boolean(module) && activeNav !== "Conversations";
 
   useEffect(() => {
-    if (!visible || !module) return;
+    if (!visible || !module || activeNav === "Tasks & Automation") return;
     setResults({});
     module.endpoints.slice(0, 2).forEach((endpoint) => void runEndpoint(endpoint));
   }, [activeNav]);
@@ -255,6 +256,10 @@ export function DashboardModules({ activeNav, onSend }: Props) {
   }, [results]);
 
   if (!visible || !module) return null;
+
+  if (activeNav === "Tasks & Automation") {
+    return <OrganizerPanel onSend={onSend} />;
+  }
 
   return (
     <section className="jv-module-shell">
