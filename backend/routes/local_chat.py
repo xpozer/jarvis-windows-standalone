@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import socket
 from typing import Any
 from urllib import error, request
 
@@ -27,13 +28,13 @@ class ChatRequest(BaseModel):
     agent: str | None = None
 
 
-def _post_json(url: str, payload: dict[str, Any], timeout: int = 180) -> dict[str, Any]:
-    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+def _json_request(url: str, payload: dict[str, Any] | None = None, timeout: int = 30) -> dict[str, Any]:
+    data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = request.Request(
         url,
         data=data,
         headers={"Content-Type": "application/json"},
-        method="POST",
+        method="POST" if payload is not None else "GET",
     )
     try:
         with request.urlopen(req, timeout=timeout) as resp:
@@ -42,10 +43,46 @@ def _post_json(url: str, payload: dict[str, Any], timeout: int = 180) -> dict[st
     except error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise HTTPException(status_code=502, detail=f"Ollama HTTP Fehler {exc.code}: {detail}") from exc
-    except error.URLError as exc:
-        raise HTTPException(status_code=503, detail=f"Ollama ist nicht erreichbar: {exc.reason}") from exc
-    except TimeoutError as exc:
+    except (error.URLError, ConnectionRefusedError) as exc:
+        reason = getattr(exc, "reason", exc)
+        raise HTTPException(status_code=503, detail=f"Ollama ist nicht erreichbar: {reason}") from exc
+    except (TimeoutError, socket.timeout) as exc:
         raise HTTPException(status_code=504, detail="Ollama Antwort Timeout") from exc
+
+
+def _ollama_tags() -> list[str]:
+    data = _json_request(f"{OLLAMA_BASE.rstrip('/')}/api/tags", timeout=5)
+    models = data.get("models", [])
+    names: list[str] = []
+    if isinstance(models, list):
+        for item in models:
+            if isinstance(item, dict):
+                name = str(item.get("name") or "").strip()
+                if name:
+                    names.append(name)
+    return names
+
+
+def _ensure_model_available(model: str) -> None:
+    try:
+        names = _ollama_tags()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Ollama Modellliste konnte nicht gelesen werden: {exc}") from exc
+
+    if model in names:
+        return
+
+    short = model.split(":", 1)[0]
+    if any(n == short or n.startswith(short + ":") for n in names):
+        return
+
+    available = ", ".join(names[:12]) if names else "keine Modelle gefunden"
+    raise HTTPException(
+        status_code=424,
+        detail=f"Das Modell {model} ist in Ollama nicht vorhanden. Gefunden: {available}. Bitte ausführen: ollama pull {model}",
+    )
 
 
 def _normalize_history(history: list[ChatMessage]) -> list[dict[str, str]]:
@@ -68,6 +105,8 @@ def chat(req: ChatRequest) -> dict[str, Any]:
         confidence = 1.0
 
     model = (req.model or DEFAULT_MODEL or "qwen3:8b").strip()
+    _ensure_model_available(model)
+
     messages = core.build_messages(
         user_input=user_text,
         history=_normalize_history(req.history),
@@ -84,9 +123,10 @@ def chat(req: ChatRequest) -> dict[str, Any]:
             "options": {
                 "temperature": 0.35,
                 "top_p": 0.9,
+                "num_predict": 700,
             },
         }
-        result = _post_json(f"{OLLAMA_BASE.rstrip('/')}/api/chat", payload)
+        result = _json_request(f"{OLLAMA_BASE.rstrip('/')}/api/chat", payload, timeout=75)
         answer = ""
         if isinstance(result.get("message"), dict):
             answer = str(result["message"].get("content") or "").strip()
@@ -114,9 +154,21 @@ def chat(req: ChatRequest) -> dict[str, Any]:
 
 @router.get("/chat/health")
 def chat_health() -> dict[str, Any]:
-    online = core.ollama_online()
-    return {
-        "ok": online,
-        "ollama": OLLAMA_BASE,
-        "model": DEFAULT_MODEL,
-    }
+    try:
+        models = _ollama_tags()
+        model = DEFAULT_MODEL
+        model_available = model in models or any(n == model.split(":", 1)[0] or n.startswith(model.split(":", 1)[0] + ":") for n in models)
+        return {
+            "ok": True,
+            "ollama": OLLAMA_BASE,
+            "model": model,
+            "model_available": model_available,
+            "models": models,
+        }
+    except HTTPException as exc:
+        return {
+            "ok": False,
+            "ollama": OLLAMA_BASE,
+            "model": DEFAULT_MODEL,
+            "error": exc.detail,
+        }
