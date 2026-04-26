@@ -39,11 +39,11 @@ type Props = {
 type LoadState = "idle" | "loading" | "ok" | "error";
 
 const modeByNav: Record<string, Mode> = {
-  "Neural Network": "agents",
-  "Core Systems": "core",
-  "Code Interpreter": "tools",
-  "Data Analyzer": "tools",
-  "API Console": "api",
+  Agentennetz: "agents",
+  Kernsysteme: "core",
+  "Code-Werkzeuge": "tools",
+  Datenanalyse: "tools",
+  "API-Konsole": "api",
 };
 
 function pretty(value: unknown) {
@@ -109,10 +109,10 @@ function defaultsFor(tool: Tool) {
 }
 
 function navTitle(mode: Mode) {
-  if (mode === "agents") return ["AI Core", "Agent Network"];
-  if (mode === "core") return ["Core", "Agents & Tools"];
-  if (mode === "api") return ["Developer", "API Console"];
-  return ["Tools", "Tool Registry"];
+  if (mode === "agents") return ["KI Kern", "Agentennetz"];
+  if (mode === "core") return ["Kern", "Agenten & Werkzeuge"];
+  if (mode === "api") return ["Entwicklung", "API-Konsole"];
+  return ["Werkzeuge", "Werkzeugverzeichnis"];
 }
 
 export function AgentToolsPanel({ activeNav, onSend }: Props) {
@@ -126,7 +126,7 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
   const [error, setError] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<string>("");
   const [selectedTool, setSelectedTool] = useState<string>("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState("alle");
   const [argsText, setArgsText] = useState("{}");
   const [riskAccepted, setRiskAccepted] = useState(false);
   const [result, setResult] = useState<unknown>(null);
@@ -134,11 +134,11 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
   const [folder, title] = navTitle(mode);
   const selectedAgentData = agents.find((agent) => agent.id === selectedAgent) || agents[0];
   const selectedToolData = tools.find((tool) => tool.id === selectedTool) || tools[0];
-  const categories = useMemo(() => ["all", ...Array.from(new Set(tools.map((tool) => tool.category || "other"))).sort()], [tools]);
+  const categories = useMemo(() => ["alle", ...Array.from(new Set(tools.map((tool) => tool.category || "sonstige"))).sort()], [tools]);
   const visibleTools = useMemo(() => {
-    const filtered = category === "all" ? tools : tools.filter((tool) => (tool.category || "other") === category);
-    if (activeNav === "Data Analyzer") return filtered.filter((tool) => ["file", "knowledge"].includes(tool.category || ""));
-    if (activeNav === "Code Interpreter") return filtered.filter((tool) => ["file", "system", "knowledge", "work", "automation"].includes(tool.category || ""));
+    const filtered = category === "alle" ? tools : tools.filter((tool) => (tool.category || "sonstige") === category);
+    if (activeNav === "Datenanalyse") return filtered.filter((tool) => ["file", "knowledge"].includes(tool.category || ""));
+    if (activeNav === "Code-Werkzeuge") return filtered.filter((tool) => ["file", "system", "knowledge", "work", "automation"].includes(tool.category || ""));
     return filtered;
   }, [activeNav, category, tools]);
   const riskySelected = Boolean(selectedToolData && (selectedToolData.requires_confirmation || selectedToolData.risk_level === "high"));
@@ -185,11 +185,11 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
   }, [selectedTool]);
 
   async function testAgent(agent: Agent) {
-    setResult({ status: "testing", agent: agent.id });
+    setResult({ status: "Teste", agent: agent.id });
     const data = await requestJson(`/agents/registry/${encodeURIComponent(agent.id)}/status`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "idle", last_action: "UI Test Button", error: false }),
+      body: JSON.stringify({ status: "idle", last_action: "UI Test", error: false }),
     });
     setResult(data);
     await loadAll();
@@ -205,10 +205,10 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
       return;
     }
     if (riskySelected && !riskAccepted) {
-      setResult({ ok: false, error: "Riskante Tools brauchen zuerst die sichtbare Bestaetigung." });
+      setResult({ ok: false, error: "Riskante Werkzeuge brauchen zuerst die sichtbare Bestaetigung." });
       return;
     }
-    setResult({ status: "running", tool_id: selectedToolData.id });
+    setResult({ status: "Laeuft", tool_id: selectedToolData.id });
     const data = await requestJson("/tools/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -228,11 +228,11 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
         <div>
           <small>{folder}</small>
           <h1>{title}</h1>
-          <p>Agenten, Faehigkeiten, Tool Registry und sichere Ausfuehrung als produktive Arbeitsflaeche.</p>
+          <p>Agenten, Faehigkeiten, Werkzeugverzeichnis und sichere Ausfuehrung als produktive Arbeitsflaeche.</p>
         </div>
         <div className="jv-agent-tools-actions">
           <button onClick={loadAll}>{status === "loading" ? "LAEDT" : "AKTUALISIEREN"}</button>
-          <button onClick={() => onSend("Pruefe Agent Registry und Tool Registry")}>CHAT CHECK</button>
+          <button onClick={() => onSend("Pruefe Agentenverzeichnis und Werkzeugverzeichnis")}>CHAT PRUEFUNG</button>
         </div>
       </div>
 
@@ -240,7 +240,7 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
 
       <div className="jv-at-summary">
         <div><b>{agents.length}</b><span>Agenten</span></div>
-        <div><b>{tools.length}</b><span>Tools</span></div>
+        <div><b>{tools.length}</b><span>Werkzeuge</span></div>
         <div><b>{tools.filter((tool) => tool.requires_confirmation || tool.risk_level === "high").length}</b><span>riskant</span></div>
         <div><b>{pending.length}</b><span>offen</span></div>
       </div>
@@ -248,12 +248,12 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
       <div className={`jv-at-grid ${showAgents && showTools ? "" : "single"}`}>
         {showAgents && (
           <section className="jv-at-card">
-            <div className="jv-at-title"><h2>Agent Status</h2><span>{agents.length}</span></div>
+            <div className="jv-at-title"><h2>Agentenstatus</h2><span>{agents.length}</span></div>
             <div className="jv-at-list">
               {agents.map((agent) => (
                 <button key={agent.id} className={`jv-agent-row ${statusClass(agent.status)} ${selectedAgentData?.id === agent.id ? "active" : ""}`} onClick={() => setSelectedAgent(agent.id)}>
-                  <div><b>{agent.name}</b><span>{agent.id} · {agent.risk_level || "unknown"}</span></div>
-                  <em>{agent.status || "unknown"}</em>
+                  <div><b>{agent.name}</b><span>{agent.id} · {agent.risk_level || "unbekannt"}</span></div>
+                  <em>{agent.status || "unbekannt"}</em>
                   <p>{agent.last_action || agent.role || "Keine letzte Aktion."}</p>
                 </button>
               ))}
@@ -264,7 +264,7 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
         {showTools && (
           <section className="jv-at-card">
             <div className="jv-at-title">
-              <h2>Tool Registry</h2>
+              <h2>Werkzeugverzeichnis</h2>
               <select value={category} onChange={(event) => setCategory(event.target.value)}>
                 {categories.map((item) => <option key={item} value={item}>{item}</option>)}
               </select>
@@ -272,8 +272,8 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
             <div className="jv-at-list">
               {visibleTools.map((tool) => (
                 <button key={tool.id} className={`jv-tool-row ${riskClass(tool)} ${selectedToolData?.id === tool.id ? "active" : ""}`} onClick={() => setSelectedTool(tool.id)}>
-                  <div><b>{tool.name}</b><span>{tool.id} · {tool.category || "other"}</span></div>
-                  <em>{tool.requires_confirmation ? "confirm" : tool.risk_level || "safe"}</em>
+                  <div><b>{tool.name}</b><span>{tool.id} · {tool.category || "sonstige"}</span></div>
+                  <em>{tool.requires_confirmation ? "bestaetigen" : tool.risk_level || "sicher"}</em>
                   <p>{tool.description || "Keine Beschreibung."}</p>
                 </button>
               ))}
@@ -282,16 +282,16 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
         )}
 
         <section className="jv-at-card jv-at-detail">
-          <div className="jv-at-title"><h2>{showAgents ? "Agent Detail" : "Registry Detail"}</h2><span>Debug</span></div>
+          <div className="jv-at-title"><h2>{showAgents ? "Agentendetails" : "Verzeichnisdetails"}</h2><span>Diagnose</span></div>
           {selectedAgentData && showAgents && (
             <div className="jv-at-agent-detail">
-              <div className="jv-at-headline"><b>{selectedAgentData.name}</b><em className={statusClass(selectedAgentData.status)}>{selectedAgentData.status || "unknown"}</em></div>
+              <div className="jv-at-headline"><b>{selectedAgentData.name}</b><em className={statusClass(selectedAgentData.status)}>{selectedAgentData.status || "unbekannt"}</em></div>
               <p>{selectedAgentData.role}</p>
               <div className="jv-at-chips">
                 {(selectedAgentData.capabilities || []).map((capability) => <span key={capability}>{capability}</span>)}
               </div>
               <div className="jv-at-buttons">
-                <button onClick={() => void testAgent(selectedAgentData)}>TEST</button>
+                <button onClick={() => void testAgent(selectedAgentData)}>TESTEN</button>
                 <button onClick={() => onSend(`Nutze ${selectedAgentData.name}: ${selectedAgentData.role || ""}`)}>CHAT</button>
               </div>
             </div>
@@ -299,7 +299,7 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
 
           {selectedToolData && showTools && (
             <div className="jv-at-tool-detail">
-              <div className="jv-at-headline"><b>{selectedToolData.name}</b><em className={riskClass(selectedToolData)}>{selectedToolData.requires_confirmation ? "confirm" : selectedToolData.risk_level || "unknown"}</em></div>
+              <div className="jv-at-headline"><b>{selectedToolData.name}</b><em className={riskClass(selectedToolData)}>{selectedToolData.requires_confirmation ? "bestaetigen" : selectedToolData.risk_level || "unbekannt"}</em></div>
               <p>{selectedToolData.description}</p>
               <textarea value={argsText} onChange={(event) => setArgsText(event.target.value)} spellCheck={false} />
               {riskySelected && (
@@ -310,14 +310,14 @@ export function AgentToolsPanel({ activeNav, onSend }: Props) {
               )}
               <div className="jv-at-buttons">
                 <button disabled={riskySelected && !riskAccepted} onClick={() => void runTool()}>{riskySelected ? "VORBEREITEN" : "AUSFUEHREN"}</button>
-                <button onClick={() => onSend(`Erklaere mir das Tool ${selectedToolData.name}`)}>CHAT</button>
+                <button onClick={() => onSend(`Erklaere mir das Werkzeug ${selectedToolData.name}`)}>CHAT</button>
               </div>
             </div>
           )}
         </section>
 
         <section className="jv-at-card jv-at-result">
-          <div className="jv-at-title"><h2>Live Ergebnis</h2><span>{status}</span></div>
+          <div className="jv-at-title"><h2>Aktuelles Ergebnis</h2><span>{status}</span></div>
           <pre>{pretty(result || (mode === "api" ? { matrix, orchestrators, pending } : { selectedAgentData, selectedToolData }))}</pre>
         </section>
       </div>

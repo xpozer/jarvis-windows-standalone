@@ -10,14 +10,14 @@ type CheckItem = {
 };
 
 const checks: CheckItem[] = [
-  { key: "self", title: "Backend Self Check", endpoint: "/self-check", status: "idle" },
+  { key: "self", title: "Backend Selbstpruefung", endpoint: "/self-check", status: "idle" },
   { key: "chat", title: "Ollama / LLM", endpoint: "/api/chat/health", status: "idle" },
-  { key: "metrics", title: "System Metrics", endpoint: "/system/metrics", status: "idle" },
+  { key: "metrics", title: "Systemwerte", endpoint: "/system/metrics", status: "idle" },
   { key: "ports", title: "Ports", endpoint: "/diagnostic/ports", status: "idle" },
-  { key: "deps", title: "Dependencies", endpoint: "/diagnostic/dependencies", status: "idle" },
+  { key: "deps", title: "Abhaengigkeiten", endpoint: "/diagnostic/dependencies", status: "idle" },
   { key: "logs", title: "Logs", endpoint: "/diagnostic/logs/list", status: "idle" },
-  { key: "deep", title: "Deep Status", endpoint: "/deep/status", status: "idle" },
-  { key: "repair", title: "Repair Plan", endpoint: "/deep/repair-plan", status: "idle" },
+  { key: "deep", title: "Tiefenstatus", endpoint: "/deep/status", status: "idle" },
+  { key: "repair", title: "Reparaturplan", endpoint: "/deep/repair-plan", status: "idle" },
 ];
 
 let state: CheckItem[] = checks.map((item) => ({ ...item }));
@@ -42,7 +42,7 @@ function inferStatus(data: unknown): CheckStatus {
 }
 
 function label(status: CheckStatus) {
-  if (status === "loading") return "Prüft";
+  if (status === "loading") return "Prueft";
   if (status === "ok") return "OK";
   if (status === "warn") return "Warnung";
   if (status === "error") return "Fehler";
@@ -50,9 +50,9 @@ function label(status: CheckStatus) {
 }
 
 function summary(item: CheckItem) {
-  if (item.status === "loading") return "Diagnose läuft...";
+  if (item.status === "loading") return "Diagnose laeuft...";
   if (item.error) return item.error;
-  if (!item.data) return "Noch nicht geprüft";
+  if (!item.data) return "Noch nicht geprueft";
   const data = item.data as any;
   if (item.key === "chat" && typeof data === "object") return `Ollama: ${data.ok ? "erreichbar" : "nicht erreichbar"} · Modell: ${data.model || "unbekannt"}`;
   if (item.key === "metrics" && typeof data === "object") return `CPU ${data.cpu?.percent ?? "N/A"}% · RAM ${data.memory?.percent ?? "N/A"}% · Temp ${data.temperature?.celsius ?? "N/A"}°C`;
@@ -60,7 +60,7 @@ function summary(item: CheckItem) {
     const count = Array.isArray(data.logs) ? data.logs.length : Array.isArray(data.items) ? data.items.length : 0;
     return `${count} Logs gefunden`;
   }
-  if (typeof data === "object") return `${Object.keys(data).length} Felder geprüft`;
+  if (typeof data === "object") return `${Object.keys(data).length} Felder geprueft`;
   return String(data).slice(0, 160);
 }
 
@@ -86,12 +86,12 @@ function renderPanel() {
     <section class="jv-diagnostics-shell jv-diagnostics-bridge">
       <div class="jv-diagnostics-header">
         <div>
-          <small>System Diagnostics</small>
+          <small>Systemdiagnose</small>
           <h1>JARVIS Diagnose</h1>
-          <p>Prüft Backend, LLM, Ports, Logs, Dependencies und Repair Plan als klare Statuskarten.</p>
+          <p>Prueft Backend, LLM, Ports, Logs, Abhaengigkeiten und Reparaturplan als klare Statuskarten.</p>
         </div>
         <div class="jv-diagnostics-actions">
-          <button data-action="run-all">KOMPLETT PRÜFEN</button>
+          <button data-action="run-all">KOMPLETT PRUEFEN</button>
           <button data-action="chat-repair">REPARATURPLAN IM CHAT</button>
         </div>
       </div>
@@ -99,7 +99,7 @@ function renderPanel() {
         <div class="ok"><b>${totals.ok}</b><span>OK</span></div>
         <div class="warn"><b>${totals.warn}</b><span>Warnung</span></div>
         <div class="error"><b>${totals.error}</b><span>Fehler</span></div>
-        <div class="loading"><b>${totals.loading}</b><span>Läuft</span></div>
+        <div class="loading"><b>${totals.loading}</b><span>Laeuft</span></div>
       </div>
       <div class="jv-diagnostics-grid">
         <div class="jv-check-list">
@@ -108,7 +108,7 @@ function renderPanel() {
               <div><b>${escapeHtml(item.title)}</b><span>${escapeHtml(item.endpoint)}</span></div>
               <em>${label(item.status)}</em>
               <p>${escapeHtml(summary(item))}</p>
-              <strong data-run="${item.key}">Neu prüfen</strong>
+              <strong data-run="${item.key}">Neu pruefen</strong>
             </button>
           `).join("")}
         </div>
@@ -184,11 +184,11 @@ function installDiagnosticsBridge() {
     const item = target?.closest(".jarvis-nav-item") as HTMLElement | null;
     if (!item) return;
     const labelText = item.textContent || "";
-    if (labelText.includes("Diagnostics")) {
+    if (labelText.includes("Diagnose") || labelText.includes("Diagnostics")) {
       window.setTimeout(openDiagnostics, 80);
       return;
     }
-    if (!labelText.includes("Diagnostics")) closeDiagnostics();
+    if (!labelText.includes("Diagnose") && !labelText.includes("Diagnostics")) closeDiagnostics();
   }, true);
 }
 

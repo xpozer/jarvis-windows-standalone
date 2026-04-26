@@ -20,192 +20,197 @@ type Props = {
 
 type ResultState = Record<string, { status: ModuleStatus; data?: unknown; error?: string }>;
 
-const moduleMap: Record<string, { title: string; subtitle: string; folder: string; endpoints: EndpointCard[]; prompts: string[]; searchMode?: "knowledge" | "research" }> = {
-  Home: {
-    folder: "Command Center",
-    title: "Home Overview",
-    subtitle: "Zentrale Übersicht. Hier bleiben nur die wichtigsten Statuspunkte sichtbar.",
+type ModuleConfig = {
+  title: string;
+  subtitle: string;
+  folder: string;
+  endpoints: EndpointCard[];
+  prompts: string[];
+  searchMode?: "knowledge" | "research";
+};
+
+const moduleMap: Record<string, ModuleConfig> = {
+  Start: {
+    folder: "Kommandozentrale",
+    title: "Startuebersicht",
+    subtitle: "Zentrale Uebersicht. Hier bleiben nur die wichtigsten Statuspunkte sichtbar.",
     endpoints: [
-      { title: "Chat Health", description: "Prüft, ob Ollama und das lokale Modell erreichbar sind.", endpoint: "/api/chat/health" },
-      { title: "System Metrics", description: "Live Werte für CPU, RAM, Temperatur und Netzwerk.", endpoint: "/system/metrics" },
-      { title: "Self Check", description: "Backend Selbsttest und wichtige Runtime Informationen.", endpoint: "/self-check" },
+      { title: "Chat Zustand", description: "Prueft, ob Ollama und das lokale Modell erreichbar sind.", endpoint: "/api/chat/health" },
+      { title: "Systemwerte", description: "Aktuelle Werte fuer CPU, RAM, Temperatur und Netzwerk.", endpoint: "/system/metrics" },
+      { title: "Selbstpruefung", description: "Backend Selbsttest und wichtige Runtime Informationen.", endpoint: "/self-check" },
     ],
     prompts: ["Fasse mir den aktuellen Systemstatus kurz zusammen", "Welche Module sind gerade einsatzbereit?"],
   },
-  "Knowledge Base": {
-    folder: "Knowledge",
-    title: "Knowledge Base",
+  Wissensbasis: {
+    folder: "Wissen",
+    title: "Wissensbasis",
     subtitle: "Dokumente, Kategorien, lokale Suche und Antworten aus dem Wissensspeicher.",
     searchMode: "knowledge",
     endpoints: [
-      { title: "Knowledge Stats", description: "Indexgröße, Dokumentanzahl und Status.", endpoint: "/knowledge/stats" },
-      { title: "Documents", description: "Zeigt importierte Dokumente und Quellen.", endpoint: "/knowledge/documents" },
-      { title: "Categories", description: "Zeigt vorhandene Wissenskategorien.", endpoint: "/knowledge/categories" },
-      { title: "Uploaded Files", description: "Dateien, die über die UI hochgeladen wurden.", endpoint: "/api/files" },
+      { title: "Wissensstatus", description: "Indexgroesse, Dokumentanzahl und Status.", endpoint: "/knowledge/stats" },
+      { title: "Dokumente", description: "Zeigt importierte Dokumente und Quellen.", endpoint: "/knowledge/documents" },
+      { title: "Kategorien", description: "Zeigt vorhandene Wissenskategorien.", endpoint: "/knowledge/categories" },
+      { title: "Hochladungen", description: "Dateien, die ueber die UI hochgeladen wurden.", endpoint: "/api/files" },
     ],
-    prompts: ["Suche in der Knowledge Base nach JARVIS Setup", "Importiere die letzten Uploads in die Knowledge Base"],
+    prompts: ["Suche in der Wissensbasis nach JARVIS Setup", "Importiere die letzten Hochladungen in die Wissensbasis"],
   },
-  "Data Streams": {
-    folder: "Telemetry",
-    title: "Data Streams",
-    subtitle: "Live Telemetrie, Systemwerte und tiefer Backend Status.",
+  Datenstroeme: {
+    folder: "Telemetrie",
+    title: "Datenstroeme",
+    subtitle: "Aktuelle Telemetrie, Systemwerte und tiefer Backend Status.",
     endpoints: [
-      { title: "Live Metrics", description: "Aktuelle CPU, RAM, Temperatur und Netzwerkdaten.", endpoint: "/system/metrics" },
-      { title: "Deep Status", description: "Tiefer Backend Zustand und interne Diagnosewerte.", endpoint: "/deep/status" },
-      { title: "Context Pack", description: "Gesammelter Kontext für Diagnose und Reparatur.", endpoint: "/deep/context-pack" },
+      { title: "Aktuelle Werte", description: "Aktuelle CPU, RAM, Temperatur und Netzwerkdaten.", endpoint: "/system/metrics" },
+      { title: "Tiefenstatus", description: "Tiefer Backend Zustand und interne Diagnosewerte.", endpoint: "/deep/status" },
+      { title: "Kontextpaket", description: "Gesammelter Kontext fuer Diagnose und Reparatur.", endpoint: "/deep/context-pack" },
     ],
-    prompts: ["Analysiere die aktuellen Systemdaten", "Gibt es Auffälligkeiten in den Live Daten?"],
+    prompts: ["Analysiere die aktuellen Systemdaten", "Gibt es Auffaelligkeiten in den aktuellen Daten?"],
   },
-  "Tasks & Automation": {
-    folder: "Organizer",
-    title: "Tasks & Automation",
-    subtitle: "Notizen, Aufgaben, Erinnerungen, Automationen und Folder Watcher.",
+  "Aufgaben & Automationen": {
+    folder: "Organisation",
+    title: "Aufgaben & Automationen",
+    subtitle: "Notizen, Aufgaben, Erinnerungen, Automationen und Ordnerueberwachung.",
     endpoints: [
-      { title: "Notes", description: "Lokale Notizen abrufen.", endpoint: "/notes" },
-      { title: "Tasks", description: "Aufgaben abrufen.", endpoint: "/tasks" },
-      { title: "Reminders", description: "Erinnerungen abrufen.", endpoint: "/reminders" },
-      { title: "Automations", description: "Automationen und geplante Abläufe anzeigen.", endpoint: "/automation/list" },
-      { title: "Folder Watch", description: "Überwachte Ordner anzeigen.", endpoint: "/folder-watch/list" },
+      { title: "Notizen", description: "Lokale Notizen abrufen.", endpoint: "/notes" },
+      { title: "Aufgaben", description: "Aufgaben abrufen.", endpoint: "/tasks" },
+      { title: "Erinnerungen", description: "Erinnerungen abrufen.", endpoint: "/reminders" },
+      { title: "Automationen", description: "Automationen und geplante Ablaeufe anzeigen.", endpoint: "/automation/list" },
+      { title: "Ordnerueberwachung", description: "Ueberwachte Ordner anzeigen.", endpoint: "/folder-watch/list" },
     ],
-    prompts: ["Erstelle mir eine Aufgabe", "Zeig mir meine offenen Aufgaben", "Welche Erinnerungen sind fällig?"],
+    prompts: ["Erstelle mir eine Aufgabe", "Zeig mir meine offenen Aufgaben", "Welche Erinnerungen sind faellig?"],
   },
-  Diagnostics: {
+  Diagnose: {
     folder: "System",
-    title: "Diagnostics",
-    subtitle: "Selbsttest, Ports, Logs, Dependencies und Reparaturplan.",
+    title: "Diagnose",
+    subtitle: "Selbsttest, Ports, Logs, Abhaengigkeiten und Reparaturplan.",
     endpoints: [
-      { title: "Self Check", description: "Gesamter Backend Selbsttest.", endpoint: "/self-check" },
-      { title: "Dependencies", description: "Prüft Python Pakete, Node und wichtige Abhängigkeiten.", endpoint: "/diagnostic/dependencies" },
-      { title: "Ports", description: "Prüft relevante Ports wie 8000 und 11434.", endpoint: "/diagnostic/ports" },
-      { title: "Logs", description: "Verfügbare Backend Logs anzeigen.", endpoint: "/diagnostic/logs/list" },
-      { title: "Repair Plan", description: "Automatisch erzeugter Reparaturplan.", endpoint: "/deep/repair-plan" },
+      { title: "Selbstpruefung", description: "Gesamter Backend Selbsttest.", endpoint: "/self-check" },
+      { title: "Abhaengigkeiten", description: "Prueft Python Pakete, Node und wichtige Abhaengigkeiten.", endpoint: "/diagnostic/dependencies" },
+      { title: "Ports", description: "Prueft relevante Ports wie 8000 und 11434.", endpoint: "/diagnostic/ports" },
+      { title: "Logs", description: "Verfuegbare Backend Logs anzeigen.", endpoint: "/diagnostic/logs/list" },
+      { title: "Reparaturplan", description: "Automatisch erzeugter Reparaturplan.", endpoint: "/deep/repair-plan" },
     ],
-    prompts: ["Starte eine Systemdiagnose", "Erstelle mir einen Reparaturplan für JARVIS"],
+    prompts: ["Starte eine Systemdiagnose", "Erstelle mir einen Reparaturplan fuer JARVIS"],
   },
-  "Neural Network": {
-    folder: "AI Core",
-    title: "Neural Network",
-    subtitle: "LLM Zustand, Orchestrator Agents und Modell Verbindung.",
+  Agentennetz: {
+    folder: "KI Kern",
+    title: "Agentennetz",
+    subtitle: "LLM Zustand, Orchestrator Agenten und Modellverbindung.",
     endpoints: [
-      { title: "LLM Health", description: "Prüft Ollama und das konfigurierte Modell.", endpoint: "/api/chat/health" },
-      { title: "Orchestrator Agents", description: "Liste der verfügbaren Orchestrator Agents.", endpoint: "/orchestrate/agents" },
-      { title: "Agent Matrix", description: "Matrix der Agent Fähigkeiten.", endpoint: "/agents/matrix" },
-      { title: "Agent Registry", description: "Registrierte Agenten und Statusdaten.", endpoint: "/agents/registry" },
+      { title: "LLM Zustand", description: "Prueft Ollama und das konfigurierte Modell.", endpoint: "/api/chat/health" },
+      { title: "Orchestrator Agenten", description: "Liste der verfuegbaren Orchestrator Agenten.", endpoint: "/orchestrate/agents" },
+      { title: "Agentenmatrix", description: "Matrix der Agentenfaehigkeiten.", endpoint: "/agents/matrix" },
+      { title: "Agentenverzeichnis", description: "Registrierte Agenten und Statusdaten.", endpoint: "/agents/registry" },
     ],
-    prompts: ["Welcher Agent ist für Web Research zuständig?", "Prüfe den LLM Zustand"],
+    prompts: ["Welcher Agent ist fuer Websuche zustaendig?", "Pruefe den LLM Zustand"],
   },
-  "Memory Banks": {
-    folder: "Memory",
-    title: "Memory Banks",
-    subtitle: "Knowledge Speicher, Upload Index und lokale Datenquellen.",
+  Speicherbanken: {
+    folder: "Speicher",
+    title: "Speicherbanken",
+    subtitle: "Wissensspeicher, Datei Index und lokale Datenquellen.",
     endpoints: [
-      { title: "Knowledge Stats", description: "Speicherstatus der Knowledge Base.", endpoint: "/knowledge/stats" },
-      { title: "Knowledge Categories", description: "Kategorien im Speicher.", endpoint: "/knowledge/categories" },
-      { title: "Uploaded Files", description: "Datei Index aus Uploads.", endpoint: "/api/files" },
+      { title: "Wissensstatus", description: "Speicherstatus der Wissensbasis.", endpoint: "/knowledge/stats" },
+      { title: "Wissenskategorien", description: "Kategorien im Speicher.", endpoint: "/knowledge/categories" },
+      { title: "Hochladungen", description: "Datei Index aus hochgeladenen Dateien.", endpoint: "/api/files" },
     ],
-    prompts: ["Was liegt aktuell im Memory?", "Fasse meine letzten Uploads zusammen"],
+    prompts: ["Was liegt aktuell im Speicher?", "Fasse meine letzten Hochladungen zusammen"],
   },
-  "Core Systems": {
-    folder: "Core",
-    title: "Core Systems",
-    subtitle: "Backend, Runtime, Agents, Tools und Systemmetriken.",
+  Kernsysteme: {
+    folder: "Kern",
+    title: "Kernsysteme",
+    subtitle: "Backend, Runtime, Agenten, Werkzeuge und Systemmetriken.",
     endpoints: [
-      { title: "Self Check", description: "Kernprüfung des Systems.", endpoint: "/self-check" },
-      { title: "Tools Registry", description: "Registrierte Tools.", endpoint: "/tools/registry" },
-      { title: "Agent Registry", description: "Agentenstatus und Registry.", endpoint: "/agents/registry" },
-      { title: "Metrics", description: "Live Systemmetriken.", endpoint: "/system/metrics" },
+      { title: "Selbstpruefung", description: "Kernpruefung des Systems.", endpoint: "/self-check" },
+      { title: "Werkzeugverzeichnis", description: "Registrierte Werkzeuge.", endpoint: "/tools/registry" },
+      { title: "Agentenverzeichnis", description: "Agentenstatus und Verzeichnis.", endpoint: "/agents/registry" },
+      { title: "Systemwerte", description: "Aktuelle Systemmetriken.", endpoint: "/system/metrics" },
     ],
-    prompts: ["Prüfe alle Core Systeme", "Welche Core Module sind noch nicht verbunden?"],
+    prompts: ["Pruefe alle Kernsysteme", "Welche Kernmodule sind noch nicht verbunden?"],
   },
-  "Security Center": {
-    folder: "Security",
-    title: "Security Center",
-    subtitle: "Status, Audit, offene Aktionen und sichere Tool Ausführung.",
+  Sicherheitszentrale: {
+    folder: "Sicherheit",
+    title: "Sicherheitszentrale",
+    subtitle: "Status, Audit, offene Aktionen und sichere Werkzeugausfuehrung.",
     endpoints: [
-      { title: "Pending Actions", description: "Aktionen, die auf Bestätigung warten.", endpoint: "/actions/pending" },
-      { title: "Diagnostics Package", description: "Diagnosepaket für Sicherheitsprüfung.", endpoint: "/diagnostics/package" },
-      { title: "Ports", description: "Offene und relevante Ports prüfen.", endpoint: "/diagnostic/ports" },
+      { title: "Offene Aktionen", description: "Aktionen, die auf Bestaetigung warten.", endpoint: "/actions/pending" },
+      { title: "Diagnosepaket", description: "Diagnosepaket fuer Sicherheitspruefung.", endpoint: "/diagnostics/package" },
+      { title: "Ports", description: "Offene und relevante Ports pruefen.", endpoint: "/diagnostic/ports" },
     ],
-    prompts: ["Prüfe den Sicherheitsstatus", "Welche Aktionen warten auf Bestätigung?"],
+    prompts: ["Pruefe den Sicherheitsstatus", "Welche Aktionen warten auf Bestaetigung?"],
   },
-  "Code Interpreter": {
-    folder: "Tools",
-    title: "Code Interpreter",
-    subtitle: "Tool Registry, Tool Kategorien und Code bezogene Aktionen.",
+  "Code-Werkzeuge": {
+    folder: "Werkzeuge",
+    title: "Code-Werkzeuge",
+    subtitle: "Werkzeugverzeichnis, Kategorien und codebezogene Aktionen.",
     endpoints: [
-      { title: "Tools Full", description: "Alle registrierten Tools vollständig anzeigen.", endpoint: "/tools/registry/full" },
-      { title: "Tool Registry", description: "Kurzübersicht der Tools.", endpoint: "/tools/registry" },
-      { title: "Code Tools", description: "Tools der Kategorie code, falls vorhanden.", endpoint: "/tools/registry/full/category/code" },
+      { title: "Alle Werkzeuge", description: "Alle registrierten Werkzeuge vollstaendig anzeigen.", endpoint: "/tools/registry/full" },
+      { title: "Werkzeugverzeichnis", description: "Kurzuebersicht der Werkzeuge.", endpoint: "/tools/registry" },
+      { title: "Code Werkzeuge", description: "Werkzeuge der Kategorie code, falls vorhanden.", endpoint: "/tools/registry/full/category/code" },
     ],
-    prompts: ["Hilf mir beim Code Debugging", "Welche Code Tools sind verfügbar?"],
+    prompts: ["Hilf mir beim Code Debugging", "Welche Code Werkzeuge sind verfuegbar?"],
   },
-  "Data Analyzer": {
-    folder: "Tools",
-    title: "Data Analyzer",
+  Datenanalyse: {
+    folder: "Werkzeuge",
+    title: "Datenanalyse",
     subtitle: "Analysefunktionen, Dateianalyse und lokale Datenabfrage.",
     endpoints: [
-      { title: "Uploaded Files", description: "Dateien, die analysiert werden können.", endpoint: "/api/files" },
-      { title: "Analysis Tools", description: "Tools der Kategorie analysis, falls vorhanden.", endpoint: "/tools/registry/full/category/analysis" },
-      { title: "Knowledge Search", description: "Leere Suchprobe gegen Knowledge Search.", endpoint: "/knowledge/search?q=&limit=5" },
+      { title: "Hochladungen", description: "Dateien, die analysiert werden koennen.", endpoint: "/api/files" },
+      { title: "Analysewerkzeuge", description: "Werkzeuge der Kategorie analysis, falls vorhanden.", endpoint: "/tools/registry/full/category/analysis" },
+      { title: "Wissenssuche", description: "Leere Suchprobe gegen die Wissenssuche.", endpoint: "/knowledge/search?q=&limit=5" },
     ],
-    prompts: ["Analysiere die letzte hochgeladene Datei", "Zeig mir Auffälligkeiten in den Daten"],
+    prompts: ["Analysiere die letzte hochgeladene Datei", "Zeig mir Auffaelligkeiten in den Daten"],
   },
-  "File Manager": {
-    folder: "Files",
-    title: "File Manager",
-    subtitle: "Upload Index, Dateisuche und Windows Ordnerzugriff.",
+  Dateimanager: {
+    folder: "Dateien",
+    title: "Dateimanager",
+    subtitle: "Datei Index, Dateisuche und Windows Ordnerzugriff.",
     endpoints: [
-      { title: "Uploaded Files", description: "JARVIS Upload Index.", endpoint: "/api/files" },
+      { title: "Hochladungen", description: "JARVIS Datei Index.", endpoint: "/api/files" },
       { title: "Windows Apps", description: "Windows App Index als Funktionstest.", endpoint: "/windows/apps" },
-      { title: "Search Files", description: "Beispielsuche nach JARVIS Dateien.", endpoint: "/windows/search-files?q=jarvis&limit=10" },
+      { title: "Dateisuche", description: "Beispielsuche nach JARVIS Dateien.", endpoint: "/windows/search-files?q=jarvis&limit=10" },
     ],
     prompts: ["Zeig mir die letzten Dateien", "Suche nach JARVIS Dateien"],
   },
-  "Web Search": {
-    folder: "Research",
-    title: "Web Search",
-    subtitle: "Reparierter Research Agent mit HTML Suche und Ollama Zusammenfassung.",
+  Websuche: {
+    folder: "Recherche",
+    title: "Websuche",
+    subtitle: "Reparierter Recherche Agent mit HTML Suche und Ollama Zusammenfassung.",
     searchMode: "research",
     endpoints: [
-      { title: "Research Health", description: "Testet den neuen Research Endpoint mit einer kurzen Suche.", endpoint: "/api/research/search?q=FastAPI%20Windows%20Ollama&limit=3" },
-      { title: "Research Answer", description: "Sucht Web Treffer und lässt Ollama zusammenfassen.", endpoint: "/api/research/answer?q=Ollama%20qwen3%208b%20FastAPI&limit=4" },
-      { title: "Agent Registry", description: "Prüft, ob ein Research Agent registriert ist.", endpoint: "/agents/registry" },
-      { title: "Tool Registry", description: "Prüft, ob Web oder Search Tools registriert sind.", endpoint: "/tools/registry/full" },
+      { title: "Recherche Zustand", description: "Testet den Recherche Endpunkt mit einer kurzen Suche.", endpoint: "/api/research/search?q=FastAPI%20Windows%20Ollama&limit=3" },
+      { title: "Recherche Antwort", description: "Sucht Web Treffer und laesst Ollama zusammenfassen.", endpoint: "/api/research/answer?q=Ollama%20qwen3%208b%20FastAPI&limit=4" },
+      { title: "Agentenverzeichnis", description: "Prueft, ob ein Recherche Agent registriert ist.", endpoint: "/agents/registry" },
+      { title: "Werkzeugverzeichnis", description: "Prueft, ob Web- oder Suchwerkzeuge registriert sind.", endpoint: "/tools/registry/full" },
     ],
     prompts: ["Recherchiere aktuelle Infos zu Ollama qwen3", "Suche im Web nach FastAPI Windows Service"],
   },
-  "API Console": {
-    folder: "Developer",
-    title: "API Console",
-    subtitle: "Direkter Überblick über Backend Routen, Tools und Systemchecks.",
+  "API-Konsole": {
+    folder: "Entwicklung",
+    title: "API-Konsole",
+    subtitle: "Direkter Ueberblick ueber Backend Routen, Werkzeuge und Systemchecks.",
     endpoints: [
       { title: "OpenAPI", description: "FastAPI OpenAPI Spezifikation.", endpoint: "/openapi.json" },
-      { title: "Tools Registry", description: "Registrierte Tools.", endpoint: "/tools/registry" },
-      { title: "Agents Registry", description: "Registrierte Agents.", endpoint: "/agents/registry" },
-      { title: "Chat Health", description: "LLM Gesundheitscheck.", endpoint: "/api/chat/health" },
+      { title: "Werkzeugverzeichnis", description: "Registrierte Werkzeuge.", endpoint: "/tools/registry" },
+      { title: "Agentenverzeichnis", description: "Registrierte Agenten.", endpoint: "/agents/registry" },
+      { title: "Chat Zustand", description: "LLM Gesundheitscheck.", endpoint: "/api/chat/health" },
     ],
-    prompts: ["Welche API Endpoints sind verfügbar?", "Prüfe die Backend API"],
+    prompts: ["Welche API Endpunkte sind verfuegbar?", "Pruefe die Backend API"],
   },
 };
 
-const agentToolsModules = new Set(["Neural Network", "Core Systems", "Code Interpreter", "Data Analyzer", "API Console"]);
+const agentToolsModules = new Set(["Agentennetz", "Kernsysteme", "Code-Werkzeuge", "Datenanalyse", "API-Konsole"]);
 
 function pretty(value: unknown) {
   if (value === undefined) return "";
   if (typeof value === "string") return value;
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
+  try { return JSON.stringify(value, null, 2); } catch { return String(value); }
 }
 
 function countHint(data: unknown) {
-  if (Array.isArray(data)) return `${data.length} Einträge`;
+  if (Array.isArray(data)) return `${data.length} Eintraege`;
   if (data && typeof data === "object") {
     const obj = data as Record<string, unknown>;
     for (const key of ["items", "files", "documents", "agents", "tools", "tasks", "notes", "reminders", "categories", "results"]) {
-      if (Array.isArray(obj[key])) return `${(obj[key] as unknown[]).length} Einträge`;
+      if (Array.isArray(obj[key])) return `${(obj[key] as unknown[]).length} Eintraege`;
     }
     return `${Object.keys(obj).length} Felder`;
   }
@@ -217,10 +222,10 @@ export function DashboardModules({ activeNav, onSend }: Props) {
   const [results, setResults] = useState<ResultState>({});
   const [query, setQuery] = useState("");
 
-  const visible = Boolean(module) && activeNav !== "Conversations";
+  const visible = Boolean(module) && activeNav !== "Dialog";
 
   useEffect(() => {
-    if (!visible || !module || activeNav === "Tasks & Automation") return;
+    if (!visible || !module || activeNav === "Aufgaben & Automationen") return;
     setResults({});
     module.endpoints.slice(0, 2).forEach((endpoint) => void runEndpoint(endpoint));
   }, [activeNav]);
@@ -248,8 +253,8 @@ export function DashboardModules({ activeNav, onSend }: Props) {
     if (!q || !module) return;
     const isResearch = module.searchMode === "research";
     const endpoint: EndpointCard = isResearch
-      ? { title: `Research: ${q}`, description: "Web Research mit Zusammenfassung", endpoint: `/api/research/answer?q=${encodeURIComponent(q)}&limit=6` }
-      : { title: `Suche: ${q}`, description: "Knowledge Suche", endpoint: `/knowledge/search?q=${encodeURIComponent(q)}&limit=8` };
+      ? { title: `Recherche: ${q}`, description: "Web Recherche mit Zusammenfassung", endpoint: `/api/research/answer?q=${encodeURIComponent(q)}&limit=6` }
+      : { title: `Suche: ${q}`, description: "Wissenssuche", endpoint: `/knowledge/search?q=${encodeURIComponent(q)}&limit=8` };
     await runEndpoint(endpoint);
   }
 
@@ -260,7 +265,7 @@ export function DashboardModules({ activeNav, onSend }: Props) {
 
   if (!visible || !module) return null;
 
-  if (activeNav === "Tasks & Automation") {
+  if (activeNav === "Aufgaben & Automationen") {
     return <OrganizerPanel onSend={onSend} />;
   }
 
@@ -276,14 +281,14 @@ export function DashboardModules({ activeNav, onSend }: Props) {
           <h1>{module.title}</h1>
           <p>{module.subtitle}</p>
         </div>
-        <button onClick={() => module.endpoints.forEach((endpoint) => void runEndpoint(endpoint))}>ALLE PRÜFEN</button>
+        <button onClick={() => module.endpoints.forEach((endpoint) => void runEndpoint(endpoint))}>ALLE PRUEFEN</button>
       </div>
 
       <div className="jv-module-grid">
         <div className="jv-module-card jv-module-card-wide">
           <div className="jv-module-card-title">
             <h2>Funktionsordner</h2>
-            <span>{module.endpoints.length} Endpoints</span>
+            <span>{module.endpoints.length} Endpunkte</span>
           </div>
           <div className="jv-folder-strip">
             {module.endpoints.map((endpoint) => {
@@ -292,7 +297,7 @@ export function DashboardModules({ activeNav, onSend }: Props) {
                 <button key={endpoint.title} className={`jv-folder ${result?.status || "idle"}`} onClick={() => void runEndpoint(endpoint)}>
                   <b>{endpoint.title}</b>
                   <span>{endpoint.description}</span>
-                  <em>{result?.status === "ok" ? countHint(result.data) : result?.status === "error" ? "Fehler" : result?.status === "loading" ? "Lädt" : endpoint.endpoint}</em>
+                  <em>{result?.status === "ok" ? countHint(result.data) : result?.status === "error" ? "Fehler" : result?.status === "loading" ? "Laedt" : endpoint.endpoint}</em>
                 </button>
               );
             })}
@@ -305,13 +310,13 @@ export function DashboardModules({ activeNav, onSend }: Props) {
             {module.prompts.map((prompt) => <button key={prompt} onClick={() => onSend(prompt)}>{prompt}</button>)}
           </div>
           <div className="jv-module-search">
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={module.searchMode === "research" ? "Web Research..." : "Knowledge Suche..."} onKeyDown={(e) => e.key === "Enter" && runSearch()} />
-            <button onClick={runSearch}>{module.searchMode === "research" ? "RESEARCH" : "SUCHEN"}</button>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={module.searchMode === "research" ? "Websuche..." : "Wissenssuche..."} onKeyDown={(e) => e.key === "Enter" && runSearch()} />
+            <button onClick={runSearch}>{module.searchMode === "research" ? "RECHERCHE" : "SUCHEN"}</button>
           </div>
         </div>
 
         <div className="jv-module-card jv-module-result">
-          <div className="jv-module-card-title"><h2>Live Ergebnis</h2><span>{Object.values(results).filter((x) => x.status === "ok").length} OK</span></div>
+          <div className="jv-module-card-title"><h2>Aktuelles Ergebnis</h2><span>{Object.values(results).filter((x) => x.status === "ok").length} OK</span></div>
           <pre>{pretty(primaryData || results)}</pre>
         </div>
       </div>

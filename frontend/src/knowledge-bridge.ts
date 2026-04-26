@@ -144,9 +144,9 @@ function renderPanel() {
     <section class="jv-knowledge-shell">
       <div class="jv-knowledge-header">
         <div>
-          <small>Knowledge Base</small>
+          <small>Wissensbasis</small>
           <h1>JARVIS Wissen</h1>
-          <p>Lokale Dokumente, Uploads, Kategorien und semantische Suche als eigene Arbeitsfläche.</p>
+          <p>Lokale Dokumente, Hochladungen, Kategorien und semantische Suche als eigene Arbeitsflaeche.</p>
         </div>
         <div class="jv-knowledge-actions">
           <button data-action="refresh">AKTUALISIEREN</button>
@@ -155,13 +155,13 @@ function renderPanel() {
       </div>
       ${state.error ? `<div class="jv-knowledge-error">${escapeHtml(state.error)}</div>` : ""}
       <div class="jv-knowledge-search">
-        <input value="${escapeHtml(state.query)}" placeholder="Knowledge Base durchsuchen..." />
+        <input value="${escapeHtml(state.query)}" placeholder="Wissensbasis durchsuchen..." />
         <button data-action="search">SUCHEN</button>
         <button data-action="answer">ANTWORT</button>
       </div>
       <div class="jv-knowledge-stats">
         <div><b>${docs.length}</b><span>Dokumente</span></div>
-        <div><b>${files.length}</b><span>Uploads</span></div>
+        <div><b>${files.length}</b><span>Hochladungen</span></div>
         <div><b>${categories.length}</b><span>Kategorien</span></div>
         <div><b>${results.length}</b><span>Treffer</span></div>
       </div>
@@ -175,8 +175,8 @@ function renderPanel() {
           <div class="jv-kb-list compact">${docs.length ? docs.slice(0, 20).map((item, i) => cardHtml(item, i, "Dokument")).join("") : `<div class="jv-kb-empty">Keine Dokumente im Index.</div>`}</div>
         </section>
         <section class="jv-knowledge-card">
-          <div class="jv-knowledge-title"><h2>Uploads</h2><span>${files.length}</span></div>
-          <div class="jv-kb-list compact">${files.length ? files.slice(0, 20).map((item, i) => cardHtml(item, i, "Upload")).join("") : `<div class="jv-kb-empty">Noch keine Uploads.</div>`}</div>
+        <div class="jv-knowledge-title"><h2>Hochladungen</h2><span>${files.length}</span></div>
+        <div class="jv-kb-list compact">${files.length ? files.slice(0, 20).map((item, i) => cardHtml(item, i, "Hochladung")).join("") : `<div class="jv-kb-empty">Noch keine Hochladungen.</div>`}</div>
         </section>
         <section class="jv-knowledge-card">
           <div class="jv-knowledge-title"><h2>Kategorien</h2><span>${categories.length}</span></div>
@@ -232,7 +232,7 @@ function installKnowledgeBridge() {
     const item = target?.closest(".jarvis-nav-item") as HTMLElement | null;
     if (!item) return;
     const text = item.textContent || "";
-    if (text.includes("Knowledge Base") || text.includes("Memory Banks")) {
+    if (text.includes("Wissensbasis") || text.includes("Speicherbanken") || text.includes("Knowledge Base") || text.includes("Memory Banks")) {
       window.setTimeout(openKnowledge, 80);
       return;
     }
