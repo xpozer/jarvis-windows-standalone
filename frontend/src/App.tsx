@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Orb, OrbState } from "./components/Orb";
+import { DashboardModules } from "./components/DashboardModules";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
 
@@ -122,6 +123,7 @@ export function App() {
     if (!cleanText || thinking) return;
     const sentAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const history = buildHistory(messages);
+    setActiveNav("Conversations");
     setMessages((prev) => [...prev, { role: "operator", time: sentAt, text: cleanText }]);
     setInput("");
     setThinking(true);
@@ -265,6 +267,8 @@ export function App() {
           {['⊙ Summarize recent activity','⌘ Check security status','⌁ Analyze performance','▣ Help me with coding','◎ Search knowledge base'].map((chip) => <button key={chip} onClick={() => quickAction(chip.replace(/^. /, ""))}>{chip}</button>)}
         </div>
       </section>
+
+      <DashboardModules activeNav={activeNav} onSend={sendMessage} />
     </div>
   );
 }
