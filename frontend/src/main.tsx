@@ -40,11 +40,26 @@ function injectBootStyle() {
       z-index: 2147483000;
       overflow: hidden;
       background:
-        radial-gradient(circle at 50% 48%, rgba(6,28,52,.92), transparent 58%),
+        radial-gradient(circle at 50% 47%, rgba(6,28,52,.94), transparent 58%),
+        radial-gradient(circle at 14% 18%, rgba(255,54,95,.14), transparent 28%),
         #02050a;
+      color: #e8fbff;
       font-family: Consolas, "JetBrains Mono", monospace;
       --boot-ratio: 0;
       --live-progress: 0%;
+      --phase-progress: 0%;
+    }
+    .jarvis-boot::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(126,231,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(126,231,255,.032) 1px, transparent 1px);
+      background-size: 44px 44px;
+      opacity: .66;
+      mask-image: radial-gradient(circle at center, black 0 72%, transparent 96%);
     }
     .jarvis-boot-stage {
       position: absolute;
@@ -58,9 +73,44 @@ function injectBootStyle() {
       height: min(100vh, calc(100vw * .75));
       object-fit: contain;
       object-position: center center;
-      filter: saturate(1.08) contrast(1.04) brightness(.98);
+      filter: saturate(1.08) contrast(1.04) brightness(.92);
       animation: jarvisBootExactPulse 2.2s ease-in-out infinite;
       transform-origin: center center;
+      opacity: .84;
+    }
+    .jarvis-boot-topline {
+      position: absolute;
+      top: 22px;
+      left: 34px;
+      right: 34px;
+      z-index: 9;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+    .jarvis-boot-logo {
+      font-size: 28px;
+      letter-spacing: 22px;
+      color: #e8fbff;
+      text-shadow: 0 0 18px rgba(126,231,255,.82);
+    }
+    .jarvis-boot-sub {
+      margin-top: 8px;
+      color: rgba(126,231,255,.66);
+      font-size: 10px;
+      letter-spacing: .24em;
+    }
+    .jarvis-boot-live-clock {
+      color: rgba(218,244,255,.70);
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-align: right;
+      line-height: 1.75;
+    }
+    .jarvis-boot-live-clock b {
+      color: #7ee7ff;
+      text-shadow: 0 0 14px rgba(126,231,255,.48);
     }
     .jarvis-boot-orb {
       position: absolute;
@@ -152,19 +202,188 @@ function injectBootStyle() {
     .jarvis-boot-orb-spark.p2 { left: 70%; top: 38%; animation-delay: .4s; }
     .jarvis-boot-orb-spark.p3 { left: 38%; top: 72%; animation-delay: .7s; }
     .jarvis-boot-orb-spark.p4 { left: 62%; top: 65%; animation-delay: 1s; }
-    .jarvis-boot.crashout .jarvis-boot-orb {
-      animation: jarvisBootCrashShake .16s linear infinite;
-      filter: drop-shadow(0 0 42px rgba(255,54,95,.70)) drop-shadow(0 0 60px rgba(126,231,255,.36));
+    .jarvis-boot-panels {
+      position: absolute;
+      inset: 112px 36px 94px;
+      z-index: 8;
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) 1fr minmax(280px, 360px);
+      gap: 24px;
     }
-    .jarvis-boot.crashout .jarvis-boot-orb-core {
-      box-shadow: 0 0 34px rgba(255,255,255,.95), 0 0 100px rgba(255,54,95,.68), 0 0 170px rgba(255,54,95,.36);
-      background: radial-gradient(circle, #fff 0 6%, #ff9fb0 12%, #ff365f 22%, rgba(126,231,255,.42) 38%, transparent 72%);
-      animation-duration: .42s;
+    .jarvis-boot-left,
+    .jarvis-boot-right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
-    .jarvis-boot.crashout .jarvis-boot-orb-ring.r3,
-    .jarvis-boot.crashout .jarvis-boot-orb-synapse { opacity: 1; }
-    .jarvis-boot.stabilize .jarvis-boot-orb { filter: drop-shadow(0 0 42px rgba(126,231,255,.58)); }
-    .jarvis-boot.stabilize .jarvis-boot-orb-synapse { animation-duration: 2.2s; opacity: .34; }
+    .jarvis-boot-right { justify-content: flex-start; }
+    .jarvis-boot-panel {
+      border: 1px solid rgba(126,231,255,.18);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(4,14,27,.62), rgba(2,7,15,.42));
+      box-shadow: 0 0 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
+      backdrop-filter: blur(12px);
+      padding: 14px;
+      min-height: 0;
+    }
+    .jarvis-boot-panel h3 {
+      margin: 0 0 12px;
+      color: #7ee7ff;
+      font-size: 12px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .jarvis-boot-panel h3 small {
+      color: #ff365f;
+      font-size: 9px;
+      letter-spacing: .18em;
+    }
+    .jarvis-boot-phase {
+      display: grid;
+      grid-template-columns: 34px 1fr 42px;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(126,231,255,.08);
+      opacity: .38;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .jarvis-boot-phase.active {
+      opacity: 1;
+      transform: translateX(4px);
+    }
+    .jarvis-boot-phase.done { opacity: .74; }
+    .jarvis-boot-phase-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(126,231,255,.38);
+      background: radial-gradient(circle, rgba(126,231,255,.70), transparent 42%);
+      box-shadow: 0 0 14px rgba(126,231,255,.20);
+    }
+    .jarvis-boot-phase.active .jarvis-boot-phase-dot {
+      border-color: rgba(255,54,95,.58);
+      box-shadow: 0 0 18px rgba(255,54,95,.35), inset 0 0 10px rgba(255,54,95,.18);
+    }
+    .jarvis-boot-phase-title {
+      color: #e8fbff;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .jarvis-boot-phase-sub {
+      margin-top: 3px;
+      color: rgba(218,244,255,.52);
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .jarvis-boot-phase-value {
+      color: #7ee7ff;
+      font-size: 11px;
+      text-align: right;
+    }
+    .jarvis-boot-telemetry {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .jarvis-boot-metric {
+      border: 1px solid rgba(126,231,255,.12);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(2,8,17,.34);
+    }
+    .jarvis-boot-metric span {
+      display: block;
+      color: rgba(218,244,255,.56);
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .jarvis-boot-metric b {
+      display: block;
+      margin-top: 6px;
+      color: #7ee7ff;
+      font-size: 18px;
+      letter-spacing: .08em;
+      text-shadow: 0 0 14px rgba(126,231,255,.38);
+    }
+    .jarvis-boot-metric em {
+      display: block;
+      margin-top: 6px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(126,231,255,.12);
+      overflow: hidden;
+    }
+    .jarvis-boot-metric em i {
+      display: block;
+      height: 100%;
+      width: var(--w, 40%);
+      background: linear-gradient(90deg, #1f9cff, #7ee7ff);
+      box-shadow: 0 0 12px rgba(126,231,255,.60);
+    }
+    .jarvis-boot-chart {
+      height: 82px;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      border-bottom: 1px solid rgba(126,231,255,.11);
+      padding-bottom: 8px;
+    }
+    .jarvis-boot-chart i {
+      flex: 1;
+      min-width: 7px;
+      height: var(--h, 38%);
+      background: linear-gradient(180deg, #7ee7ff, rgba(126,231,255,.10));
+      box-shadow: 0 0 12px rgba(126,231,255,.22);
+      transition: height .18s ease;
+    }
+    .jarvis-boot-diag {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(126,231,255,.08);
+      padding: 7px 0;
+      color: rgba(218,244,255,.64);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .jarvis-boot-diag b { color: #4ce8a0; }
+    .jarvis-boot-diag.hot b { color: #ff365f; text-shadow: 0 0 12px rgba(255,54,95,.45); }
+    .jarvis-boot-log {
+      max-height: 154px;
+      overflow: hidden;
+      color: rgba(126,231,255,.72);
+      font-size: 10px;
+      line-height: 1.65;
+      letter-spacing: .08em;
+    }
+    .jarvis-boot-log-line {
+      white-space: nowrap;
+      animation: jarvisLogIn .24s ease-out both;
+    }
+    .jarvis-boot-log-line b { color: #4ce8a0; font-weight: 400; }
+    .jarvis-boot-log-line.hot b { color: #ff365f; }
+    .jarvis-boot-crunch {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .jarvis-boot-crunch i {
+      height: 18px;
+      border: 1px solid rgba(126,231,255,.10);
+      border-radius: 4px;
+      background: rgba(126,231,255,.08);
+      opacity: var(--o, .4);
+      box-shadow: 0 0 10px rgba(126,231,255,.08);
+    }
     .jarvis-boot-flash {
       position: absolute;
       inset: 0;
@@ -174,7 +393,6 @@ function injectBootStyle() {
       opacity: 0;
       mix-blend-mode: screen;
     }
-    .jarvis-boot.ready .jarvis-boot-flash { animation: jarvisReadyFlash .68s ease-out 1; }
     .jarvis-boot-scan {
       position: absolute;
       inset: 0;
@@ -185,13 +403,14 @@ function injectBootStyle() {
       mix-blend-mode: screen;
       opacity: .7;
       animation: jarvisBootScan 2.5s ease-in-out infinite;
+      z-index: 7;
     }
     .jarvis-boot-live {
       position: absolute;
       left: 50%;
       bottom: 24px;
       transform: translateX(-50%);
-      width: min(620px, 42vw);
+      width: min(720px, 46vw);
       z-index: 9;
       color: rgba(218,244,255,.88);
       text-align: center;
@@ -213,7 +432,7 @@ function injectBootStyle() {
       font-weight: 700;
     }
     .jarvis-boot-livebar {
-      height: 6px;
+      height: 7px;
       border-radius: 999px;
       border: 1px solid rgba(126,231,255,.26);
       background: rgba(2,8,17,.72);
@@ -227,6 +446,20 @@ function injectBootStyle() {
       background: linear-gradient(90deg, rgba(31,156,255,.35), #7ee7ff, rgba(255,54,95,.72));
       box-shadow: 0 0 18px rgba(126,231,255,.65);
       transition: width .12s linear;
+    }
+    .jarvis-boot-phasebar {
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(126,231,255,.12);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .jarvis-boot-phasebar span {
+      display: block;
+      width: var(--phase-progress, 0%);
+      height: 100%;
+      background: linear-gradient(90deg, #ff365f, #7ee7ff);
+      box-shadow: 0 0 14px rgba(126,231,255,.55);
     }
     .jarvis-boot-skip {
       position: absolute;
@@ -250,6 +483,20 @@ function injectBootStyle() {
       border-color: rgba(126,231,255,.65);
       box-shadow: 0 0 24px rgba(126,231,255,.24);
     }
+    .jarvis-boot.crashout .jarvis-boot-orb {
+      animation: jarvisBootCrashShake .16s linear infinite;
+      filter: drop-shadow(0 0 42px rgba(255,54,95,.70)) drop-shadow(0 0 60px rgba(126,231,255,.36));
+    }
+    .jarvis-boot.crashout .jarvis-boot-orb-core {
+      box-shadow: 0 0 34px rgba(255,255,255,.95), 0 0 100px rgba(255,54,95,.68), 0 0 170px rgba(255,54,95,.36);
+      background: radial-gradient(circle, #fff 0 6%, #ff9fb0 12%, #ff365f 22%, rgba(126,231,255,.42) 38%, transparent 72%);
+      animation-duration: .42s;
+    }
+    .jarvis-boot.crashout .jarvis-boot-orb-ring.r3,
+    .jarvis-boot.crashout .jarvis-boot-orb-synapse { opacity: 1; }
+    .jarvis-boot.stabilize .jarvis-boot-orb { filter: drop-shadow(0 0 42px rgba(126,231,255,.58)); }
+    .jarvis-boot.stabilize .jarvis-boot-orb-synapse { animation-duration: 2.2s; opacity: .34; }
+    .jarvis-boot.ready .jarvis-boot-flash { animation: jarvisReadyFlash .68s ease-out 1; }
     .jarvis-boot.out {
       opacity: 0;
       transform: scale(1.012);
@@ -260,8 +507,8 @@ function injectBootStyle() {
       65%,100% { background-position: 0 140%, center; }
     }
     @keyframes jarvisBootExactPulse {
-      0%,100% { filter: saturate(1.08) contrast(1.04) brightness(.96); }
-      50% { filter: saturate(1.2) contrast(1.08) brightness(1.06); }
+      0%,100% { filter: saturate(1.08) contrast(1.04) brightness(.92); }
+      50% { filter: saturate(1.24) contrast(1.09) brightness(1.05); }
     }
     @keyframes jarvisBootSpin { to { transform: rotate(360deg); } }
     @keyframes jarvisBootSpinReverse { to { transform: rotate(-360deg); } }
@@ -271,10 +518,15 @@ function injectBootStyle() {
     @keyframes jarvisSpark { 0%,100% { opacity: .2; transform: scale(.55); } 35% { opacity: 1; transform: scale(1.25); } 65% { opacity: .42; transform: scale(.8); } }
     @keyframes jarvisBootCrashShake { 0% { transform: translate(-50%, -50%) translate(0,0) scale(1.03); } 25% { transform: translate(-50%, -50%) translate(2px,-1px) scale(1.045); } 50% { transform: translate(-50%, -50%) translate(-2px,1px) scale(1.035); } 75% { transform: translate(-50%, -50%) translate(1px,2px) scale(1.052); } 100% { transform: translate(-50%, -50%) translate(0,0) scale(1.03); } }
     @keyframes jarvisReadyFlash { 0% { opacity: 0; } 30% { opacity: .88; } 100% { opacity: 0; } }
-    @media (max-aspect-ratio: 4/3) {
-      .jarvis-boot-live { width: min(620px, 72vw); bottom: 18px; }
+    @keyframes jarvisLogIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1180px) {
+      .jarvis-boot-panels { grid-template-columns: 1fr; inset: 110px 22px 90px; opacity: .92; }
+      .jarvis-boot-right { display: none; }
+      .jarvis-boot-left { max-width: 360px; }
+      .jarvis-boot-live { width: min(720px, 72vw); bottom: 18px; }
       .jarvis-boot-skip { right: 18px; bottom: 18px; }
       .jarvis-boot-orb { width: min(64vw, 54vh); top: 47%; }
+      .jarvis-boot-logo { letter-spacing: 12px; font-size: 20px; }
     }
   `;
   document.head.appendChild(style);
@@ -287,13 +539,29 @@ function runBootSequence(): Promise<void> {
   injectBootStyle();
 
   const hasBooted = localStorage.getItem("jarvis_boot_seen") === "1";
-  const duration = hasBooted ? 2200 : 6200;
+  const duration = hasBooted ? 5200 : 16800;
+  const phases = [
+    { title: "Power Core", sub: "Kernel wake and HUD frame", start: 0, end: 10, label: "Power core ignition" },
+    { title: "Memory Banks", sub: "Context cache alignment", start: 10, end: 28, label: "Syncing memory banks" },
+    { title: "IO Channels", sub: "Local ports and service bus", start: 28, end: 44, label: "Binding local IO channels" },
+    { title: "Security Layer", sub: "Permission shell and audit", start: 44, end: 58, label: "Validating security layer" },
+    { title: "Neural Core", sub: "Synaptic crashout sequence", start: 58, end: 78, label: "Charging neural core" },
+    { title: "Backend Link", sub: "FastAPI route handshake", start: 78, end: 90, label: "Linking backend services" },
+    { title: "Interface Sync", sub: "Dashboard and command layer", start: 90, end: 100, label: "Interface synchronized" },
+  ];
 
   const overlay = document.createElement("div");
   overlay.className = "jarvis-boot";
   overlay.innerHTML = `
     <div class="jarvis-boot-stage">
       <img class="jarvis-boot-exact" src="/jarvis-boot-sequence.svg" alt="JARVIS Boot Sequence" />
+    </div>
+    <div class="jarvis-boot-topline">
+      <div>
+        <div class="jarvis-boot-logo">JARVIS</div>
+        <div class="jarvis-boot-sub">LOCAL ASSISTANT BOOT SEQUENCE</div>
+      </div>
+      <div class="jarvis-boot-live-clock"><span class="boot-time">00:00:00</span><br/>SESSION <b>LOCAL</b><br/>MODE <b>STANDALONE</b></div>
     </div>
     <div class="jarvis-boot-orb">
       <div class="jarvis-boot-orb-ring r1"></div>
@@ -312,6 +580,49 @@ function runBootSequence(): Promise<void> {
       <div class="jarvis-boot-orb-spark p3"></div>
       <div class="jarvis-boot-orb-spark p4"></div>
     </div>
+    <div class="jarvis-boot-panels">
+      <div class="jarvis-boot-left">
+        <section class="jarvis-boot-panel">
+          <h3>Boot Phases <small>REAL PROGRESS</small></h3>
+          ${phases.map((phase, index) => `
+            <div class="jarvis-boot-phase" data-phase="${index}">
+              <div class="jarvis-boot-phase-dot"></div>
+              <div><div class="jarvis-boot-phase-title">${phase.title}</div><div class="jarvis-boot-phase-sub">${phase.sub}</div></div>
+              <div class="jarvis-boot-phase-value">00%</div>
+            </div>`).join("")}
+        </section>
+        <section class="jarvis-boot-panel">
+          <h3>Runtime Telemetry <small>LIVE</small></h3>
+          <div class="jarvis-boot-telemetry">
+            <div class="jarvis-boot-metric"><span>CPU Load</span><b data-metric="cpu">00%</b><em><i data-bar="cpu"></i></em></div>
+            <div class="jarvis-boot-metric"><span>Memory</span><b data-metric="mem">0.0 GB</b><em><i data-bar="mem"></i></em></div>
+            <div class="jarvis-boot-metric"><span>Core Temp</span><b data-metric="temp">00.0 C</b><em><i data-bar="temp"></i></em></div>
+            <div class="jarvis-boot-metric"><span>Uplink</span><b data-metric="net">0.00 Gb/s</b><em><i data-bar="net"></i></em></div>
+          </div>
+        </section>
+      </div>
+      <div></div>
+      <div class="jarvis-boot-right">
+        <section class="jarvis-boot-panel">
+          <h3>Neural Activity <small>STREAM</small></h3>
+          <div class="jarvis-boot-chart">${Array.from({ length: 18 }, (_, i) => `<i data-chart="${i}"></i>`).join("")}</div>
+          <div class="jarvis-boot-crunch">${Array.from({ length: 40 }, (_, i) => `<i data-cell="${i}"></i>`).join("")}</div>
+        </section>
+        <section class="jarvis-boot-panel">
+          <h3>Diagnostics <small>CHECK</small></h3>
+          <div class="jarvis-boot-diag"><span>Backend Port</span><b data-diag="backend">SCANNING</b></div>
+          <div class="jarvis-boot-diag"><span>Ollama Bridge</span><b data-diag="ollama">PENDING</b></div>
+          <div class="jarvis-boot-diag"><span>Model Slot</span><b data-diag="model">LOCKING</b></div>
+          <div class="jarvis-boot-diag"><span>Dashboard Bus</span><b data-diag="dashboard">INIT</b></div>
+          <div class="jarvis-boot-diag"><span>Command Layer</span><b data-diag="command">ARMING</b></div>
+          <div class="jarvis-boot-phasebar"><span></span></div>
+        </section>
+        <section class="jarvis-boot-panel">
+          <h3>Boot Log <small>TRACE</small></h3>
+          <div class="jarvis-boot-log"></div>
+        </section>
+      </div>
+    </div>
     <div class="jarvis-boot-flash"></div>
     <div class="jarvis-boot-scan"></div>
     <div class="jarvis-boot-live">
@@ -327,10 +638,61 @@ function runBootSequence(): Promise<void> {
   const livePercent = overlay.querySelector<HTMLElement>(".jarvis-boot-live-percent");
   const liveLabel = overlay.querySelector<HTMLElement>(".jarvis-boot-live-label");
   const liveBar = overlay.querySelector<HTMLElement>(".jarvis-boot-livebar > span");
+  const phaseBar = overlay.querySelector<HTMLElement>(".jarvis-boot-phasebar > span");
+  const phaseEls = Array.from(overlay.querySelectorAll<HTMLElement>(".jarvis-boot-phase"));
+  const chartBars = Array.from(overlay.querySelectorAll<HTMLElement>("[data-chart]"));
+  const cells = Array.from(overlay.querySelectorAll<HTMLElement>("[data-cell]"));
+  const bootLog = overlay.querySelector<HTMLElement>(".jarvis-boot-log");
+  const timeEl = overlay.querySelector<HTMLElement>(".boot-time");
   let done = false;
   let raf = 0;
   let started = 0;
   let readyFlashed = false;
+  let lastLogIndex = -1;
+
+  const logMessages = [
+    "POWER RAIL NOMINAL",
+    "KERNEL WAKE VECTOR ACCEPTED",
+    "HUD FRAME BUFFER ONLINE",
+    "MEMORY BANKS INDEXED",
+    "CONTEXT CACHE ALIGNED",
+    "LOCAL IO CHANNELS BOUND",
+    "PORT 8000 ROUTE TABLE PREPARED",
+    "SECURITY SHELL VERIFIED",
+    "AUDIT STREAM READY",
+    "SYNAPTIC GRID CHARGING",
+    "NEURAL CRASHOUT STABILIZING",
+    "OLLAMA BRIDGE HANDSHAKE QUEUED",
+    "MODEL SLOT RESERVED",
+    "DASHBOARD EVENT BUS READY",
+    "COMMAND LAYER ONLINE",
+    "INTERFACE SYNCHRONIZED",
+    "SYSTEM READY"
+  ];
+
+  const setMetric = (name: string, value: string, width: number) => {
+    const metric = overlay.querySelector<HTMLElement>(`[data-metric="${name}"]`);
+    const bar = overlay.querySelector<HTMLElement>(`[data-bar="${name}"]`);
+    if (metric) metric.textContent = value;
+    if (bar) bar.style.setProperty("--w", `${Math.max(3, Math.min(100, width))}%`);
+  };
+
+  const setDiag = (name: string, value: string) => {
+    const item = overlay.querySelector<HTMLElement>(`[data-diag="${name}"]`);
+    if (item) item.textContent = value;
+  };
+
+  const addLog = (index: number, hot = false) => {
+    if (!bootLog || index <= lastLogIndex || !logMessages[index]) return;
+    lastLogIndex = index;
+    const now = new Date();
+    const stamp = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const line = document.createElement("div");
+    line.className = `jarvis-boot-log-line ${hot ? "hot" : ""}`;
+    line.innerHTML = `${stamp}.${String(Math.floor(performance.now() % 999)).padStart(3, "0")}&nbsp;&nbsp;<b>${hot ? "SYNC" : "OK"}</b>&nbsp;&nbsp;${logMessages[index]}`;
+    bootLog.appendChild(line);
+    while (bootLog.children.length > 9) bootLog.removeChild(bootLog.firstElementChild as Element);
+  };
 
   return new Promise((resolve) => {
     const finish = () => {
@@ -347,30 +709,63 @@ function runBootSequence(): Promise<void> {
 
     const tick = (now: number) => {
       if (!started) started = now;
-      const ratio = Math.min(1, (now - started) / duration);
-      const eased = 1 - Math.pow(1 - ratio, 2.2);
+      const raw = Math.min(1, (now - started) / duration);
+      const eased = 1 - Math.pow(1 - raw, 2.2);
       const pct = Math.round(eased * 100);
+      const pulse = Math.sin(now / 260);
+      const wave = Math.sin(now / 520);
       overlay.style.setProperty("--boot-ratio", String(eased));
-      overlay.classList.toggle("crashout", ratio > .34 && ratio < .76);
-      overlay.classList.toggle("stabilize", ratio >= .76 && ratio < .94);
-      if (ratio > .92 && !readyFlashed) {
+      overlay.classList.toggle("crashout", raw > .34 && raw < .76);
+      overlay.classList.toggle("stabilize", raw >= .76 && raw < .94);
+      if (raw > .92 && !readyFlashed) {
         readyFlashed = true;
         overlay.classList.add("ready");
       }
+      if (timeEl) timeEl.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       if (livePercent) livePercent.textContent = `${String(pct).padStart(2, "0")}%`;
       if (liveBar) liveBar.style.setProperty("--live-progress", `${pct}%`);
-      if (liveLabel) {
-        liveLabel.textContent = ratio > .92
-          ? "System ready, awaiting command"
-          : ratio > .76
-            ? "Stabilizing core resonance"
-            : ratio > .34
-              ? "Synaptic crashout, neural grid charging"
-              : ratio > .18
-                ? "Syncing memory banks"
-                : "Loading interface modules";
-      }
-      if (ratio >= 1) finish();
+
+      const currentPhase = phases.find((phase) => pct >= phase.start && pct <= phase.end) || phases[phases.length - 1];
+      const phaseRange = Math.max(1, currentPhase.end - currentPhase.start);
+      const phasePct = Math.max(0, Math.min(100, ((pct - currentPhase.start) / phaseRange) * 100));
+      if (phaseBar) phaseBar.style.setProperty("--phase-progress", `${phasePct}%`);
+      if (liveLabel) liveLabel.textContent = currentPhase.label;
+
+      phaseEls.forEach((el, index) => {
+        const phase = phases[index];
+        const donePhase = pct > phase.end;
+        const active = pct >= phase.start && pct <= phase.end;
+        const local = donePhase ? 100 : active ? Math.round(Math.max(0, Math.min(100, ((pct - phase.start) / Math.max(1, phase.end - phase.start)) * 100))) : 0;
+        el.classList.toggle("done", donePhase);
+        el.classList.toggle("active", active);
+        const value = el.querySelector<HTMLElement>(".jarvis-boot-phase-value");
+        if (value) value.textContent = `${String(local).padStart(2, "0")}%`;
+      });
+
+      setMetric("cpu", `${Math.round(24 + eased * 54 + pulse * 11)}%`, 24 + eased * 54 + pulse * 11);
+      setMetric("mem", `${(3.8 + eased * 7.6 + wave * .6).toFixed(1)} GB`, 34 + eased * 42 + wave * 8);
+      setMetric("temp", `${(31.4 + eased * 10.8 + pulse * 1.2).toFixed(1)} C`, 28 + eased * 36 + pulse * 6);
+      setMetric("net", `${(0.18 + eased * 1.82 + Math.abs(wave) * .36).toFixed(2)} Gb/s`, 18 + eased * 62 + Math.abs(wave) * 12);
+
+      chartBars.forEach((bar, index) => {
+        const h = 18 + Math.abs(Math.sin(now / (220 + index * 17) + index)) * 74;
+        bar.style.setProperty("--h", `${h}%`);
+      });
+      cells.forEach((cell, index) => {
+        const o = .18 + Math.abs(Math.sin(now / 190 + index * .7)) * .78;
+        cell.style.setProperty("--o", String(o));
+      });
+
+      setDiag("backend", pct > 78 ? "ONLINE" : pct > 32 ? "SCANNING" : "PENDING");
+      setDiag("ollama", pct > 84 ? "BRIDGED" : pct > 58 ? "HANDSHAKE" : "PENDING");
+      setDiag("model", pct > 88 ? "READY" : pct > 62 ? "LOCKING" : "WAITING");
+      setDiag("dashboard", pct > 92 ? "SYNCED" : pct > 48 ? "LOADING" : "INIT");
+      setDiag("command", pct > 96 ? "ONLINE" : pct > 72 ? "ARMING" : "STANDBY");
+
+      const logIndex = Math.min(logMessages.length - 1, Math.floor(eased * logMessages.length));
+      addLog(logIndex, raw > .34 && raw < .76);
+
+      if (raw >= 1) finish();
       else raf = requestAnimationFrame(tick);
     };
 
