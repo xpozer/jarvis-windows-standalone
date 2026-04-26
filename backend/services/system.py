@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from fastapi import Request, HTTPException, UploadFile, File
 from services import _runtime as core
+from services import awareness_runtime
 from services import usejarvis_runtime
 
 
@@ -10,19 +11,21 @@ def api_self_check():
     data = core.api_self_check()
     if isinstance(data, dict):
         data["usejarvis_runtime"] = usejarvis_runtime.runtime_status()
+        data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
 def api_diagnostics_package():
     data = core.api_diagnostics_package()
     if isinstance(data, dict):
         data["usejarvis_runtime"] = usejarvis_runtime.runtime_status()
+        data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
 def api_b4_deep_status():
     data = core.api_b4_deep_status()
     if isinstance(data, dict):
         data["usejarvis_runtime"] = usejarvis_runtime.runtime_status()
-        data["awareness"] = usejarvis_runtime.current_awareness()
+        data["awareness"] = awareness_runtime.awareness_status()
     return data
 
 def api_b4_repair_plan_get():
@@ -36,6 +39,7 @@ def api_b4_context_pack():
     if isinstance(data, dict):
         data["memory_context"] = usejarvis_runtime.search_facts("jarvis", limit=10)
         data["runtime"] = usejarvis_runtime.runtime_status()
+        data["awareness_snapshot"] = awareness_runtime.capture_snapshot(write_event=False)
     return data
 
 def api_diagnostic_deps():
@@ -45,6 +49,7 @@ def api_diagnostic_deep():
     data = core.api_diagnostic_deep()
     if isinstance(data, dict):
         data["runtime"] = usejarvis_runtime.runtime_status()
+        data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
 async def api_diagnostic_analyze_text(req: Request):
@@ -63,6 +68,7 @@ def health():
     data = core.health()
     if isinstance(data, dict):
         data["runtime"] = usejarvis_runtime.runtime_status()
+        data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
 def debug_logs(lines: int = 200):
@@ -72,6 +78,7 @@ def api_system_status():
     data = core.api_system_status()
     if isinstance(data, dict):
         data["usejarvis_runtime"] = usejarvis_runtime.runtime_status()
+        data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
 def api_agent_status():
@@ -81,7 +88,7 @@ def api_agent_status():
     return data
 
 def awareness_current():
-    runtime_awareness = usejarvis_runtime.current_awareness()
+    runtime_awareness = awareness_runtime.awareness_status()
     legacy = core.awareness_current()
     return {"ok": True, "legacy": legacy, "runtime": runtime_awareness}
 
@@ -114,7 +121,7 @@ def api_dashboard():
     data = core.api_dashboard()
     if isinstance(data, dict):
         data["runtime"] = usejarvis_runtime.runtime_status()
-        data["awareness"] = usejarvis_runtime.current_awareness()
+        data["awareness"] = awareness_runtime.awareness_status()
         data["pending_actions"] = [item for item in usejarvis_runtime.list_action_requests(limit=100) if item.get("status") == "pending_approval"]
         data["goals"] = usejarvis_runtime.list_goals(limit=12)
     return data
