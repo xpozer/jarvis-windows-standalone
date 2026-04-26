@@ -83,6 +83,17 @@ export function SystemCenterPage() {
     await load();
   }
 
+  function replayBootSequence() {
+    try {
+      localStorage.removeItem("jarvis_boot_seen");
+      localStorage.removeItem("jarvis_boot_disabled");
+      setStatus("Boot Sequenz wird neu gestartet...");
+      window.location.href = "/";
+    } catch (e) {
+      setStatus(`Boot Reset Fehler: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
   useEffect(() => { load(); }, []);
 
   return (
@@ -101,6 +112,7 @@ export function SystemCenterPage() {
           <button className="termin-parse-btn" onClick={checkGithubUpdate}>GITHUB PRUEFEN</button>
           <button className="termin-parse-btn" onClick={stageGithubUpdate}>GITHUB UPDATE STAGEN</button>
           <button className="termin-parse-btn" onClick={prepareUpdate}>UPDATE VORBEREITEN</button>
+          <button className="termin-parse-btn" onClick={replayBootSequence}>BOOT ERNEUT ABSPIELEN</button>
           <button className="termin-parse-btn" onClick={load}>AKTUALISIEREN</button>
         </div>
       </div>
