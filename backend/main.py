@@ -23,6 +23,7 @@ from utils import log, read_json, write_json
 from routes.chat import router as chat_router
 from routes.local_chat import router as local_chat_router
 from routes.files import router as files_router
+from routes.research import router as research_router
 from routes.notes_tasks import router as notes_tasks_router
 from routes.work import router as work_router
 from routes.windows import router as windows_router
@@ -101,6 +102,7 @@ async def log_requests(req: Request, call_next):
 app.include_router(chat_router)
 app.include_router(local_chat_router)
 app.include_router(files_router)
+app.include_router(research_router)
 app.include_router(notes_tasks_router)
 app.include_router(work_router)
 app.include_router(windows_router)
