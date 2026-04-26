@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionEngineCard } from "../features/runtime/ActionEngineCard";
+import { AuthorityGateCard } from "../features/runtime/AuthorityGateCard";
 import { AwarenessCard } from "../features/runtime/AwarenessCard";
+import { GoalsCard } from "../features/runtime/GoalsCard";
 import { MemoryCard } from "../features/runtime/MemoryCard";
+import { SidecarsCard } from "../features/runtime/SidecarsCard";
+import { WorkflowsCard } from "../features/runtime/WorkflowsCard";
 import {
   addRuntimeFact,
   addRuntimeGoal,
@@ -16,7 +20,7 @@ import {
   startRuntimeAwarenessLoop,
   stopRuntimeAwarenessLoop,
 } from "../features/runtime/runtimeApi";
-import { safeCount, prettyDate } from "../features/runtime/runtimeFormat";
+import { safeCount } from "../features/runtime/runtimeFormat";
 import type {
   ActionRequest,
   AwarenessLoopState,
@@ -214,70 +218,12 @@ export function RuntimeControlPanel({ onSend }: Props) {
 
       <div className="runtime-control-grid runtime-control-grid-awareness">
         <MemoryCard facts={data.facts} factText={factText} onFactTextChange={setFactText} onAddFact={addFact} />
-
-        <AwarenessCard
-          awareness={awareness}
-          loop={loop}
-          awarenessInterval={awarenessInterval}
-          loopBusy={loopBusy}
-          onAwarenessIntervalChange={setAwarenessInterval}
-          onStartLoop={startAwarenessLoop}
-          onStopLoop={stopAwarenessLoop}
-        />
-
-        <ActionEngineCard
-          actionBusy={actionBusy}
-          actionPath={actionPath}
-          actionUrl={actionUrl}
-          actionResult={actionResult}
-          onActionPathChange={setActionPath}
-          onActionUrlChange={setActionUrl}
-          onRunAction={runAction}
-        />
-
-        <section className="runtime-control-card">
-          <div className="runtime-control-card-title"><h2>Authority Gate</h2><span>pending actions</span></div>
-          <div className="runtime-control-list compact">
-            {data.actions.map((action) => <article key={action.id} className={`risk-${action.risk}`}><b>{action.action_type}</b><span>{action.summary}</span><em>{action.risk} · {action.status}</em>{action.status === "pending_approval" && <div className="runtime-control-row-actions"><button onClick={() => void approve(action, true)}>APPROVE</button><button onClick={() => void approve(action, false)}>REJECT</button></div>}{action.status === "approved" && <div className="runtime-control-row-actions"><button onClick={() => void executeAction(action)}>EXECUTE</button></div>}</article>)}
-            {!data.actions.length && <p className="runtime-control-empty">Keine Actions vorhanden.</p>}
-          </div>
-        </section>
-
-        <section className="runtime-control-card">
-          <div className="runtime-control-card-title"><h2>Goals</h2><span>okr basis</span></div>
-          <div className="runtime-control-form">
-            <input value={goalTitle} onChange={(e) => setGoalTitle(e.target.value)} placeholder="Objective anlegen" onKeyDown={(e) => e.key === "Enter" && addGoal()} />
-            <button onClick={() => void addGoal()}>ADD</button>
-          </div>
-          <div className="runtime-control-list compact">
-            {data.goals.map((goal) => <article key={goal.id}><b>{goal.title}</b><span>{goal.type} · {goal.status}</span></article>)}
-            {!data.goals.length && <p className="runtime-control-empty">Noch keine Goals.</p>}
-          </div>
-        </section>
-
-        <section className="runtime-control-card runtime-control-card-wide">
-          <div className="runtime-control-card-title"><h2>Workflows</h2><span>self healing runner</span></div>
-          <div className="runtime-control-form">
-            <input value={workflowName} onChange={(e) => setWorkflowName(e.target.value)} placeholder="Workflow Name" />
-            <button onClick={() => void createDemoWorkflow()}>CREATE DEMO</button>
-          </div>
-          <div className="runtime-control-list workflow-list">
-            {data.workflows.map((workflow) => <article key={workflow.id}><b>{workflow.name}</b><span>{workflow.description || "Kein Beschreibungstext"}</span><em>{workflow.enabled ? "enabled" : "disabled"} · {workflow.authority_policy}</em><div className="runtime-control-row-actions"><button onClick={() => void runWorkflow(workflow)}>RUN</button></div></article>)}
-            {!data.workflows.length && <p className="runtime-control-empty">Noch keine Workflows. Erstelle einen Demo Workflow.</p>}
-          </div>
-        </section>
-
-        <section className="runtime-control-card">
-          <div className="runtime-control-card-title"><h2>Sidecars</h2><span>multi machine</span></div>
-          <div className="runtime-control-form">
-            <input value={sidecarName} onChange={(e) => setSidecarName(e.target.value)} placeholder="Maschinenname" />
-            <button onClick={() => void registerSidecar()}>REGISTER</button>
-          </div>
-          <div className="runtime-control-list compact">
-            {data.sidecars.map((sidecar) => <article key={sidecar.id}><b>{sidecar.name}</b><span>{sidecar.machine_id} · {sidecar.status}</span><em>{(sidecar.capabilities || []).join(", ")}</em></article>)}
-            {!data.sidecars.length && <p className="runtime-control-empty">Noch keine Sidecars registriert.</p>}
-          </div>
-        </section>
+        <AwarenessCard awareness={awareness} loop={loop} awarenessInterval={awarenessInterval} loopBusy={loopBusy} onAwarenessIntervalChange={setAwarenessInterval} onStartLoop={startAwarenessLoop} onStopLoop={stopAwarenessLoop} />
+        <ActionEngineCard actionBusy={actionBusy} actionPath={actionPath} actionUrl={actionUrl} actionResult={actionResult} onActionPathChange={setActionPath} onActionUrlChange={setActionUrl} onRunAction={runAction} />
+        <AuthorityGateCard actions={data.actions} onApprove={approve} onExecute={executeAction} />
+        <GoalsCard goals={data.goals} goalTitle={goalTitle} onGoalTitleChange={setGoalTitle} onAddGoal={addGoal} />
+        <WorkflowsCard workflows={data.workflows} workflowName={workflowName} onWorkflowNameChange={setWorkflowName} onCreateDemoWorkflow={createDemoWorkflow} onRunWorkflow={runWorkflow} />
+        <SidecarsCard sidecars={data.sidecars} sidecarName={sidecarName} onSidecarNameChange={setSidecarName} onRegisterSidecar={registerSidecar} />
       </div>
     </section>
   );
