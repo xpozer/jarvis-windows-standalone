@@ -43,6 +43,7 @@ from routes.usejarvis import router as usejarvis_router
 
 from services import _runtime as core
 from services import usejarvis_runtime
+from services import usejarvis_workflow
 
 classify_agent = core.classify_agent
 ollama_online = core.ollama_online
@@ -77,8 +78,9 @@ async def on_startup():
         log("WARN", "Registry-Init fehlgeschlagen", error=str(e))
     try:
         usejarvis_runtime.init_runtime()
-        usejarvis_runtime.audit("system", "runtime.startup", "UseJARVIS Runtime initialisiert", "low", {"version": core.app_version()})
-        log("INFO", "UseJARVIS Runtime initialisiert")
+        usejarvis_workflow.init_workflow_runtime()
+        usejarvis_runtime.audit("system", "runtime.startup", "UseJARVIS Runtime und Workflow Runtime initialisiert", "low", {"version": core.app_version()})
+        log("INFO", "UseJARVIS Runtime und Workflow Runtime initialisiert")
     except Exception as e:
         log("WARN", "UseJARVIS Runtime Init fehlgeschlagen", error=str(e))
     try:
@@ -139,6 +141,8 @@ def root():
         "docs": "/docs",
         "health": "/health",
         "runtime": "/api/runtime/status",
+        "workflows": "/api/runtime/workflows",
+        "sidecars": "/api/runtime/sidecars",
         "hint": "Frontend Build fehlt. Bitte FIRST_SETUP.bat ausfuehren.",
     }
 
