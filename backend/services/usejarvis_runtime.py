@@ -83,7 +83,9 @@ def init_runtime() -> None:
               created_at TEXT NOT NULL,
               updated_at TEXT NOT NULL,
               approved_at TEXT,
-              rejected_at TEXT
+              rejected_at TEXT,
+              executed_at TEXT,
+              result_json TEXT NOT NULL DEFAULT '{}'
             );
 
             CREATE TABLE IF NOT EXISTS goals (
@@ -111,11 +113,16 @@ def init_runtime() -> None:
             );
             """
         )
+        existing_cols = {row[1] for row in db.execute("PRAGMA table_info(action_requests)").fetchall()}
+        if "executed_at" not in existing_cols:
+            db.execute("ALTER TABLE action_requests ADD COLUMN executed_at TEXT")
+        if "result_json" not in existing_cols:
+            db.execute("ALTER TABLE action_requests ADD COLUMN result_json TEXT NOT NULL DEFAULT '{}'")
 
 
 def _row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
     out = dict(row)
-    for key in ("tags_json", "payload_json", "aliases_json", "metadata_json"):
+    for key in ("tags_json", "payload_json", "aliases_json", "metadata_json", "result_json"):
         if key in out:
             target = key.replace("_json", "")
             try:
@@ -171,7 +178,7 @@ def add_fact(fact_text: str, source_type: str = "manual", source_ref: str | None
             item,
         )
     audit("memory", "memory.fact.created", text[:180], "low", {"fact_id": item["id"], "source_type": source_type})
-    return _row_to_dict(sqlite3.Row) if False else {**item, "tags": tags or []}
+    return {**item, "tags": tags or []}
 
 
 def search_facts(q: str = "", limit: int = 10) -> list[dict[str, Any]]:
@@ -200,19 +207,15 @@ def extract_facts_from_text(text: str, source_ref: str = "chat") -> list[dict[st
     clean = (text or "").strip()
     if not clean or len(clean) < 12:
         return []
-
     candidates: list[str] = []
     for sentence in re.split(r"(?<=[.!?])\s+|\n+", clean):
         s = sentence.strip(" -•\t")
         if len(s) < 20 or len(s) > 260:
             continue
         lower = s.lower()
-        signal = any(token in lower for token in [
-            "ich ", "mein ", "meine ", "wir ", "jarvis", "projekt", "github", "repo", "ziel", "wichtig", "soll", "muss", "immer", "nie", "nutze", "arbeite"
-        ])
+        signal = any(token in lower for token in ["ich ", "mein ", "meine ", "wir ", "jarvis", "projekt", "github", "repo", "ziel", "wichtig", "soll", "muss", "immer", "nie", "nutze", "arbeite"])
         if signal:
             candidates.append(s)
-
     facts: list[dict[str, Any]] = []
     for sentence in candidates[:5]:
         try:
@@ -253,10 +256,7 @@ def set_awareness_event(event_type: str, app_name: str | None = None, window_tit
         "created_at": now_iso(),
     }
     with _connect() as db:
-        db.execute(
-            "INSERT INTO awareness_events(id, event_type, app_name, window_title, summary, payload_json, created_at) VALUES (:id, :event_type, :app_name, :window_title, :summary, :payload_json, :created_at)",
-            item,
-        )
+        db.execute("INSERT INTO awareness_events(id, event_type, app_name, window_title, summary, payload_json, created_at) VALUES (:id, :event_type, :app_name, :window_title, :summary, :payload_json, :created_at)", item)
     return {**item, "payload": payload or {}}
 
 
@@ -265,13 +265,7 @@ def current_awareness() -> dict[str, Any]:
     with _connect() as db:
         row = db.execute("SELECT * FROM awareness_events ORDER BY created_at DESC LIMIT 1").fetchone()
     if not row:
-        return {
-            "ok": True,
-            "status": "idle",
-            "summary": "Noch kein Awareness Ereignis vorhanden.",
-            "privacy": "local_first",
-            "paused": False,
-        }
+        return {"ok": True, "status": "idle", "summary": "Noch kein Awareness Ereignis vorhanden.", "privacy": "local_first", "paused": False}
     return {"ok": True, "status": "active", "current": _row_to_dict(row), "privacy": "local_first", "paused": False}
 
 
@@ -302,17 +296,23 @@ def create_action_request(action_type: str, summary: str, payload: dict[str, Any
         "updated_at": ts,
         "approved_at": ts if status == "approved" else None,
         "rejected_at": None,
+        "executed_at": None,
+        "result_json": json.dumps({}, ensure_ascii=False),
     }
     with _connect() as db:
-        db.execute(
-            """
-            INSERT INTO action_requests(id, action_type, summary, risk, status, payload_json, created_at, updated_at, approved_at, rejected_at)
-            VALUES (:id, :action_type, :summary, :risk, :status, :payload_json, :created_at, :updated_at, :approved_at, :rejected_at)
-            """,
-            item,
-        )
+        db.execute("""
+            INSERT INTO action_requests(id, action_type, summary, risk, status, payload_json, created_at, updated_at, approved_at, rejected_at, executed_at, result_json)
+            VALUES (:id, :action_type, :summary, :risk, :status, :payload_json, :created_at, :updated_at, :approved_at, :rejected_at, :executed_at, :result_json)
+        """, item)
     audit("authority", "action.requested", summary, final_risk, {"action_id": item["id"], "status": status})
-    return {**item, "payload": payload or {}}
+    return {**item, "payload": payload or {}, "result": {}}
+
+
+def get_action_request(action_id: str) -> dict[str, Any] | None:
+    init_runtime()
+    with _connect() as db:
+        row = db.execute("SELECT * FROM action_requests WHERE id=?", (action_id,)).fetchone()
+    return _row_to_dict(row) if row else None
 
 
 def list_action_requests(limit: int = 25) -> list[dict[str, Any]]:
@@ -330,38 +330,33 @@ def approve_action(action_id: str, approve: bool = True) -> dict[str, Any]:
         row = db.execute("SELECT * FROM action_requests WHERE id=?", (action_id,)).fetchone()
         if not row:
             return {"ok": False, "error": "not_found"}
-        db.execute(
-            "UPDATE action_requests SET status=?, updated_at=?, approved_at=?, rejected_at=? WHERE id=?",
-            (status, ts, ts if approve else None, None if approve else ts, action_id),
-        )
+        db.execute("UPDATE action_requests SET status=?, updated_at=?, approved_at=?, rejected_at=? WHERE id=?", (status, ts, ts if approve else None, None if approve else ts, action_id))
     audit("authority", f"action.{status}", action_id, str(row["risk"]), {"action_id": action_id})
     return {"ok": True, "action_id": action_id, "status": status}
+
+
+def mark_action_executed(action_id: str, result: dict[str, Any], status: str = "executed") -> dict[str, Any]:
+    init_runtime()
+    ts = now_iso()
+    final_status = status if status in {"executed", "execution_failed"} else "executed"
+    with _connect() as db:
+        row = db.execute("SELECT * FROM action_requests WHERE id=?", (action_id,)).fetchone()
+        if not row:
+            return {"ok": False, "error": "not_found"}
+        db.execute("UPDATE action_requests SET status=?, updated_at=?, executed_at=?, result_json=? WHERE id=?", (final_status, ts, ts, json.dumps(result or {}, ensure_ascii=False), action_id))
+    audit("authority", f"action.{final_status}", action_id, "medium", {"action_id": action_id, "result": result})
+    return {"ok": True, "action_id": action_id, "status": final_status, "result": result}
 
 
 def create_goal(goal_type: str, title: str, description: str | None = None, parent_id: str | None = None, due_date: str | None = None) -> dict[str, Any]:
     init_runtime()
     ts = now_iso()
-    item = {
-        "id": f"goal_{uuid.uuid4().hex}",
-        "type": goal_type,
-        "parent_id": parent_id,
-        "title": title,
-        "description": description,
-        "score": 0.0,
-        "target_score": 1.0,
-        "status": "active",
-        "due_date": due_date,
-        "created_at": ts,
-        "updated_at": ts,
-    }
+    item = {"id": f"goal_{uuid.uuid4().hex}", "type": goal_type, "parent_id": parent_id, "title": title, "description": description, "score": 0.0, "target_score": 1.0, "status": "active", "due_date": due_date, "created_at": ts, "updated_at": ts}
     with _connect() as db:
-        db.execute(
-            """
+        db.execute("""
             INSERT INTO goals(id, type, parent_id, title, description, score, target_score, status, due_date, created_at, updated_at)
             VALUES (:id, :type, :parent_id, :title, :description, :score, :target_score, :status, :due_date, :created_at, :updated_at)
-            """,
-            item,
-        )
+        """, item)
     audit("goal", "goal.created", title, "low", {"goal_id": item["id"]})
     return item
 
@@ -382,20 +377,7 @@ def workflow_node_registry() -> dict[str, Any]:
 
 
 def agents() -> list[dict[str, Any]]:
-    roles = [
-        ("primary", "Primary Agent", "Nutzerkontakt, Kontext, Freigaben"),
-        ("researcher", "Researcher", "Recherche, Quellen, Vergleich"),
-        ("coder", "Coder", "Code Analyse, Patches, Tests"),
-        ("reviewer", "Reviewer", "Prüfung von Qualität und Risiko"),
-        ("planner", "Planner", "Ziele, Reihenfolge, Tagesplanung"),
-        ("writer", "Writer", "Doku, Texte, Spezifikationen"),
-        ("analyst", "Analyst", "Datenanalyse und Metriken"),
-        ("sysadmin", "Sysadmin", "Windows, Dienste, Logs"),
-        ("devops", "DevOps", "Git, Builds, Releases"),
-        ("security", "Security", "Secrets, Rechte, Freigaben"),
-        ("designer", "Designer", "UI und visuelle Systeme"),
-        ("data_engineer", "Data Engineer", "Speicher, Vektoren, ETL"),
-    ]
+    roles = [("primary", "Primary Agent", "Nutzerkontakt, Kontext, Freigaben"), ("researcher", "Researcher", "Recherche, Quellen, Vergleich"), ("coder", "Coder", "Code Analyse, Patches, Tests"), ("reviewer", "Reviewer", "Prüfung von Qualität und Risiko"), ("planner", "Planner", "Ziele, Reihenfolge, Tagesplanung"), ("writer", "Writer", "Doku, Texte, Spezifikationen"), ("analyst", "Analyst", "Datenanalyse und Metriken"), ("sysadmin", "Sysadmin", "Windows, Dienste, Logs"), ("devops", "DevOps", "Git, Builds, Releases"), ("security", "Security", "Secrets, Rechte, Freigaben"), ("designer", "Designer", "UI und visuelle Systeme"), ("data_engineer", "Data Engineer", "Speicher, Vektoren, ETL")]
     return [{"id": rid, "name": name, "description": desc, "authority": "prepare_only" if rid != "primary" else "approval_owner"} for rid, name, desc in roles]
 
 
@@ -405,6 +387,8 @@ def runtime_status() -> dict[str, Any]:
         facts = db.execute("SELECT COUNT(*) AS c FROM memory_facts").fetchone()["c"]
         actions = db.execute("SELECT COUNT(*) AS c FROM action_requests").fetchone()["c"]
         pending = db.execute("SELECT COUNT(*) AS c FROM action_requests WHERE status='pending_approval'").fetchone()["c"]
+        approved = db.execute("SELECT COUNT(*) AS c FROM action_requests WHERE status='approved'").fetchone()["c"]
+        executed = db.execute("SELECT COUNT(*) AS c FROM action_requests WHERE status='executed'").fetchone()["c"]
         goals_count = db.execute("SELECT COUNT(*) AS c FROM goals").fetchone()["c"]
         awareness_count = db.execute("SELECT COUNT(*) AS c FROM awareness_events").fetchone()["c"]
     return {
@@ -414,7 +398,7 @@ def runtime_status() -> dict[str, Any]:
         "primitives": {
             "memory": {"status": "active", "facts": facts},
             "awareness": {"status": "active", "events": awareness_count},
-            "action": {"status": "active", "requests": actions, "pending_approval": pending},
+            "action": {"status": "active", "requests": actions, "pending_approval": pending, "approved": approved, "executed": executed},
             "orchestration": {"status": "defined", "agents": len(agents())},
         },
         "goals": goals_count,
