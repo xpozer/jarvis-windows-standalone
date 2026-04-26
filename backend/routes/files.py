@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -10,6 +9,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from config import DATA_DIR, FILE_INDEX_FILE
 from services import _runtime as core
+from services.llm_client import call_llm
 from utils import read_json, write_json, log
 
 router = APIRouter(prefix="/api/files", tags=["files"])
@@ -35,7 +35,7 @@ def _save_index(items: list[dict[str, Any]]) -> None:
     write_json(FILE_INDEX_FILE, items[:500])
 
 
-def _summarize_with_ollama(filename: str, extracted_text: str) -> str:
+def _summarize_with_llm(filename: str, extracted_text: str) -> str:
     text = extracted_text.strip()
     if not text:
         return "Die Datei wurde gespeichert, aber es konnte kein Text extrahiert werden."
@@ -51,22 +51,11 @@ def _summarize_with_ollama(filename: str, extracted_text: str) -> str:
     )
     agent = "file"
     messages = core.build_messages(prompt, history=[], memory_facts=[], agent=agent)
-    payload = {
-        "model": getattr(core, "DEFAULT_MODEL", "qwen3:8b"),
-        "messages": messages,
-        "stream": False,
-        "options": {"temperature": 0.25, "top_p": 0.9},
-    }
     try:
-        result = core.http_json(core.OLLAMA_BASE.rstrip("/") + "/api/chat", payload, timeout=180)
-        if isinstance(result.get("message"), dict):
-            answer = str(result["message"].get("content") or "").strip()
-            if answer:
-                return answer
-        normalized = core.normalize_backend_text(result).strip()
-        return normalized or core.summarize_text_basic(text)
+        answer = str(call_llm(messages, getattr(core, "DEFAULT_MODEL", "qwen3:8b"), temperature=0.25, stream=False)).strip()
+        return answer or core.summarize_text_basic(text)
     except Exception as exc:
-        log("WARN", "file ollama analysis failed", filename=filename, error=str(exc))
+        log("WARN", "Dateianalyse per LLM fehlgeschlagen", filename=filename, error=str(exc))
         return core.summarize_text_basic(text)
 
 
@@ -87,7 +76,7 @@ async def upload_file(file: UploadFile = File(...), analyze: bool = True) -> dic
         log("ERROR", "file extraction failed", filename=safe_name, error=str(exc))
         extracted = f"[Textextraktion fehlgeschlagen: {exc}]"
 
-    summary = _summarize_with_ollama(safe_name, extracted) if analyze else core.summarize_text_basic(extracted)
+    summary = _summarize_with_llm(safe_name, extracted) if analyze else core.summarize_text_basic(extracted)
     item = {
         "id": upload_id,
         "filename": safe_name,

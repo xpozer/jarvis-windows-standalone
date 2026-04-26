@@ -4,11 +4,10 @@ Gemeinsame Basis fuer alle Sub-Agenten.
 """
 
 import json
-import urllib.request
 from typing import Generator
 from dataclasses import dataclass, field
 
-from config import OLLAMA_OPENAI
+from services.llm_client import call_llm
 
 
 @dataclass
@@ -34,41 +33,14 @@ class BaseAgent:
     description: str = ""
 
     def llm(self, messages: list, ctx: AgentContext, temperature: float = 0.3) -> str:
-        payload = json.dumps({
-            "model": ctx.model, "messages": messages,
-            "stream": False, "temperature": temperature,
-        }).encode()
-        req = urllib.request.Request(
-            OLLAMA_OPENAI, data=payload,
-            headers={"Content-Type": "application/json"}, method="POST"
-        )
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = json.loads(resp.read())
-                return data["choices"][0]["message"]["content"].strip()
+            return str(call_llm(messages, ctx.model, temperature=temperature, stream=False))
         except Exception as e:
             return f"[LLM-Fehler: {e}]"
 
     def llm_stream(self, messages: list, ctx: AgentContext, temperature: float = 0.3) -> Generator[str, None, None]:
-        payload = json.dumps({
-            "model": ctx.model, "messages": messages,
-            "stream": True, "temperature": temperature,
-        }).encode()
-        req = urllib.request.Request(
-            OLLAMA_OPENAI, data=payload,
-            headers={"Content-Type": "application/json"}, method="POST"
-        )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                for line in resp:
-                    line = line.decode("utf-8").strip()
-                    if not line.startswith("data:"): continue
-                    raw = line[5:].strip()
-                    if raw == "[DONE]": break
-                    try:
-                        delta = json.loads(raw)["choices"][0]["delta"].get("content","")
-                        if delta: yield delta
-                    except Exception: continue
+            yield from call_llm(messages, ctx.model, temperature=temperature, stream=True)
         except Exception as e:
             yield f"[Stream-Fehler: {e}]"
 

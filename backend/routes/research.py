@@ -8,8 +8,9 @@ from urllib import parse, request, error
 
 from fastapi import APIRouter, HTTPException
 
-from config import DEFAULT_MODEL, OLLAMA_BASE
+from config import DEFAULT_MODEL
 from services import _runtime as core
+from services.llm_client import call_llm
 from utils import log
 
 router = APIRouter(prefix="/api/research", tags=["research"])
@@ -115,27 +116,10 @@ def _llm_summary(query: str, results: list[dict[str, str]]) -> str:
         "Nenne Unsicherheiten klar. Keine erfundenen Fakten. Gib am Ende eine kurze Quellenliste mit Nummern aus.\n\n"
         f"Fragestellung: {query}\n\nTreffer:\n{source_text}"
     )
-    payload = {
-        "model": DEFAULT_MODEL or "qwen3:8b",
-        "messages": core.build_messages(prompt, history=[], memory_facts=[], agent="research"),
-        "stream": False,
-        "options": {"temperature": 0.2, "top_p": 0.9},
-    }
+    messages = core.build_messages(prompt, history=[], memory_facts=[], agent="research")
     try:
-        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        req = request.Request(
-            OLLAMA_BASE.rstrip("/") + "/api/chat",
-            data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with request.urlopen(req, timeout=180) as resp:
-            result = json.loads(resp.read().decode("utf-8", errors="replace"))
-        if isinstance(result.get("message"), dict):
-            answer = str(result["message"].get("content") or "").strip()
-            if answer:
-                return answer
-        return core.normalize_backend_text(result).strip() or "Research abgeschlossen, aber Ollama hat keine verwertbare Zusammenfassung geliefert."
+        answer = str(call_llm(messages, DEFAULT_MODEL or "qwen3:8b", temperature=0.2, stream=False)).strip()
+        return answer or "Research abgeschlossen, aber der LLM Provider hat keine verwertbare Zusammenfassung geliefert."
     except Exception as exc:
         log("WARN", "research llm summary failed", error=str(exc))
         lines = ["Research Treffer gefunden, aber die LLM Zusammenfassung ist fehlgeschlagen:"]

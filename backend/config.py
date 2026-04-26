@@ -9,6 +9,24 @@ DATA_DIR = BASE_DIR / "data"
 LOG_DIR.mkdir(exist_ok=True)
 DATA_DIR.mkdir(exist_ok=True)
 
+
+def _load_env_file() -> None:
+    env_file = BASE_DIR / ".env"
+    if not env_file.exists():
+        return
+    for raw_line in env_file.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_env_file()
+
 LOG_FILE = LOG_DIR / "backend.log"
 START_LOG = LOG_DIR / "startup.log"
 BACKEND_PID_FILE = LOG_DIR / "backend.pid"
@@ -68,6 +86,51 @@ FRONTEND_DIAG = FRONTEND_DIR / "diagnose.html"
 OLLAMA_BASE = os.environ.get("JARVIS_OLLAMA_BASE", "http://127.0.0.1:11434")
 OLLAMA_OPENAI = OLLAMA_BASE.rstrip("/") + "/v1/chat/completions"
 DEFAULT_MODEL = os.environ.get("JARVIS_MODEL", "qwen3:8b")
+JARVIS_PROVIDER = os.environ.get("JARVIS_PROVIDER", "ollama").strip().lower() or "ollama"
+JARVIS_FALLBACK = [
+    item.strip().lower()
+    for item in os.environ.get("JARVIS_FALLBACK", "").split(",")
+    if item.strip()
+]
+
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY") or None
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY") or None
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY") or None
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or None
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or None
+
+PROVIDER_CONFIG: dict[str, dict[str, str | None]] = {
+    "ollama": {
+        "base_url": OLLAMA_OPENAI,
+        "api_key": None,
+        "auth_header": "none",
+    },
+    "anthropic": {
+        "base_url": "https://api.anthropic.com/v1/messages",
+        "api_key": ANTHROPIC_API_KEY,
+        "auth_header": "x-api-key",
+    },
+    "openai": {
+        "base_url": "https://api.openai.com/v1/chat/completions",
+        "api_key": OPENAI_API_KEY,
+        "auth_header": "bearer",
+    },
+    "groq": {
+        "base_url": "https://api.groq.com/openai/v1/chat/completions",
+        "api_key": GROQ_API_KEY,
+        "auth_header": "bearer",
+    },
+    "gemini": {
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key": GEMINI_API_KEY,
+        "auth_header": "bearer",
+    },
+    "openrouter": {
+        "base_url": "https://openrouter.ai/api/v1/chat/completions",
+        "api_key": OPENROUTER_API_KEY,
+        "auth_header": "bearer",
+    },
+}
 
 # B5 Productization
 APP_VERSION = "B6.5.1"

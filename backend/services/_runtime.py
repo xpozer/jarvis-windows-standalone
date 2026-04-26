@@ -60,7 +60,6 @@ from config import (
     MEMORY_FILE,
     NOTES_FILE,
     OLLAMA_BASE,
-    OLLAMA_OPENAI,
     PERMISSIONS_FILE,
     PIPER_DIR,
     PIPER_VOICES_DIR,
@@ -79,6 +78,7 @@ from config import (
     WORK_LOG_FILE,
     WORK_MEMORY_FILE,
 )
+from services.llm_client import call_llm
 from utils import log, read_json, write_json
 
 def http_json(url: str, payload: Optional[dict] = None, timeout: int = 60) -> Any:
@@ -1836,21 +1836,36 @@ async def chat_completions(req: Request):
     if payload.get("stream"):
         def gen():
             try:
-                data = json.dumps(payload).encode("utf-8")
-                r = request.Request(OLLAMA_OPENAI, data=data, headers={"Content-Type":"application/json"}, method="POST")
-                with request.urlopen(r, timeout=120) as resp:
-                    for line in resp:
-                        yield line
+                chunks = call_llm(
+                    payload.get("messages") or [],
+                    payload.get("model") or DEFAULT_MODEL,
+                    temperature=float(payload.get("temperature", 0.3)),
+                    stream=True,
+                )
+                for chunk in chunks:
+                    yield ("data: " + json.dumps({"choices":[{"delta":{"content":chunk},"finish_reason":None}]}, ensure_ascii=False) + "\n\n").encode("utf-8")
+                yield b"data: [DONE]\n\n"
             except Exception as e:
-                yield ("data: " + json.dumps({"choices":[{"delta":{"content":f"[Ollama Fehler: {e}]"},"finish_reason":"stop"}]}, ensure_ascii=False) + "\n\n").encode("utf-8")
+                yield ("data: " + json.dumps({"choices":[{"delta":{"content":f"[LLM Fehler: {e}]"},"finish_reason":"stop"}]}, ensure_ascii=False) + "\n\n").encode("utf-8")
                 yield b"data: [DONE]\n\n"
         return StreamingResponse(gen(), media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
     try:
-        return JSONResponse(http_json(OLLAMA_OPENAI, payload, timeout=120))
+        content = call_llm(
+            payload.get("messages") or [],
+            payload.get("model") or DEFAULT_MODEL,
+            temperature=float(payload.get("temperature", 0.3)),
+            stream=False,
+        )
+        return JSONResponse({
+            "choices": [{
+                "message": {"role": "assistant", "content": content},
+                "finish_reason": "stop",
+            }],
+        })
     except Exception as e:
-        log("ERROR", "ollama request failed", error=str(e))
-        raise HTTPException(503, f"Ollama nicht erreichbar: {e}")
+        log("ERROR", "LLM Request fehlgeschlagen", error=str(e))
+        raise HTTPException(503, f"LLM Provider nicht erreichbar: {e}")
 
 class OrchReq(BaseModel):
     user_input: str
@@ -1881,30 +1896,19 @@ def orchestrate_run(req: OrchReq):
         yield sse({"event":"routing", "agent":agent, "reason":reason, "confidence":conf})
         yield sse({"event":"thinking", "agent":agent, "message":f"{agent.upper()} Agent verarbeitet..."})
         messages = build_messages(req.user_input, req.history, req.memory_facts, agent)
-        payload = {"model": req.model or DEFAULT_MODEL, "messages": messages, "stream": True, "temperature": 0.35}
         try:
-            data = json.dumps(payload).encode("utf-8")
-            r = request.Request(OLLAMA_OPENAI, data=data, headers={"Content-Type":"application/json"}, method="POST")
-            with request.urlopen(r, timeout=180) as resp:
-                for raw_line in resp:
-                    line = raw_line.decode("utf-8", errors="ignore").strip()
-                    if not line.startswith("data:"): continue
-                    raw = line[5:].strip()
-                    if raw == "[DONE]": break
-                    try:
-                        obj = json.loads(raw)
-                        delta = normalize_backend_text(obj.get("choices", [{}])[0].get("delta", {}).get("content", ""))
-                        if delta:
-                            full_response += delta
-                            yield sse({"event":"delta", "agent":agent, "content":delta, "response":delta})
-                    except Exception:
-                        continue
+            chunks = call_llm(messages, req.model or DEFAULT_MODEL, temperature=0.35, stream=True)
+            for chunk in chunks:
+                delta = normalize_backend_text(chunk)
+                if delta:
+                    full_response += delta
+                    yield sse({"event":"delta", "agent":agent, "content":delta, "response":delta})
             write_json(AGENT_STATUS_FILE, {"active": None, "phase": "done", "last_agent": agent, "updated_at": now_iso()})
             yield sse({"event":"done", "agent":agent, "response":full_response, "content":"", "tool_log":[f"{agent} abgeschlossen", "Windows Standalone Backend"]})
             yield "data: [DONE]\n\n"
         except Exception as e:
             log("ERROR", "orchestrator failed", error=str(e))
-            yield sse({"event":"error", "message": f"Ollama/Backend Fehler: {e}"})
+            yield sse({"event":"error", "message": f"LLM/Backend Fehler: {e}"})
             yield "data: [DONE]\n\n"
     return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control":"no-cache", "X-Accel-Buffering":"no"})
 

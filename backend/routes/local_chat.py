@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import json
 from typing import Any
-from urllib import error, request
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 import agent_registry
-from config import DEFAULT_MODEL, OLLAMA_BASE
+from config import DEFAULT_MODEL, JARVIS_PROVIDER, OLLAMA_BASE, PROVIDER_CONFIG
 from services import _runtime as core
+from services.llm_client import call_llm
 from utils import log
 
 router = APIRouter(prefix="/api", tags=["local-chat"])
@@ -25,27 +24,6 @@ class ChatRequest(BaseModel):
     history: list[ChatMessage] = Field(default_factory=list)
     model: str | None = None
     agent: str | None = None
-
-
-def _post_json(url: str, payload: dict[str, Any], timeout: int = 180) -> dict[str, Any]:
-    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    req = request.Request(
-        url,
-        data=data,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with request.urlopen(req, timeout=timeout) as resp:
-            raw = resp.read().decode("utf-8", errors="replace")
-            return json.loads(raw) if raw.strip() else {}
-    except error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise HTTPException(status_code=502, detail=f"Ollama HTTP Fehler {exc.code}: {detail}") from exc
-    except error.URLError as exc:
-        raise HTTPException(status_code=503, detail=f"Ollama ist nicht erreichbar: {exc.reason}") from exc
-    except TimeoutError as exc:
-        raise HTTPException(status_code=504, detail="Ollama Antwort Timeout") from exc
 
 
 def _normalize_history(history: list[ChatMessage]) -> list[dict[str, str]]:
@@ -77,23 +55,9 @@ def chat(req: ChatRequest) -> dict[str, Any]:
 
     agent_registry.update_status(agent_id, "running", last_action=user_text[:160])
     try:
-        payload = {
-            "model": model,
-            "messages": messages,
-            "stream": False,
-            "options": {
-                "temperature": 0.35,
-                "top_p": 0.9,
-            },
-        }
-        result = _post_json(f"{OLLAMA_BASE.rstrip('/')}/api/chat", payload)
-        answer = ""
-        if isinstance(result.get("message"), dict):
-            answer = str(result["message"].get("content") or "").strip()
+        answer = str(call_llm(messages, model, temperature=0.35, stream=False)).strip()
         if not answer:
-            answer = core.normalize_backend_text(result).strip()
-        if not answer:
-            answer = "Ich habe von Ollama eine leere Antwort bekommen."
+            answer = "Ich habe vom LLM Provider eine leere Antwort bekommen."
         agent_registry.update_status(agent_id, "idle", last_action="Antwort erstellt")
         return {
             "ok": True,
@@ -103,9 +67,6 @@ def chat(req: ChatRequest) -> dict[str, Any]:
             "model": model,
             "response": answer,
         }
-    except HTTPException:
-        agent_registry.update_status(agent_id, "error", last_action="Ollama Fehler", error=True)
-        raise
     except Exception as exc:
         log("ERROR", "local chat failed", error=str(exc), agent=agent_id)
         agent_registry.update_status(agent_id, "error", last_action=str(exc)[:160], error=True)
@@ -114,9 +75,11 @@ def chat(req: ChatRequest) -> dict[str, Any]:
 
 @router.get("/chat/health")
 def chat_health() -> dict[str, Any]:
-    online = core.ollama_online()
+    provider_config = PROVIDER_CONFIG.get(JARVIS_PROVIDER, {})
+    online = core.ollama_online() if JARVIS_PROVIDER == "ollama" else bool(provider_config.get("api_key"))
     return {
         "ok": online,
+        "provider": JARVIS_PROVIDER,
         "ollama": OLLAMA_BASE,
         "model": DEFAULT_MODEL,
     }
