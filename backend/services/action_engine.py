@@ -3,8 +3,10 @@ from __future__ import annotations
 import os
 import platform
 import subprocess
+import webbrowser
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from config import BASE_DIR, DATA_DIR, UPLOAD_DIR
 from services import usejarvis_runtime as rt
@@ -54,7 +56,7 @@ def tool_registry() -> dict[str, Any]:
         {"id": "git.branch", "name": "Git Branch", "risk": "low", "description": "Liest aktuellen Branch und letzte Commits."},
         {"id": "system.info", "name": "System Info", "risk": "low", "description": "Liest OS, Host, Arbeitsverzeichnis und Python Umgebung."},
         {"id": "process.list", "name": "Process List", "risk": "low", "description": "Listet laufende Prozesse über tasklist auf Windows."},
-        {"id": "browser.open_url", "name": "Open URL", "risk": "medium", "description": "Bereitet das Öffnen einer URL vor. Ausführung erfolgt über Authority Gate."},
+        {"id": "browser.open_url", "name": "Open URL", "risk": "medium", "description": "Bereitet das Öffnen einer URL vor. Nach Freigabe wird sie im Standardbrowser geöffnet."},
         {"id": "terminal.command", "name": "Terminal Command", "risk": "high", "description": "Terminal Befehle werden nur als Freigabeanforderung vorbereitet."},
         {"id": "filesystem.write_file", "name": "Write File", "risk": "high", "description": "Datei schreiben benötigt Freigabe."},
         {"id": "filesystem.delete_file", "name": "Delete File", "risk": "critical", "description": "Datei löschen benötigt immer Freigabe."},
@@ -153,6 +155,47 @@ def process_list(limit: int = 50) -> dict[str, Any]:
 def prepare_action(action_type: str, summary: str, payload: dict[str, Any] | None = None, risk: str | None = None) -> dict[str, Any]:
     action = rt.create_action_request(action_type=action_type, summary=summary, payload=payload or {}, risk=risk)
     return {"ok": True, "approval_required": action.get("status") == "pending_approval", "action": action}
+
+
+def _validate_url(url: str) -> tuple[bool, str]:
+    clean = (url or "").strip()
+    parsed = urlparse(clean)
+    if parsed.scheme not in {"http", "https"}:
+        return False, "Nur http und https URLs sind erlaubt."
+    if not parsed.netloc:
+        return False, "URL enthält keinen Host."
+    return True, clean
+
+
+def execute_approved_action(action_id: str) -> dict[str, Any]:
+    action = rt.get_action_request(action_id)
+    if not action:
+        return {"ok": False, "error": "not_found"}
+    if action.get("status") != "approved":
+        return {"ok": False, "error": "not_approved", "status": action.get("status")}
+
+    action_type = str(action.get("action_type") or "")
+    payload = action.get("payload") if isinstance(action.get("payload"), dict) else {}
+
+    try:
+        if action_type == "browser.open_url":
+            ok, value = _validate_url(str(payload.get("url") or ""))
+            if not ok:
+                result = {"ok": False, "error": value}
+                rt.mark_action_executed(action_id, result, status="execution_failed")
+                return result
+            opened = webbrowser.open(value, new=2, autoraise=True)
+            result = {"ok": bool(opened), "action_type": action_type, "url": value, "opened": bool(opened)}
+            rt.mark_action_executed(action_id, result, status="executed" if opened else "execution_failed")
+            return result
+
+        result = {"ok": False, "error": "executor_not_implemented", "action_type": action_type}
+        rt.mark_action_executed(action_id, result, status="execution_failed")
+        return result
+    except Exception as exc:
+        result = {"ok": False, "error": "execution_exception", "detail": str(exc), "action_type": action_type}
+        rt.mark_action_executed(action_id, result, status="execution_failed")
+        return result
 
 
 def run_tool(tool_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
