@@ -24,6 +24,7 @@ import { useAwareness } from "./hooks/useAwareness";
 import { AwarenessBar } from "./components/AwarenessBar";
 import { useProactiveAgent } from "./hooks/useProactiveAgent";
 import "./App.css";
+import "./jarvis-ui-upgrade.css";
 
 export function App() {
   const [activeItem, setActiveItem] = useState("Dialog");
