@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from services import action_engine
 from services import awareness_runtime
 from services import usejarvis_runtime as rt
 from services import usejarvis_workflow as wf
@@ -45,6 +46,11 @@ class ActionIn(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
+class ActionToolIn(BaseModel):
+    tool_id: str = Field(min_length=1)
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
 class GoalIn(BaseModel):
     type: str = "objective"
     title: str = Field(min_length=1)
@@ -82,6 +88,7 @@ def status():
     data = rt.runtime_status()
     data["workflow_runtime"] = wf.workflow_runtime_status()
     data["awareness_runtime"] = awareness_runtime.awareness_status()
+    data["action_engine"] = action_engine.tool_registry()
     return data
 
 
@@ -175,6 +182,46 @@ def action_reject(action_id: str):
     if not result.get("ok"):
         raise HTTPException(status_code=404, detail="Action not found")
     return result
+
+
+@router.get("/action-engine/tools")
+def action_engine_tools():
+    return action_engine.tool_registry()
+
+
+@router.post("/action-engine/run")
+def action_engine_run(req: ActionToolIn):
+    return action_engine.run_tool(req.tool_id, req.payload)
+
+
+@router.get("/action-engine/files")
+def action_engine_files(path: str = "", limit: int = 80):
+    return action_engine.list_dir(path or None, limit=limit)
+
+
+@router.get("/action-engine/file")
+def action_engine_file(path: str, max_bytes: int = 512000):
+    return action_engine.read_file(path, max_bytes=max_bytes)
+
+
+@router.get("/action-engine/git/status")
+def action_engine_git_status(path: str = ""):
+    return action_engine.git_status(path or None)
+
+
+@router.get("/action-engine/git/branch")
+def action_engine_git_branch(path: str = ""):
+    return action_engine.git_branch(path or None)
+
+
+@router.get("/action-engine/system/info")
+def action_engine_system_info():
+    return action_engine.system_info()
+
+
+@router.get("/action-engine/processes")
+def action_engine_processes(limit: int = 50):
+    return action_engine.process_list(limit=limit)
 
 
 @router.get("/goals")
