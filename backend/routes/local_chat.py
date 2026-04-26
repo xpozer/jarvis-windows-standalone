@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 import agent_registry
 from config import DEFAULT_MODEL, OLLAMA_BASE
 from services import _runtime as core
+from services import usejarvis_runtime
 from utils import log
 
 router = APIRouter(prefix="/api", tags=["local-chat"])
@@ -95,6 +96,17 @@ def _normalize_history(history: list[ChatMessage]) -> list[dict[str, str]]:
     return out
 
 
+def _memory_system_block(user_text: str) -> list[dict[str, str]]:
+    facts = usejarvis_runtime.memory_context(user_text, limit=6)
+    if not facts:
+        return []
+    compact = "\n".join(f"- {fact}" for fact in facts)
+    return [{
+        "role": "system",
+        "content": "Relevanter lokaler JARVIS Memory Kontext:\n" + compact + "\nNutze diesen Kontext nur, wenn er zur Nutzerfrage passt."
+    }]
+
+
 @router.post("/chat")
 def chat(req: ChatRequest) -> dict[str, Any]:
     user_text = req.message.strip()
@@ -107,7 +119,8 @@ def chat(req: ChatRequest) -> dict[str, Any]:
     model = (req.model or DEFAULT_MODEL or "qwen3:8b").strip()
     _ensure_model_available(model)
 
-    messages = core.build_messages(
+    memory_messages = _memory_system_block(user_text)
+    messages = memory_messages + core.build_messages(
         user_input=user_text,
         history=_normalize_history(req.history),
         memory_facts=[],
@@ -134,6 +147,16 @@ def chat(req: ChatRequest) -> dict[str, Any]:
             answer = core.normalize_backend_text(result).strip()
         if not answer:
             answer = "Ich habe von Ollama eine leere Antwort bekommen."
+
+        extracted = usejarvis_runtime.extract_facts_from_text(user_text, source_ref="chat:user")
+        usejarvis_runtime.audit(
+            "primary_agent",
+            "chat.completed",
+            user_text[:180],
+            "low",
+            {"agent": agent_id, "model": model, "memory_facts_used": len(memory_messages), "facts_extracted": len(extracted)},
+        )
+
         agent_registry.update_status(agent_id, "idle", last_action="Antwort erstellt")
         return {
             "ok": True,
@@ -141,6 +164,10 @@ def chat(req: ChatRequest) -> dict[str, Any]:
             "reason": reason,
             "confidence": confidence,
             "model": model,
+            "memory": {
+                "facts_used": len(memory_messages),
+                "facts_extracted": len(extracted),
+            },
             "response": answer,
         }
     except HTTPException:
@@ -158,12 +185,14 @@ def chat_health() -> dict[str, Any]:
         models = _ollama_tags()
         model = DEFAULT_MODEL
         model_available = model in models or any(n == model.split(":", 1)[0] or n.startswith(model.split(":", 1)[0] + ":") for n in models)
+        runtime = usejarvis_runtime.runtime_status()
         return {
             "ok": True,
             "ollama": OLLAMA_BASE,
             "model": model,
             "model_available": model_available,
             "models": models,
+            "runtime": runtime,
         }
     except HTTPException as exc:
         return {
