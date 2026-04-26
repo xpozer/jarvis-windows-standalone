@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Orb, OrbState } from "./components/Orb";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
 
 type Role = "operator" | "jarvis";
+type Level = "ok" | "warn" | "critical" | "unknown";
 
 type Message = {
   role: Role;
@@ -11,6 +12,22 @@ type Message = {
   text: string;
   link?: string;
   file?: boolean;
+};
+
+type SystemMetrics = {
+  status: Level;
+  cpu: { percent: number | null; level: Level };
+  memory: { used_gb: number | null; total_gb: number | null; percent: number | null; level: Level };
+  temperature: { celsius: number | null; level: Level };
+  network: { mbps: number | null; label: string; level: Level };
+};
+
+const fallbackMetrics: SystemMetrics = {
+  status: "unknown",
+  cpu: { percent: null, level: "unknown" },
+  memory: { used_gb: null, total_gb: null, percent: null, level: "unknown" },
+  temperature: { celsius: null, level: "unknown" },
+  network: { mbps: null, label: "N/A", level: "unknown" },
 };
 
 const navGroups = [
@@ -28,6 +45,32 @@ const initialMessages: Message[] = [
   { role: "jarvis", time: "11:44 AM", text: "Report generated. Identified 3 optimization opportunities\nthat could improve efficiency by up to 12%.", file: true },
 ];
 
+function metricClass(level: Level) {
+  return `metric-level ${level}`;
+}
+
+function fmtPercent(value: number | null | undefined) {
+  return typeof value === "number" ? `${Math.round(value)}%` : "N/A";
+}
+
+function fmtMemory(metrics: SystemMetrics) {
+  const used = metrics.memory.used_gb;
+  const total = metrics.memory.total_gb;
+  if (typeof used === "number" && typeof total === "number") return `${used.toFixed(1)} / ${total.toFixed(1)} GB`;
+  return "N/A";
+}
+
+function fmtTemp(value: number | null | undefined) {
+  return typeof value === "number" ? `${value.toFixed(1)} °C` : "N/A";
+}
+
+function statusLabel(status: Level) {
+  if (status === "critical") return "CRITICAL";
+  if (status === "warn") return "WARNUNG";
+  if (status === "ok") return "OPTIMAL";
+  return "UNBEKANNT";
+}
+
 export function App() {
   const [activeNav, setActiveNav] = useState("Conversations");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -35,10 +78,28 @@ export function App() {
   const [pinned, setPinned] = useState(false);
   const [thinking, setThinking] = useState(false);
   const [listening, setListening] = useState(false);
+  const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
   const orbState: OrbState = thinking ? "thinking" : listening ? "listening" : "idle";
   const typingActivity = Math.min(1, input.length / 80);
+
+  useEffect(() => {
+    let alive = true;
+    async function loadMetrics() {
+      try {
+        const response = await fetch("/system/metrics", { cache: "no-store" });
+        if (!response.ok) throw new Error(String(response.status));
+        const data = await response.json();
+        if (alive) setMetrics(data as SystemMetrics);
+      } catch {
+        if (alive) setMetrics(fallbackMetrics);
+      }
+    }
+    loadMetrics();
+    const interval = window.setInterval(loadMetrics, 2500);
+    return () => { alive = false; window.clearInterval(interval); };
+  }, []);
 
   function sendMessage(text = input.trim()) {
     if (!text) return;
@@ -65,12 +126,12 @@ export function App() {
             <div className="jarvis-brand-sub">AI ASSISTANT INTERFACE&nbsp;&nbsp;v2.1.4</div>
           </div>
         </div>
-        <div className="jarvis-system-status">SYSTEM STATUS: <b>OPTIMAL</b></div>
+        <div className={`jarvis-system-status ${metrics.status}`}>SYSTEM STATUS: <b>{statusLabel(metrics.status)}</b></div>
         <div className="jarvis-metrics">
-          <div><span>CPU</span><b>18%</b></div>
-          <div><span>MEMORY</span><b>6.2 / 12.0 GB</b></div>
-          <div><span>TEMP</span><b>34.2 °C</b></div>
-          <div><span>NETWORK</span><b>1.2 GB/s</b></div>
+          <div className={metricClass(metrics.cpu.level)}><span>CPU</span><b>{fmtPercent(metrics.cpu.percent)}</b></div>
+          <div className={metricClass(metrics.memory.level)}><span>MEMORY</span><b>{fmtMemory(metrics)}</b></div>
+          <div className={metricClass(metrics.temperature.level)}><span>TEMP</span><b>{fmtTemp(metrics.temperature.celsius)}</b></div>
+          <div className={metricClass(metrics.network.level)}><span>NETWORK</span><b>{metrics.network.label || "N/A"}</b></div>
           <nav><button>↻</button><button>⚙</button><button>−</button><button>□</button><button>×</button></nav>
         </div>
       </header>
@@ -142,8 +203,12 @@ export function App() {
         </section>
         <section className="jarvis-card snapshot-card">
           <div className="jarvis-card-title"><h2>SYSTEM SNAPSHOT</h2><button>• LIVE</button></div>
-          <div className="snapshot-grid"><div><span>CPU</span><b>18%</b></div><div><span>Memory</span><b>52%</b></div><div><span>Storage</span><b>68%</b></div></div>
-          <div className="snapshot-bottom"><div><span>Network</span><b>1.2 GB/s</b></div><ul><li><span>Active Processes</span><b>142</b></li><li><span>System Uptime</span><b>3d 14h 28m</b></li><li><span>Temperature</span><b>34.2 °C</b></li><li><span>Power Status</span><b>Optimal</b></li></ul></div>
+          <div className="snapshot-grid">
+            <div className={metricClass(metrics.cpu.level)}><span>CPU</span><b>{fmtPercent(metrics.cpu.percent)}</b></div>
+            <div className={metricClass(metrics.memory.level)}><span>Memory</span><b>{fmtPercent(metrics.memory.percent)}</b></div>
+            <div><span>Storage</span><b>68%</b></div>
+          </div>
+          <div className="snapshot-bottom"><div className={metricClass(metrics.network.level)}><span>Network</span><b>{metrics.network.label || "N/A"}</b></div><ul><li><span>Active Processes</span><b>142</b></li><li><span>System Uptime</span><b>Live</b></li><li className={metricClass(metrics.temperature.level)}><span>Temperature</span><b>{fmtTemp(metrics.temperature.celsius)}</b></li><li><span>Power Status</span><b>{statusLabel(metrics.status)}</b></li></ul></div>
         </section>
       </aside>
 
