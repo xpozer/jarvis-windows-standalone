@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 from services import usejarvis_runtime as rt
 from services.actions.filesystem import copy_file, make_dir, write_text_file
+from services.actions.outlook_tools import create_calendar_event, send_email
 
 
 def validate_url(url: str) -> tuple[bool, str]:
@@ -40,6 +41,26 @@ def execute_approved_action(action_id: str) -> dict[str, Any]:
                 return _finish(action_id, {"ok": False, "error": value})
             opened = webbrowser.open(value, new=2, autoraise=True)
             return _finish(action_id, {"ok": bool(opened), "action_type": action_type, "url": value, "opened": bool(opened)})
+
+        if action_type == "outlook.email.send":
+            return _finish(action_id, send_email(
+                to=str(payload.get("to") or ""),
+                subject=str(payload.get("subject") or ""),
+                body=str(payload.get("body") or ""),
+                cc=str(payload.get("cc") or ""),
+                save_to_sent_items=bool(payload.get("save_to_sent_items") if "save_to_sent_items" in payload else True),
+            ))
+
+        if action_type == "outlook.calendar.create_event":
+            return _finish(action_id, create_calendar_event(
+                subject=str(payload.get("subject") or ""),
+                start=str(payload.get("start") or ""),
+                end=str(payload.get("end") or ""),
+                body=str(payload.get("body") or ""),
+                location=str(payload.get("location") or ""),
+                attendees=str(payload.get("attendees") or ""),
+                timezone=str(payload.get("timezone") or "Europe/Berlin"),
+            ))
 
         if action_type == "filesystem.make_dir":
             return _finish(action_id, make_dir(str(payload.get("path") or "")))
