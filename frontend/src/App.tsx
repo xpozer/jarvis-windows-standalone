@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Orb, OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
+import { DayStartCard } from "./components/DayStartCard";
 import { TodayScheduleCard } from "./components/TodayScheduleCard";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
@@ -163,6 +164,7 @@ export function App() {
 
   return (
     <div className={`jarvis-screen ${thinking ? "is-thinking" : ""}`}>
+      <DayStartCard onSend={sendMessage} />
       <header className="jarvis-topbar">
         <div className="jarvis-brand">
           <div className="jarvis-mini-orb" />
