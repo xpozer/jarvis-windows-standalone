@@ -5,6 +5,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from services import usejarvis_runtime as rt
+from services.actions.filesystem import copy_file, make_dir, write_text_file
 
 
 def validate_url(url: str) -> tuple[bool, str]:
@@ -15,6 +16,11 @@ def validate_url(url: str) -> tuple[bool, str]:
     if not parsed.netloc:
         return False, "URL enthält keinen Host."
     return True, clean
+
+
+def _finish(action_id: str, result: dict[str, Any]) -> dict[str, Any]:
+    rt.mark_action_executed(action_id, result, status="executed" if result.get("ok") else "execution_failed")
+    return result
 
 
 def execute_approved_action(action_id: str) -> dict[str, Any]:
@@ -31,18 +37,19 @@ def execute_approved_action(action_id: str) -> dict[str, Any]:
         if action_type == "browser.open_url":
             ok, value = validate_url(str(payload.get("url") or ""))
             if not ok:
-                result = {"ok": False, "error": value}
-                rt.mark_action_executed(action_id, result, status="execution_failed")
-                return result
+                return _finish(action_id, {"ok": False, "error": value})
             opened = webbrowser.open(value, new=2, autoraise=True)
-            result = {"ok": bool(opened), "action_type": action_type, "url": value, "opened": bool(opened)}
-            rt.mark_action_executed(action_id, result, status="executed" if opened else "execution_failed")
-            return result
+            return _finish(action_id, {"ok": bool(opened), "action_type": action_type, "url": value, "opened": bool(opened)})
 
-        result = {"ok": False, "error": "executor_not_implemented", "action_type": action_type}
-        rt.mark_action_executed(action_id, result, status="execution_failed")
-        return result
+        if action_type == "filesystem.make_dir":
+            return _finish(action_id, make_dir(str(payload.get("path") or "")))
+
+        if action_type == "filesystem.write_text_file":
+            return _finish(action_id, write_text_file(str(payload.get("path") or ""), str(payload.get("content") or ""), bool(payload.get("overwrite") or False)))
+
+        if action_type == "filesystem.copy_file":
+            return _finish(action_id, copy_file(str(payload.get("source") or ""), str(payload.get("destination") or ""), bool(payload.get("overwrite") or False)))
+
+        return _finish(action_id, {"ok": False, "error": "executor_not_implemented", "action_type": action_type})
     except Exception as exc:
-        result = {"ok": False, "error": "execution_exception", "detail": str(exc), "action_type": action_type}
-        rt.mark_action_executed(action_id, result, status="execution_failed")
-        return result
+        return _finish(action_id, {"ok": False, "error": "execution_exception", "detail": str(exc), "action_type": action_type})
