@@ -48,6 +48,11 @@ export function RuntimeControlPanel({ onSend }: Props) {
   const [awarenessInterval, setAwarenessInterval] = useState(10);
   const [actionPath, setActionPath] = useState("");
   const [actionUrl, setActionUrl] = useState("https://github.com/xpozer/jarvis-windows-standalone");
+  const [mkdirPath, setMkdirPath] = useState("data/jarvis-test-folder");
+  const [writePath, setWritePath] = useState("data/jarvis-test-folder/test.txt");
+  const [writeContent, setWriteContent] = useState("Hallo von JARVIS Action Engine Level 2.");
+  const [copySource, setCopySource] = useState("data/jarvis-test-folder/test.txt");
+  const [copyDestination, setCopyDestination] = useState("data/jarvis-test-folder/test-copy.txt");
   const [actionResult, setActionResult] = useState<unknown>(null);
 
   async function refresh() {
@@ -219,7 +224,25 @@ export function RuntimeControlPanel({ onSend }: Props) {
       <div className="runtime-control-grid runtime-control-grid-awareness">
         <MemoryCard facts={data.facts} factText={factText} onFactTextChange={setFactText} onAddFact={addFact} />
         <AwarenessCard awareness={awareness} loop={loop} awarenessInterval={awarenessInterval} loopBusy={loopBusy} onAwarenessIntervalChange={setAwarenessInterval} onStartLoop={startAwarenessLoop} onStopLoop={stopAwarenessLoop} />
-        <ActionEngineCard actionBusy={actionBusy} actionPath={actionPath} actionUrl={actionUrl} actionResult={actionResult} onActionPathChange={setActionPath} onActionUrlChange={setActionUrl} onRunAction={runAction} />
+        <ActionEngineCard
+          actionBusy={actionBusy}
+          actionPath={actionPath}
+          actionUrl={actionUrl}
+          mkdirPath={mkdirPath}
+          writePath={writePath}
+          writeContent={writeContent}
+          copySource={copySource}
+          copyDestination={copyDestination}
+          actionResult={actionResult}
+          onActionPathChange={setActionPath}
+          onActionUrlChange={setActionUrl}
+          onMkdirPathChange={setMkdirPath}
+          onWritePathChange={setWritePath}
+          onWriteContentChange={setWriteContent}
+          onCopySourceChange={setCopySource}
+          onCopyDestinationChange={setCopyDestination}
+          onRunAction={runAction}
+        />
         <AuthorityGateCard actions={data.actions} onApprove={approve} onExecute={executeAction} />
         <GoalsCard goals={data.goals} goalTitle={goalTitle} onGoalTitleChange={setGoalTitle} onAddGoal={addGoal} />
         <WorkflowsCard workflows={data.workflows} workflowName={workflowName} onWorkflowNameChange={setWorkflowName} onCreateDemoWorkflow={createDemoWorkflow} onRunWorkflow={runWorkflow} />
