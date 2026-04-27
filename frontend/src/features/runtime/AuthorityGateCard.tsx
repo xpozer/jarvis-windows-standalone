@@ -1,4 +1,5 @@
 import type { ActionRequest } from "./runtimeTypes";
+import { pretty } from "./runtimeFormat";
 
 type Props = {
   actions: ActionRequest[];
@@ -6,16 +7,25 @@ type Props = {
   onExecute: (action: ActionRequest) => void;
 };
 
+function compactResult(result: unknown) {
+  const text = pretty(result);
+  if (!text) return "";
+  return text.length > 420 ? `${text.slice(0, 420)}...` : text;
+}
+
 export function AuthorityGateCard({ actions, onApprove, onExecute }: Props) {
   return (
     <section className="runtime-control-card">
       <div className="runtime-control-card-title"><h2>Authority Gate</h2><span>pending actions</span></div>
       <div className="runtime-control-list compact">
         {actions.map((action) => (
-          <article key={action.id} className={`risk-${action.risk}`}>
+          <article key={action.id} className={`risk-${action.risk} status-${action.status}`}>
             <b>{action.action_type}</b>
             <span>{action.summary}</span>
             <em>{action.risk} · {action.status}</em>
+            {action.result && Object.keys(action.result as Record<string, unknown>).length > 0 && (
+              <pre className="runtime-authority-result">{compactResult(action.result)}</pre>
+            )}
             {action.status === "pending_approval" && (
               <div className="runtime-control-row-actions">
                 <button onClick={() => void onApprove(action, true)}>APPROVE</button>
