@@ -30,6 +30,12 @@ def run_tool(tool_id: str, payload: dict[str, Any] | None = None) -> dict[str, A
         return process_list(int(payload.get("limit") or 50))
     if tool_id == "browser.open_url":
         return prepare_action("browser.open_url", f"URL öffnen: {payload.get('url')}", payload, "medium")
+    if tool_id == "filesystem.make_dir":
+        return prepare_action("filesystem.make_dir", f"Ordner erstellen: {payload.get('path')}", payload, "high")
+    if tool_id == "filesystem.write_text_file":
+        return prepare_action("filesystem.write_text_file", f"Textdatei schreiben: {payload.get('path')}", payload, "high")
+    if tool_id == "filesystem.copy_file":
+        return prepare_action("filesystem.copy_file", f"Datei kopieren: {payload.get('source')} -> {payload.get('destination')}", payload, "high")
     if tool_id == "terminal.command":
         return prepare_action("terminal.command", str(payload.get("command") or "Terminal Befehl ausführen"), payload, "high")
     if tool_id == "filesystem.write_file":
