@@ -32,6 +32,35 @@ function Jv-Info { param([string]$Message) Write-JvLine "INFO" $Message "Gray" }
 function Jv-Step { param([string]$Message) Write-JvLine "STEP" $Message "Cyan" }
 function Jv-Fail { param([string]$Message) Write-JvLine "ERROR" $Message "Red"; throw $Message }
 
+function Write-DesktopFailureLog {
+  param([string]$Message)
+  try {
+    $desktop = [Environment]::GetFolderPath("Desktop")
+    $failure = Join-Path $desktop "REPAIR_FAILED.log"
+    $content = @(
+      "JARVIS Repair fehlgeschlagen",
+      "Zeitpunkt: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')",
+      "Root: $Root",
+      "Backend: $Backend",
+      "Frontend: $Frontend",
+      "",
+      "Fehler:",
+      $Message,
+      "",
+      "Repair Log:",
+      $script:LogFile
+    )
+    Set-Content -Path $failure -Value $content -Encoding UTF8
+  } catch {}
+}
+
+trap {
+  $msg = $_.Exception.Message
+  Jv-Warn "Repair abgebrochen: $msg"
+  Write-DesktopFailureLog $msg
+  exit 1
+}
+
 function Test-IsAdmin {
   $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
   $principal = New-Object Security.Principal.WindowsPrincipal($identity)
@@ -206,14 +235,18 @@ function Get-NpmCmd {
 
 function Test-Port {
   param([int]$Port)
+  $c = $null
   try {
     $c = New-Object Net.Sockets.TcpClient
     $iar = $c.BeginConnect("127.0.0.1", $Port, $null, $null)
     $ok = $iar.AsyncWaitHandle.WaitOne(500, $false)
     if($ok){ $c.EndConnect($iar) }
-    $c.Close()
     return $ok
-  } catch { return $false }
+  } catch {
+    return $false
+  } finally {
+    if($c){ $c.Close() }
+  }
 }
 
 function Wait-Port {
