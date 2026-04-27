@@ -48,9 +48,10 @@ export function ActionEngineCard({
         <button onClick={() => void onRunAction("git.branch")}>BRANCH</button>
         <button onClick={() => void onRunAction("process.list", { limit: 25 })}>PROCESSES</button>
       </div>
-      <div className="runtime-control-form runtime-action-path">
+      <div className="runtime-action-read-grid">
         <input value={actionPath} onChange={(e) => onActionPathChange(e.target.value)} placeholder="Pfad optional, leer = Projektordner" />
         <button onClick={() => void onRunAction("filesystem.list_dir", { path: actionPath || undefined, limit: 60 })}>LIST</button>
+        <button onClick={() => void onRunAction("filesystem.read_file", { path: actionPath, max_bytes: 128000 })}>READ</button>
       </div>
       <div className="runtime-control-form runtime-action-path">
         <input value={actionUrl} onChange={(e) => onActionUrlChange(e.target.value)} placeholder="URL für Browser Action" />
