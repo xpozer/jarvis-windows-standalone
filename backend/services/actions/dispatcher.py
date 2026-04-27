@@ -6,6 +6,7 @@ from services import usejarvis_runtime as rt
 from services.actions.common import MAX_READ_BYTES
 from services.actions.filesystem import list_dir, read_file
 from services.actions.git_tools import git_branch, git_status
+from services.actions.outlook_tools import outlook_status
 from services.actions.system_tools import process_list, system_info
 
 
@@ -28,8 +29,14 @@ def run_tool(tool_id: str, payload: dict[str, Any] | None = None) -> dict[str, A
         return system_info()
     if tool_id == "process.list":
         return process_list(int(payload.get("limit") or 50))
+    if tool_id == "outlook.status":
+        return outlook_status()
     if tool_id == "browser.open_url":
         return prepare_action("browser.open_url", f"URL öffnen: {payload.get('url')}", payload, "medium")
+    if tool_id == "outlook.email.send":
+        return prepare_action("outlook.email.send", f"Outlook E-Mail senden an: {payload.get('to')} · {payload.get('subject')}", payload, "critical")
+    if tool_id == "outlook.calendar.create_event":
+        return prepare_action("outlook.calendar.create_event", f"Outlook Termin erstellen: {payload.get('subject')} · {payload.get('start')}", payload, "high")
     if tool_id == "filesystem.make_dir":
         return prepare_action("filesystem.make_dir", f"Ordner erstellen: {payload.get('path')}", payload, "high")
     if tool_id == "filesystem.write_text_file":
