@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./today-schedule-card.css";
 
 type CalendarEvent = {
   id: string;
