@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Orb, OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
+import { TodayScheduleCard } from "./components/TodayScheduleCard";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
 
@@ -236,10 +237,7 @@ export function App() {
       </main>
 
       <aside className="jarvis-right-panel">
-        <section className="jarvis-card context-card">
-          <div className="jarvis-card-title"><h2>CONVERSATION CONTEXT</h2><button>• VIEW ALL</button></div>
-          {[ ["System Performance Summary", "11:42 AM"], ["Neural Network Pipeline", "11:43 AM"], ["Optimization Report", "11:44 AM"] ].map(([label, time]) => <button className="context-row" key={label} onClick={() => quickAction(label)}><span /><em>{label}</em><b>{time}</b></button>)}
-        </section>
+        <TodayScheduleCard onSend={sendMessage} />
         <section className="jarvis-card quick-card">
           <div className="jarvis-card-title"><h2>QUICK ACTIONS</h2></div>
           {[ ["▣", "Run System Diagnostics", "Full system health check"], ["⌘", "Analyze Data Stream", "Real-time data analysis"], ["⌬", "Search Knowledge Base", "Find information quickly"], ["▤", "Generate Report", "Create detailed reports"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
