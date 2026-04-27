@@ -40,6 +40,7 @@ from routes.email import router as email_router
 from routes.export import router as export_router
 from routes.metrics import router as metrics_router
 from routes.calendar import router as calendar_router
+from routes.day_start import router as day_start_router
 from routes.usejarvis import router as usejarvis_router
 
 from services import _runtime as core
@@ -130,6 +131,7 @@ app.include_router(email_router)
 app.include_router(export_router)
 app.include_router(metrics_router)
 app.include_router(calendar_router)
+app.include_router(day_start_router)
 app.include_router(usejarvis_router)
 
 
