@@ -1,0 +1,134 @@
+[build-system]
+requires = ["setuptools==69.5.1", "wheel==0.43.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis-windows-standalone"
+version = "6.5.1"
+description = "Local first Windows standalone assistant for electrical work planning"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+authors = [
+  { name = "Julien Negro" }
+]
+keywords = [
+  "jarvis",
+  "windows",
+  "fastapi",
+  "assistant",
+  "diagnostics",
+  "local-first"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+  "fastapi==0.115.6",
+  "uvicorn[standard]==0.34.0",
+  "pydantic==2.10.4",
+  "pydantic-settings==2.7.1",
+  "python-dotenv==1.0.1",
+  "httpx==0.28.1",
+  "loguru==0.7.3",
+  "orjson==3.10.12",
+  "typer==0.15.1",
+  "rich==13.9.4"
+]
+
+[project.optional-dependencies]
+dev = [
+  "black==24.10.0",
+  "ruff==0.8.4",
+  "pytest==8.3.4",
+  "pytest-cov==6.0.0",
+  "pytest-asyncio==0.25.0",
+  "mypy==1.14.1"
+]
+voice = [
+  "sounddevice==0.5.1"
+]
+security = [
+  "detect-secrets==1.5.0"
+]
+
+[project.scripts]
+jarvis = "jarvis.__main__:main"
+jarvis-api = "jarvis.api.main:main"
+jarvis-diagnose = "jarvis.diagcenter.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jarvis*"]
+exclude = ["tests*", "frontend*", "docs*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [
+  ".git",
+  ".venv",
+  "venv",
+  "node_modules",
+  "frontend/dist",
+  "frontend/build",
+  "release",
+  "artifacts"
+]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "SIM",
+  "C4"
+]
+ignore = [
+  "E501"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["jarvis"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--cov=jarvis",
+  "--cov-report=term-missing"
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true
+source = ["jarvis"]
+omit = [
+  "tests/*",
+  "*/__main__.py"
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 70
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
