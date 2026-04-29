@@ -67,12 +67,13 @@ npm --version
 powershell $PSVersionTable.PSVersion
 ```
 
-Empfohlen für spätere Backend Entwicklung:
+Python Umgebung vorbereiten:
 
 ```powershell
 py -3.11 -m venv .venv
 .venv\Scripts\activate
 python -m pip install --upgrade pip
+pip install -e .[dev]
 ```
 
 ## Installation
@@ -95,17 +96,36 @@ Frontend Abhängigkeiten installieren und Build prüfen:
 ```powershell
 cd frontend
 npm install
+npm run typecheck
 npm run build
 ```
 
-TypeScript prüfen:
+## Erste Schritte
+
+Backend CLI prüfen:
 
 ```powershell
-cd frontend
-npm run typecheck
+jarvis version
+jarvis status
 ```
 
-## Erste Schritte
+Backend API lokal starten:
+
+```powershell
+jarvis-api
+```
+
+Health Check im Browser oder per PowerShell:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health
+```
+
+DiagCenter Smoke Check:
+
+```powershell
+jarvis-diagnose smoke
+```
 
 Frontend im Entwicklungsmodus starten:
 
@@ -124,12 +144,6 @@ GitHub Pages Dashboard:
 
 ```text
 https://xpozer.github.io/jarvis-windows-standalone/
-```
-
-Hinweis zum Backend:
-
-```text
-Das pyproject.toml bereitet die Python Backend Struktur vor. Im aktuellen Repo Stand wurden über die GitHub Suche noch keine Python Quelldateien gefunden. Backend Startbefehle werden ergänzt, sobald das Python Package im Repo liegt.
 ```
 
 ## Konfiguration
@@ -174,7 +188,13 @@ DiagCenter 2.0 soll prüfen:
 | Knowledge Index | Status der lokalen Wissensdaten |
 | Voice | Piper TTS und Mikrofonstatus |
 
-Beispiel für die geplante Struktur:
+Aktueller Smoke Check:
+
+```powershell
+jarvis-diagnose smoke
+```
+
+Geplanter Skript Pfad:
 
 ```powershell
 scripts\maintenance\diagnose.ps1
@@ -281,19 +301,19 @@ flowchart TD
 
 ## Tests
 
-Aktueller Frontend Check:
+Backend Tests:
+
+```powershell
+pytest
+```
+
+Frontend Check:
 
 ```powershell
 cd frontend
 npm install
 npm run typecheck
 npm run build
-```
-
-Python Tests sind vorbereitet, sobald Backend Code und Tests im Repo liegen:
-
-```powershell
-pytest
 ```
 
 ## Entwicklung
@@ -306,21 +326,16 @@ git pull
 git checkout -b feature/mein-thema
 ```
 
-Vor einem Pull Request im aktuellen Repo Stand:
-
-```powershell
-cd frontend
-npm install
-npm run typecheck
-npm run build
-```
-
-Sobald Backend Code vorhanden ist, zusätzlich:
+Vor einem Pull Request:
 
 ```powershell
 ruff check .
 black --check .
 pytest
+cd frontend
+npm install
+npm run typecheck
+npm run build
 ```
 
 ## Mitwirken
