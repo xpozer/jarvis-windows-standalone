@@ -1,0 +1,199 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  lint-python:
+    name: Lint Python
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install Python tooling
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path pyproject.toml) {
+            pip install -e .[dev]
+          } else {
+            pip install ruff black
+          }
+
+      - name: Run ruff
+        run: ruff check .
+
+      - name: Run black check
+        run: black --check .
+
+  test-python:
+    name: Test Python
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path pyproject.toml) {
+            pip install -e .[dev]
+          } else {
+            pip install pytest pytest-cov
+          }
+
+      - name: Run pytest with coverage
+        shell: pwsh
+        run: |
+          if (Test-Path tests) {
+            pytest --cov=jarvis --cov-report=term-missing --cov-report=xml
+          } else {
+            Write-Host "No tests directory found. Skipping pytest."
+          }
+
+  lint-typescript:
+    name: Lint TypeScript
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Run frontend lint
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            npm run lint --if-present
+          } else {
+            Write-Host "No frontend package found. Skipping lint."
+          }
+
+  test-typescript:
+    name: Test TypeScript
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Run frontend tests
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            npm test --if-present
+          } else {
+            Write-Host "No frontend package found. Skipping tests."
+          }
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Build frontend
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            npm run build --if-present
+          } else {
+            Write-Host "No frontend package found. Skipping build."
+          }
