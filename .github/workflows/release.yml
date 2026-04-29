@@ -24,21 +24,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install Python dependencies
+      - name: Install Python tooling only when Python files exist
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          if (Test-Path pyproject.toml) {
-            pip install -e .[dev]
+          $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+
+          if ($PythonFiles.Count -gt 0) {
+            pip install ruff==0.8.4 black==24.10.0 pytest==8.3.4 pytest-cov==6.0.0
+          } else {
+            Write-Host "No Python files found. Skipping Python dependency install."
           }
 
       - name: Install frontend dependencies
@@ -78,10 +80,15 @@ jobs:
             "node_modules",
             ".venv",
             "venv",
+            "env",
             "logs",
             "audit",
             "knowledge_index",
-            "release"
+            "local_data",
+            "runtime",
+            "cache",
+            "release",
+            "artifacts"
           )
 
           $Items = Get-ChildItem -Force | Where-Object { $Exclude -notcontains $_.Name }
