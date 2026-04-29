@@ -1,2 +1,69 @@
-*.DS_Store
+# Betriebssystem
+.DS_Store
 Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
+env/
+ENV/
+
+# Node und Frontend
+node_modules/
+dist/
+build/
+.vite/
+.npm/
+
+# Logs und Laufzeitdaten
+logs/
+*.log
+*.trace
+*.tmp
+*.temp
+
+# Projekt spezifisch
+audit/
+knowledge_index/
+local_data/
+runtime/
+cache/
+
+# Lokale Konfiguration und Secrets
+.env
+.env.*
+!.env.example
+*.local.json
+*.secret.json
+*.key
+*.pem
+*.pfx
+*.crt
+*.token
+
+# Installer und Release Artefakte
+*.zip
+*.7z
+*.tar.gz
+release/
+artifacts/
+
+# IDEs und Editor Dateien
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Windows Shortcuts und temporäre Dateien
+*.lnk
+~$*
