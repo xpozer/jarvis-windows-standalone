@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="JARVIS Dashboard Screenshot Placeholder">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#00345c"/>
+      <stop offset="55%" stop-color="#001122"/>
+      <stop offset="100%" stop-color="#000814"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <g opacity="0.18" stroke="#00d4ff" stroke-width="1">
+    <path d="M0 120H1920M0 240H1920M0 360H1920M0 480H1920M0 600H1920M0 720H1920M0 840H1920M0 960H1920"/>
+    <path d="M120 0V1080M240 0V1080M360 0V1080M480 0V1080M600 0V1080M720 0V1080M840 0V1080M960 0V1080M1080 0V1080M1200 0V1080M1320 0V1080M1440 0V1080M1560 0V1080M1680 0V1080M1800 0V1080"/>
+  </g>
+  <rect x="80" y="80" width="1760" height="920" rx="18" fill="rgba(0,20,45,0.65)" stroke="#00d4ff" stroke-width="3" opacity="0.9"/>
+  <text x="960" y="455" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="92" font-weight="800" letter-spacing="16" filter="url(#glow)">JARVIS</text>
+  <text x="960" y="530" text-anchor="middle" fill="#00d4ff" font-family="Segoe UI, Arial, sans-serif" font-size="34" letter-spacing="10" filter="url(#glow)">GLOBAL COMMAND GRID</text>
+  <text x="960" y="610" text-anchor="middle" fill="#7fdbff" font-family="Segoe UI, Arial, sans-serif" font-size="24" letter-spacing="4">Screenshot Platzhalter</text>
+  <text x="960" y="655" text-anchor="middle" fill="#7fdbff" font-family="Segoe UI, Arial, sans-serif" font-size="20" opacity="0.75">Ersetze diese Datei später durch docs/screenshot.png</text>
+</svg>
