@@ -67,7 +67,7 @@ npm --version
 powershell $PSVersionTable.PSVersion
 ```
 
-Empfohlen:
+Empfohlen für spätere Backend Entwicklung:
 
 ```powershell
 py -3.11 -m venv .venv
@@ -84,21 +84,13 @@ git clone https://github.com/xpozer/jarvis-windows-standalone.git
 cd jarvis-windows-standalone
 ```
 
-Installer starten:
+Installer starten, sobald die Installer Dateien im Root vorhanden sind:
 
 ```bat
 INSTALL_JARVIS.bat
 ```
 
-Manuelle Entwicklung:
-
-```powershell
-py -3.11 -m venv .venv
-.venv\Scripts\activate
-pip install -e .[dev]
-```
-
-Frontend Abhängigkeiten:
+Frontend Abhängigkeiten installieren und Build prüfen:
 
 ```powershell
 cd frontend
@@ -106,13 +98,14 @@ npm install
 npm run build
 ```
 
-## Erste Schritte
-
-Backend starten:
+TypeScript prüfen:
 
 ```powershell
-python -m jarvis
+cd frontend
+npm run typecheck
 ```
+
+## Erste Schritte
 
 Frontend im Entwicklungsmodus starten:
 
@@ -131,6 +124,12 @@ GitHub Pages Dashboard:
 
 ```text
 https://xpozer.github.io/jarvis-windows-standalone/
+```
+
+Hinweis zum Backend:
+
+```text
+Das pyproject.toml bereitet die Python Backend Struktur vor. Im aktuellen Repo Stand wurden über die GitHub Suche noch keine Python Quelldateien gefunden. Backend Startbefehle werden ergänzt, sobald das Python Package im Repo liegt.
 ```
 
 ## Konfiguration
@@ -175,7 +174,7 @@ DiagCenter 2.0 soll prüfen:
 | Knowledge Index | Status der lokalen Wissensdaten |
 | Voice | Piper TTS und Mikrofonstatus |
 
-Beispiel:
+Beispiel für die geplante Struktur:
 
 ```powershell
 scripts\maintenance\diagnose.ps1
@@ -183,7 +182,7 @@ scripts\maintenance\diagnose.ps1
 
 ## Update
 
-Empfohlener Ablauf:
+Empfohlener Ablauf nach Einführung der Maintenance Skripte:
 
 ```powershell
 git pull
@@ -282,30 +281,19 @@ flowchart TD
 
 ## Tests
 
-Python Tests:
+Aktueller Frontend Check:
+
+```powershell
+cd frontend
+npm install
+npm run typecheck
+npm run build
+```
+
+Python Tests sind vorbereitet, sobald Backend Code und Tests im Repo liegen:
 
 ```powershell
 pytest
-```
-
-Python Tests mit Coverage:
-
-```powershell
-pytest --cov=jarvis --cov-report=term-missing
-```
-
-Frontend Tests:
-
-```powershell
-cd frontend
-npm test
-```
-
-Frontend Build:
-
-```powershell
-cd frontend
-npm run build
 ```
 
 ## Entwicklung
@@ -313,21 +301,26 @@ npm run build
 Empfohlener Ablauf:
 
 ```powershell
-git checkout develop
+git checkout main
 git pull
 git checkout -b feature/mein-thema
 ```
 
-Vor einem Pull Request:
+Vor einem Pull Request im aktuellen Repo Stand:
+
+```powershell
+cd frontend
+npm install
+npm run typecheck
+npm run build
+```
+
+Sobald Backend Code vorhanden ist, zusätzlich:
 
 ```powershell
 ruff check .
 black --check .
 pytest
-cd frontend
-npm run lint
-npm test
-npm run build
 ```
 
 ## Mitwirken
