@@ -58,7 +58,7 @@ security = [
 ]
 
 [project.scripts]
-jarvis = "jarvis.__main__:main"
+jarvis = "jarvis.__main__:app"
 jarvis-api = "jarvis.api.main:main"
 jarvis-diagnose = "jarvis.diagcenter.cli:main"
 
