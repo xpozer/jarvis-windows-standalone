@@ -1,0 +1,68 @@
+# Changelog
+
+Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
+
+Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
+
+## [B6.5.1] - 2026-04-29
+
+### Added
+
+- GitHub Pages Bootscreen und Dashboard unter `docs/index.html`.
+- Dashboard Darstellung für Global Command Grid mit Live Telemetrie Ansatz.
+- Dokumentationsgrundlage für Windows Standalone Betrieb.
+- Projekt README mit Architektur, Roadmap und Setup Hinweisen.
+
+### Changed
+
+- Projektbeschreibung stärker auf lokalen Windows Standalone Einsatz ausgerichtet.
+- Roadmap nach B1 bis B6 Struktur dokumentiert.
+- Voice Modul in der Dokumentation auf Push to Talk und Mikrofon Default Off ausgerichtet.
+
+### Fixed
+
+- Klarere Hinweise zum lokalen Start des Dashboard Prototyps.
+- Beschreibung der geplanten Installer und Diagnose Abläufe ergänzt.
+
+### Security
+
+- Local First Prinzip dokumentiert.
+- Keine externe Telemetrie als Projektanforderung festgehalten.
+- Mikrofon bleibt standardmäßig ausgeschaltet.
+
+## [B6.5.0] - 2026-04-28
+
+### Added
+
+- Grundlage für JARVIS Windows Standalone Repository.
+- Erste Dashboard und HUD Prototypen.
+- Erste lokale HTML Ansicht ohne externe Assets.
+- Basis für Installer und Maintenance Skripte.
+
+### Changed
+
+- Fokus auf offline nutzbare Single File Darstellung für das Dashboard.
+- Projekt auf Windows 10 und Windows 11 als Zielplattform ausgerichtet.
+
+### Fixed
+
+- Entfernung externer Font Abhängigkeiten im Dashboard Prototyp.
+- Verbesserte Nutzbarkeit per lokalem Browser Start.
+
+### Security
+
+- Erste Trennung zwischen lokalem Dashboard und späteren Backend Funktionen.
+- Datenschutzanforderung für Voice Modul aufgenommen.
+
+## Hinweise
+
+Geplante zukünftige Einträge sollen diese Gruppen nutzen:
+
+```text
+Added
+Changed
+Deprecated
+Removed
+Fixed
+Security
+```
