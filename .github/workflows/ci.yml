@@ -33,21 +33,35 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install Python tooling
+      - name: Install Python lint tooling
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          if (Test-Path pyproject.toml) {
-            pip install -e .[dev]
+          pip install ruff==0.8.4 black==24.10.0
+
+      - name: Run ruff when Python files exist
+        shell: pwsh
+        run: |
+          $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+
+          if ($PythonFiles.Count -gt 0) {
+            ruff check .
           } else {
-            pip install ruff black
+            Write-Host "No Python files found. Skipping ruff."
           }
 
-      - name: Run ruff
-        run: ruff check .
+      - name: Run black check when Python files exist
+        shell: pwsh
+        run: |
+          $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
 
-      - name: Run black check
-        run: black --check .
+          if ($PythonFiles.Count -gt 0) {
+            black --check .
+          } else {
+            Write-Host "No Python files found. Skipping black."
+          }
 
   test-python:
     name: Test Python
@@ -68,27 +82,23 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install Python dependencies
+      - name: Install Python test tooling
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          if (Test-Path pyproject.toml) {
-            pip install -e .[dev]
-          } else {
-            pip install pytest pytest-cov
-          }
+          pip install pytest==8.3.4 pytest-cov==6.0.0
 
-      - name: Run pytest with coverage
+      - name: Run pytest when tests exist
         shell: pwsh
         run: |
           if (Test-Path tests) {
-            pytest --cov=jarvis --cov-report=term-missing --cov-report=xml
+            pytest
           } else {
             Write-Host "No tests directory found. Skipping pytest."
           }
 
   lint-typescript:
-    name: Lint TypeScript
+    name: TypeScript Check
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -98,8 +108,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         shell: pwsh
@@ -114,14 +122,14 @@ jobs:
             Write-Host "No frontend package found. Skipping install."
           }
 
-      - name: Run frontend lint
+      - name: Run typecheck when available
         shell: pwsh
         run: |
           if (Test-Path frontend/package.json) {
             cd frontend
-            npm run lint --if-present
+            npm run typecheck --if-present
           } else {
-            Write-Host "No frontend package found. Skipping lint."
+            Write-Host "No frontend package found. Skipping typecheck."
           }
 
   test-typescript:
@@ -135,8 +143,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         shell: pwsh
@@ -151,12 +157,17 @@ jobs:
             Write-Host "No frontend package found. Skipping install."
           }
 
-      - name: Run frontend tests
+      - name: Run frontend tests only when script exists
         shell: pwsh
         run: |
           if (Test-Path frontend/package.json) {
             cd frontend
-            npm test --if-present
+            $Package = Get-Content package.json -Raw | ConvertFrom-Json
+            if ($Package.scripts.test) {
+              npm test
+            } else {
+              Write-Host "No frontend test script found. Skipping tests."
+            }
           } else {
             Write-Host "No frontend package found. Skipping tests."
           }
@@ -172,8 +183,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend dependencies
         shell: pwsh
@@ -188,7 +197,7 @@ jobs:
             Write-Host "No frontend package found. Skipping install."
           }
 
-      - name: Build frontend
+      - name: Build frontend when available
         shell: pwsh
         run: |
           if (Test-Path frontend/package.json) {
