@@ -23,9 +23,7 @@ docs/index.html
 
 Screenshot Platzhalter:
 
-```md
-![JARVIS Dashboard](docs/assets/dashboard-placeholder.png)
-```
+![JARVIS Dashboard](docs/assets/dashboard-placeholder.svg)
 
 ## Features nach Block Roadmap
 
