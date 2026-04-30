@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS — Global Command Grid</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --c:#00d4ff;--b:#0066cc;--g:#00ff88;--r:#ff3344;--a:#ffaa00;
+  --w:#ffffff;--bg:#000814;--bg2:#000d1a;--bg3:#001122;
+  --pb:rgba(0,180,255,0.2);--pbh:rgba(0,180,255,0.35);
+  --panel:rgba(0,20,45,0.85);
+}
+html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;
+  font-family:'Segoe UI',Arial,sans-serif;color:var(--c);user-select:none;}
+
+/* ── BG LAYERS ── */
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 50% 38%,#001830 0%,#000a14 55%,#000 100%);z-index:0;}
+#grid-bg{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:linear-gradient(rgba(0,150,255,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,150,255,0.04) 1px,transparent 1px);
+  background-size:32px 32px;animation:gridMove 80s linear infinite;}
+@keyframes gridMove{to{background-position:32px 32px,32px 32px;}}
+#scanlines{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);}
+#beam{position:fixed;left:0;right:0;height:2px;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(0,180,255,0.6),transparent);
+  animation:beamSweep 5s linear infinite;}
+@keyframes beamSweep{from{top:-2px}to{top:100vh}}
+.corner{position:fixed;width:32px;height:32px;z-index:20;pointer-events:none;
+  filter:drop-shadow(0 0 5px var(--c));}
+.corner.tl{top:10px;left:10px;border-top:2px solid var(--c);border-left:2px solid var(--c);}
+.corner.tr{top:10px;right:10px;border-top:2px solid var(--c);border-right:2px solid var(--c);}
+.corner.bl{bottom:10px;left:10px;border-bottom:2px solid var(--c);border-left:2px solid var(--c);}
+.corner.br{bottom:10px;right:10px;border-bottom:2px solid var(--c);border-right:2px solid var(--c);}
+
+/* ── BOOT SCREEN ── */
+#boot{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:opacity 1s;}
+#boot-logo{text-align:center;margin-bottom:36px;opacity:0;transform:translateY(-12px);
+  animation:fadeUp 0.9s ease-out 0.3s forwards;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+#boot-title{font-size:clamp(56px,8vw,96px);font-weight:900;letter-spacing:clamp(16px,3vw,36px);
+  color:var(--w);text-shadow:0 0 15px var(--c),0 0 35px var(--c),0 0 70px var(--b),0 0 120px var(--b);
+  animation:logoPulse 3.5s ease-in-out 1s infinite;}
+@keyframes logoPulse{
+  0%,100%{text-shadow:0 0 15px var(--c),0 0 35px var(--c),0 0 70px var(--b),0 0 120px var(--b);}
+  50%{text-shadow:0 0 20px var(--c),0 0 50px var(--c),0 0 100px var(--b),0 0 160px var(--b);}}
+#boot-sub{font-size:clamp(9px,1.2vw,12px);letter-spacing:clamp(5px,1.5vw,12px);
+  color:rgba(0,212,255,0.65);margin-top:8px;}
+#boot-ver{font-size:9px;letter-spacing:3px;color:rgba(0,212,255,0.3);margin-top:5px;}
+#boot-div{height:1px;width:0;background:linear-gradient(90deg,transparent,var(--c),transparent);
+  box-shadow:0 0 8px var(--c);margin-bottom:26px;animation:divExp 0.7s ease-out 1.1s forwards;}
+@keyframes divExp{to{width:min(560px,80vw);}}
+#boot-term{width:min(600px,90vw);opacity:0;animation:fadeUp 0.4s 1.2s forwards;}
+.bline{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:baseline;
+  font-family:Consolas,monospace;font-size:clamp(10px,1.3vw,13px);line-height:1.9;
+  opacity:0;transform:translateX(-5px);transition:opacity 0.12s,transform 0.12s;}
+.bline.show{opacity:1;transform:translateX(0);}
+.bline .bp{color:rgba(0,212,255,0.3);}
+.bline .bm{color:rgba(0,212,255,0.85);white-space:nowrap;overflow:hidden;}
+.bline .bt{font-size:clamp(8px,0.9vw,10px);letter-spacing:2px;white-space:nowrap;padding-left:10px;}
+.bt.ok{color:var(--g);text-shadow:0 0 6px var(--g);}
+.bt.warn{color:var(--a);text-shadow:0 0 6px var(--a);}
+.bt.active{color:var(--c);text-shadow:0 0 6px var(--c);}
+.bt.dim{color:rgba(0,212,255,0.28);}
+@keyframes blink{50%{opacity:0;}}
+#boot-prog{width:min(600px,90vw);margin-top:20px;opacity:0;animation:fadeUp 0.4s 1.2s forwards;}
+#boot-prog-hdr{display:flex;justify-content:space-between;font-family:Consolas,monospace;
+  font-size:9px;letter-spacing:2px;color:rgba(0,212,255,0.38);margin-bottom:5px;}
+#boot-prog-track{width:100%;height:2px;background:rgba(0,212,255,0.1);}
+#boot-prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--b),var(--c));
+  box-shadow:0 0 8px var(--c);transition:width 0.15s ease-out;}
+#boot-prog-pct{color:var(--c);}
+#boot-dots{display:flex;gap:18px;margin-top:16px;opacity:0;animation:fadeUp 0.4s 1.3s forwards;}
+.bdot{display:flex;align-items:center;gap:5px;font-family:Consolas,monospace;
+  font-size:9px;letter-spacing:1.5px;color:rgba(0,212,255,0.36);}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(0,212,255,0.15);
+  transition:background 0.4s,box-shadow 0.4s;}
+.dot.on{background:var(--g);box-shadow:0 0 8px var(--g);animation:dpulse 1.6s ease-in-out infinite;}
+@keyframes dpulse{50%{opacity:0.45;transform:scale(0.8);}}
+#flash{position:fixed;inset:0;z-index:99;background:rgba(0,180,255,0.06);opacity:0;pointer-events:none;transition:opacity 0.6s;}
+
+/* ── DASHBOARD ── */
+#dash{position:fixed;inset:0;z-index:10;opacity:0;pointer-events:none;
+  display:grid;
+  grid-template-columns:310px 1fr 310px;
+  grid-template-rows:68px 1fr 90px;
+  gap:6px;padding:8px;
+  transition:opacity 1s;}
+#dash.on{opacity:1;pointer-events:all;}
+
+/* HEADER */
+.hdr{grid-column:1/-1;grid-row:1;
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;padding:0 16px;
+  border:1px solid var(--pb);background:var(--panel);backdrop-filter:blur(4px);
+  position:relative;}
+.hdr::before,.hdr::after{content:'';position:absolute;width:16px;height:16px;border:1px solid var(--c);}
+.hdr::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+.hdr::after{top:-1px;right:-1px;border-left:none;border-bottom:none;}
+
+.hdr-left{display:flex;align-items:center;gap:14px;}
+.sys-icon{width:32px;height:32px;border:1px solid rgba(0,212,255,0.4);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;}
+.sys-icon svg{width:16px;height:16px;fill:var(--c);}
+.sys-status{display:flex;flex-direction:column;}
+.sys-lbl{font-size:9px;letter-spacing:2px;color:rgba(127,219,255,0.5);}
+.sys-val{font-size:13px;font-weight:700;color:var(--g);text-shadow:0 0 8px var(--g);letter-spacing:2px;}
+.heartbeat{margin-left:8px;}
+
+.ttl{text-align:center;}
+.ttl-main{font-size:clamp(22px,3vw,36px);font-weight:900;letter-spacing:clamp(8px,2vw,18px);
+  color:var(--w);text-shadow:0 0 10px var(--c),0 0 25px var(--c),0 0 50px var(--b);line-height:1;}
+.ttl-sub{font-size:9px;letter-spacing:clamp(4px,1vw,8px);color:rgba(0,212,255,0.6);margin-top:4px;}
+
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.hdr-right .row{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1px;}
+.hdr-right .lbl{color:rgba(127,219,255,0.5);}
+.hdr-right .val{color:var(--c);text-shadow:0 0 5px var(--c);}
+.hdr-right .val.g{color:var(--g);text-shadow:0 0 5px var(--g);}
+
+/* SIDEBARS */
+.sb{grid-row:2;display:flex;flex-direction:column;gap:6px;overflow:hidden;}
+.sb.left{grid-column:1;} .sb.right{grid-column:3;}
+
+.panel{border:1px solid var(--pb);background:var(--panel);backdrop-filter:blur(3px);
+  padding:8px 11px;position:relative;display:flex;flex-direction:column;}
+.panel::before,.panel::after{content:'';position:absolute;width:10px;height:10px;border:1px solid var(--c);opacity:0.6;}
+.panel::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+.panel::after{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(0,180,255,0.15);}
+.panel-title{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;
+  letter-spacing:2px;color:var(--w);}
+.panel-title svg{width:13px;height:13px;fill:var(--c);}
+.panel-dots{display:flex;gap:3px;}
+.panel-dots span{width:5px;height:5px;border-radius:50%;background:rgba(0,180,255,0.3);}
+
+/* CORE DIAGNOSTICS */
+.diag-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:10px;}
+.diag-lbl{color:rgba(127,219,255,0.6);letter-spacing:1px;}
+.diag-val{color:var(--c);text-shadow:0 0 5px var(--c);font-family:Consolas,monospace;}
+.diag-val.g{color:var(--g);text-shadow:0 0 5px var(--g);}
+.spark-wrap{margin-top:4px;}
+.spark-lbl{font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.35);margin-bottom:2px;display:flex;justify-content:space-between;}
+
+/* ROUTE EXPLORER */
+.route-tbl{width:100%;border-collapse:collapse;font-size:9px;}
+.route-tbl th{color:rgba(127,219,255,0.45);letter-spacing:1px;text-align:left;
+  padding:2px 4px;border-bottom:1px solid rgba(0,180,255,0.1);font-weight:400;}
+.route-tbl td{padding:3px 4px;color:rgba(200,235,255,0.8);}
+.route-tbl tr:hover td{background:rgba(0,150,255,0.06);}
+.qbar-wrap{width:60px;height:4px;background:rgba(0,180,255,0.15);border-radius:2px;overflow:hidden;}
+.qbar{height:100%;background:linear-gradient(90deg,var(--b),var(--c));border-radius:2px;
+  box-shadow:0 0 4px var(--c);}
+.latcol{color:var(--c);font-family:Consolas,monospace;text-align:right;}
+
+/* BANDWIDTH */
+.bw-inner{display:flex;align-items:center;gap:12px;margin-top:4px;}
+.donut-svg{width:72px;height:72px;flex-shrink:0;}
+.dbg{fill:none;stroke:rgba(0,180,255,0.12);stroke-width:7;}
+.dfg{fill:none;stroke:var(--c);stroke-width:7;stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:center;filter:drop-shadow(0 0 4px var(--c));}
+.donut-label{fill:var(--w);font-size:13px;font-weight:700;text-anchor:middle;
+  font-family:'Segoe UI',Arial,sans-serif;}
+.donut-sub{fill:rgba(0,212,255,0.55);font-size:7px;letter-spacing:2px;text-anchor:middle;}
+.bw-stats{flex:1;font-size:10px;}
+.bw-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;}
+.bw-dot{width:6px;height:6px;border-radius:50%;margin-right:5px;display:inline-block;}
+.bw-lbl{color:rgba(127,219,255,0.7);}
+.bw-val{color:var(--w);font-family:Consolas,monospace;text-shadow:0 0 5px var(--c);}
+
+/* NODE FIELD */
+.node-big{font-size:32px;font-weight:700;color:var(--c);text-shadow:0 0 12px var(--c);
+  font-family:'Segoe UI',Arial,sans-serif;line-height:1;margin:4px 0;}
+.node-sub{font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.45);margin-bottom:6px;}
+
+/* CONNECTION STATUS */
+.conn-row{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:8px;padding:3px 0;font-size:10px;}
+.conn-icon svg{width:12px;height:12px;}
+.conn-lbl{color:rgba(127,219,255,0.65);letter-spacing:1px;}
+.conn-val{font-family:Consolas,monospace;color:var(--w);text-align:right;text-shadow:0 0 5px var(--c);}
+.conn-val.g{color:var(--g);text-shadow:0 0 5px var(--g);}
+.conn-val.r{color:var(--r);text-shadow:0 0 5px var(--r);}
+.threat-row .conn-lbl{color:var(--r);font-weight:600;}
+
+/* TOP ROUTES */
+.tr-row{display:grid;grid-template-columns:14px 1fr 50px 48px;align-items:center;gap:6px;padding:2px 0;font-size:9px;}
+.tr-num{color:rgba(0,212,255,0.45);}
+.tr-route{color:rgba(200,235,255,0.8);}
+.tr-bar-wrap{height:3px;background:rgba(0,180,255,0.15);border-radius:2px;overflow:hidden;}
+.tr-bar{height:100%;background:linear-gradient(90deg,var(--b),var(--c));box-shadow:0 0 3px var(--c);}
+.tr-lat{color:var(--c);font-family:Consolas,monospace;text-align:right;}
+
+/* NEURAL BUS */
+.nb-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:10px;}
+.nb-lbl{color:rgba(127,219,255,0.65);letter-spacing:1px;min-width:120px;}
+.nb-bar-track{flex:1;height:4px;background:rgba(0,180,255,0.12);border-radius:2px;overflow:hidden;}
+.nb-bar{height:100%;background:linear-gradient(90deg,var(--b),var(--c));
+  box-shadow:0 0 5px var(--c);border-radius:2px;transition:width 0.5s;}
+.nb-pct{color:var(--c);font-family:Consolas,monospace;font-size:10px;min-width:32px;text-align:right;}
+
+/* SYSTEM LOGS */
+.log-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:1px;font-size:9px;font-family:Consolas,monospace;}
+.log-entry{display:grid;grid-template-columns:44px 40px 1fr auto;gap:4px;align-items:start;
+  padding:1px 0;animation:logIn 0.3s ease-out;border-bottom:1px solid rgba(0,180,255,0.05);}
+@keyframes logIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+.log-ts{color:rgba(0,212,255,0.4);}
+.log-lvl{font-weight:700;}
+.log-lvl.info{color:var(--c);}
+.log-lvl.warn{color:var(--a);}
+.log-msg{color:rgba(200,235,255,0.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.log-node{color:rgba(0,212,255,0.45);text-align:right;white-space:nowrap;}
+.log-more{text-align:right;margin-top:4px;font-size:8px;letter-spacing:2px;color:rgba(0,180,255,0.5);cursor:pointer;}
+.log-more:hover{color:var(--c);}
+
+/* MAP CENTER */
+.map-area{grid-column:2;grid-row:2;position:relative;overflow:hidden;
+  border:1px solid var(--pb);background:rgba(0,8,20,0.9);}
+.map-area::before,.map-area::after{content:'';position:absolute;width:14px;height:14px;border:1px solid var(--c);z-index:6;}
+.map-area::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+.map-area::after{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+#worldMap{width:100%;height:100%;display:block;}
+
+/* map ellipse rings */
+.map-ellipse{position:absolute;border:1px solid rgba(0,100,180,0.2);border-radius:50%;
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:2;}
+
+/* map node labels */
+.map-label{position:absolute;font-family:'Segoe UI',Arial,sans-serif;font-size:10px;letter-spacing:1.5px;
+  color:var(--w);text-shadow:0 0 8px var(--c),0 0 12px rgba(0,180,255,0.4);
+  pointer-events:none;z-index:5;text-align:center;
+  transform:translate(-50%,-50%);font-weight:700;white-space:nowrap;}
+.map-label .city-name{font-size:9px;color:rgba(180,225,255,0.75);display:block;
+  font-weight:500;letter-spacing:1px;text-shadow:0 0 6px rgba(0,180,255,0.5);margin-top:1px;}
+
+/* JARVIS/ULTRON buttons */
+#map-btns{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  display:flex;gap:14px;z-index:6;}
+.map-btn{padding:10px 38px;font-family:'Segoe UI',Arial,sans-serif;font-size:13px;
+  font-weight:700;letter-spacing:5px;cursor:pointer;border:1.5px solid;
+  background:rgba(0,15,30,0.92);backdrop-filter:blur(6px);position:relative;
+  transition:all 0.25s;text-transform:uppercase;
+  clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%);}
+.map-btn::before,.map-btn::after{content:'';position:absolute;width:6px;height:6px;
+  border-radius:50%;top:50%;transform:translateY(-50%);}
+.map-btn::before{left:6px;background:currentColor;box-shadow:0 0 6px currentColor;}
+.map-btn::after{right:6px;background:currentColor;box-shadow:0 0 6px currentColor;}
+.map-btn.jarvis{border-color:var(--c);color:var(--c);
+  box-shadow:0 0 18px rgba(0,180,255,0.35),inset 0 0 12px rgba(0,180,255,0.15);
+  text-shadow:0 0 8px var(--c);}
+.map-btn.jarvis:hover,.map-btn.jarvis.active{
+  background:rgba(0,180,255,0.18);
+  box-shadow:0 0 28px rgba(0,180,255,0.6),inset 0 0 18px rgba(0,180,255,0.25);}
+.map-btn.ultron{border-color:var(--r);color:var(--r);
+  box-shadow:0 0 18px rgba(255,60,80,0.3),inset 0 0 12px rgba(255,60,80,0.12);
+  text-shadow:0 0 8px var(--r);}
+.map-btn.ultron:hover,.map-btn.ultron.active{
+  background:rgba(255,60,80,0.15);
+  box-shadow:0 0 28px rgba(255,60,80,0.55),inset 0 0 18px rgba(255,60,80,0.2);}
+
+/* FOOTER */
+.footer{grid-column:1/-1;grid-row:3;
+  display:grid;grid-template-columns:260px 200px 1fr 260px 200px;gap:6px;align-items:stretch;}
+.fc{border:1px solid var(--pb);background:var(--panel);
+  padding:7px 12px;display:flex;flex-direction:column;justify-content:center;position:relative;}
+.fc::before,.fc::after{content:'';position:absolute;width:9px;height:9px;border:1px solid var(--c);opacity:0.5;}
+.fc::before{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+.fc::after{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+.fc-inner{display:flex;align-items:center;gap:10px;}
+.fc-icon svg{width:28px;height:28px;fill:var(--c);opacity:0.7;}
+.fc-data{}
+.fc-lbl{font-size:8px;letter-spacing:2px;color:rgba(127,219,255,0.5);}
+.fc-title{font-size:11px;font-weight:700;color:var(--w);letter-spacing:2px;margin-top:1px;}
+.fc-coord{font-size:9px;color:var(--c);margin-top:2px;font-family:Consolas,monospace;}
+.fc-big{font-size:26px;font-weight:700;color:var(--g);text-shadow:0 0 10px var(--g);
+  font-family:'Segoe UI',Arial,sans-serif;line-height:1;}
+.fc-sub{font-size:8px;letter-spacing:2px;color:rgba(127,219,255,0.5);}
+.fc.active-conn .fc-big{font-size:32px;color:var(--w);text-shadow:0 0 12px var(--c),0 0 24px var(--b);
+  letter-spacing:2px;}
+.fc.active-conn .fc-sub{color:rgba(127,219,255,0.45);}
+.thr-val{font-size:20px;font-weight:700;color:var(--c);text-shadow:0 0 8px var(--c);
+  font-family:'Segoe UI',Arial,sans-serif;line-height:1;}
+.thr-peak{font-size:8px;color:rgba(127,219,255,0.5);letter-spacing:1px;margin-top:2px;}
+.clock-time{font-size:22px;font-weight:700;color:var(--c);text-shadow:0 0 10px var(--c);
+  font-family:Consolas,monospace;letter-spacing:2px;}
+.clock-date{font-size:9px;color:rgba(127,219,255,0.6);letter-spacing:2px;margin-top:2px;}
+.clock-tz{font-size:8px;color:rgba(127,219,255,0.4);letter-spacing:2px;margin-top:1px;}
+
+/* ═══════════ MOBILE LAYOUT ═══════════ */
+@media (max-width: 900px) {
+  html, body { overflow-y: auto; overflow-x: hidden; height: auto; min-height: 100%; }
+
+  #dash {
+    position: relative;
+    inset: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px 56vh auto auto auto;
+    height: auto;
+    min-height: 100vh;
+    padding: 6px;
+    gap: 5px;
+  }
+
+  /* HEADER stays full width */
+  .hdr {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 0 10px;
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .hdr-left { gap: 6px; }
+  .hdr-left .heartbeat { display: none; }
+  .sys-icon { width: 24px; height: 24px; }
+  .sys-icon svg { width: 12px; height: 12px; }
+  .sys-lbl { font-size: 7px; letter-spacing: 1px; }
+  .sys-val { font-size: 10px; }
+  .ttl-main { font-size: 16px; letter-spacing: 4px; }
+  .ttl-sub { font-size: 7px; letter-spacing: 2px; }
+  .hdr-right .row { font-size: 8px; gap: 4px; }
+  .hdr-right .row svg { width: 9px; height: 9px; }
+
+  /* MAP — comes RIGHT after header, takes prime real estate */
+  .map-area {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 380px;
+  }
+  .map-label {
+    font-size: 8px;
+    letter-spacing: 0.5px;
+  }
+  .map-label .city-name { font-size: 7px; }
+  .map-btn {
+    padding: 7px 22px;
+    font-size: 10px;
+    letter-spacing: 3px;
+  }
+  #map-btns { bottom: 10px; gap: 8px; }
+
+  /* SIDEBARS become horizontal scrollable rows */
+  .sb {
+    grid-column: 1;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,180,255,0.3) transparent;
+  }
+  .sb::-webkit-scrollbar { height: 4px; }
+  .sb::-webkit-scrollbar-thumb { background: rgba(0,180,255,0.3); border-radius: 2px; }
+  .sb.left  { grid-row: 3; }
+  .sb.right { grid-row: 4; }
+  .sb .panel {
+    flex: 0 0 240px;
+    min-height: 150px;
+  }
+
+  /* FOOTER stacks 2 columns */
+  .footer {
+    grid-column: 1;
+    grid-row: 5;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: auto;
+    gap: 5px;
+  }
+  .fc { padding: 6px 10px; }
+  .fc.active-conn { grid-column: 1 / -1; }
+  .fc-big { font-size: 20px; }
+  .fc.active-conn .fc-big { font-size: 26px; }
+  .clock-time { font-size: 16px; }
+  .thr-val { font-size: 16px; }
+  .fc-icon svg { width: 22px; height: 22px; }
+
+  /* Boot screen stays full height */
+  #boot-title { font-size: 44px; letter-spacing: 12px; }
+  #boot-sub { font-size: 9px; letter-spacing: 4px; }
+  #boot-term { font-size: 10px; }
+  #boot-dots { gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .bdot { font-size: 8px; }
+
+  /* Smaller corners on mobile */
+  .corner { width: 24px; height: 24px; }
+}
+
+/* ═══════════ VERY SMALL ═══════════ */
+@media (max-width: 480px) {
+  .hdr-right .row .lbl { display: none; }
+  .ttl-main { font-size: 14px; letter-spacing: 3px; }
+  .map-area { min-height: 320px; }
+  .sb .panel { flex: 0 0 220px; }
+}
+</style>
+</head>
+<body>
+<div id="grid-bg"></div>
+<div id="scanlines"></div>
+<div id="beam"></div>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+<div id="flash"></div>
+
+<!-- ══════════ BOOT ══════════ -->
+<div id="boot">
+  <div id="boot-logo">
+    <div id="boot-title">JARVIS</div>
+    <div id="boot-sub">GLOBAL COMMAND GRID</div>
+    <div id="boot-ver">BUILD B6.5.1 &nbsp;|&nbsp; FRANKFURT HUB &nbsp;|&nbsp; AES-256</div>
+  </div>
+  <div id="boot-div"></div>
+  <div id="boot-term"></div>
+  <div id="boot-prog">
+    <div id="boot-prog-hdr"><span id="boot-prog-lbl">INITIALIZING</span><span id="boot-prog-pct">0%</span></div>
+    <div id="boot-prog-track"><div id="boot-prog-fill"></div></div>
+  </div>
+  <div id="boot-dots">
+    <div class="bdot"><div class="dot" id="bd-core"></div>CORE</div>
+    <div class="bdot"><div class="dot" id="bd-agent"></div>AGENTS</div>
+    <div class="bdot"><div class="dot" id="bd-net"></div>NETWORK</div>
+    <div class="bdot"><div class="dot" id="bd-sec"></div>SECURITY</div>
+    <div class="bdot"><div class="dot" id="bd-diag"></div>DIAGNOSTICS</div>
+    <div class="bdot"><div class="dot" id="bd-ui"></div>INTERFACE</div>
+  </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dash">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
+      </div>
+      <div class="sys-status">
+        <span class="sys-lbl">SYSTEM STATUS</span>
+        <span class="sys-val">ONLINE</span>
+      </div>
+      <canvas id="heartbeat" class="heartbeat" width="120" height="32"></canvas>
+    </div>
+    <div class="ttl">
+      <div class="ttl-main">JARVIS</div>
+      <div class="ttl-sub">GLOBAL COMMAND GRID</div>
+    </div>
+    <div class="hdr-right">
+      <div class="row">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--c)"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/></svg>
+        <span class="lbl">LOCAL SINGLE FILE</span>
+        <span class="val">AES 256 ENCRYPTION</span>
+      </div>
+      <div class="row">
+        <span class="lbl">ASSISTIVE MODE:</span>
+        <span class="val g">ACTIVE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sb left">
+
+    <!-- CORE DIAGNOSTICS -->
+    <div class="panel" style="flex:1.4">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+          CORE DIAGNOSTICS
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="diag-row"><span class="diag-lbl">LATENCY</span><span class="diag-val" id="d-lat">12.4 ms</span></div>
+      <div class="diag-row"><span class="diag-lbl">PACKET LOSS</span><span class="diag-val" id="d-pkt">0.18 %</span></div>
+      <div class="diag-row"><span class="diag-lbl">JITTER</span><span class="diag-val" id="d-jit">1.7 ms</span></div>
+      <div class="diag-row"><span class="diag-lbl">UPTIME</span><span class="diag-val g" id="d-upt">99.993 %</span></div>
+      <div class="spark-wrap" style="flex:1;min-height:0;">
+        <div class="spark-lbl"><span>60 SEC WINDOW</span><span id="spark-max">100</span></div>
+        <canvas id="main-spark" style="width:100%;flex:1;display:block;" height="50"></canvas>
+      </div>
+    </div>
+
+    <!-- ROUTE EXPLORER -->
+    <div class="panel" style="flex:1.5">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+          ROUTE EXPLORER
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <table class="route-tbl">
+        <thead>
+          <tr><th>ROUTE</th><th>DESTINATION</th><th>QUALITY</th><th style="text-align:right">LATENCY</th></tr>
+        </thead>
+        <tbody id="route-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- BANDWIDTH -->
+    <div class="panel" style="flex:1.2">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          BANDWIDTH
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="bw-inner">
+        <svg class="donut-svg" viewBox="0 0 72 72">
+          <circle class="dbg" cx="36" cy="36" r="28"/>
+          <circle class="dfg" id="bw-donut" cx="36" cy="36" r="28" stroke-dasharray="175.9" stroke-dashoffset="38.7"/>
+          <text class="donut-label" id="bw-pct" x="36" y="40">78%</text>
+          <text class="donut-sub" x="36" y="50">UTILIZATION</text>
+        </svg>
+        <div class="bw-stats">
+          <div class="bw-row"><span class="bw-dot" style="background:var(--c)"></span><span class="bw-lbl">INBOUND</span><span class="bw-val" id="bw-in">4.32 Gbps</span></div>
+          <div class="bw-row"><span class="bw-dot" style="background:var(--g)"></span><span class="bw-lbl">OUTBOUND</span><span class="bw-val" id="bw-out">3.68 Gbps</span></div>
+          <div class="bw-row"><span class="bw-dot" style="background:var(--a)"></span><span class="bw-lbl">BURST</span><span class="bw-val" id="bw-burst">7.91 Gbps</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NODE FIELD -->
+    <div class="panel" style="flex:1.2">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg>
+          NODE FIELD
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex:1;">
+        <div>
+          <div class="node-big" id="node-count">1,248</div>
+          <div class="node-sub">ACTIVE GLOBAL NODES</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:8px;letter-spacing:1px;color:rgba(0,212,255,0.35);margin-bottom:3px;display:flex;justify-content:space-between;">
+            <span>1.5K</span><span>1.0K</span><span>0.5K</span><span>0</span>
+          </div>
+          <canvas id="node-bar" style="width:100%;height:40px;display:block;"></canvas>
+          <div style="font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.35);margin-top:2px;text-align:center;">GLOBAL NODE DISTRIBUTION</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-area">
+    <canvas id="mapCanvas" style="position:absolute;inset:0;width:100%;height:100%;display:block;"></canvas>
+    <svg id="mapSVG" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;"></svg>
+    <div id="map-labels" style="position:absolute;inset:0;pointer-events:none;z-index:5;"></div>
+    <div id="map-btns">
+      <button class="map-btn jarvis active" onclick="setMode('jarvis')">JARVIS</button>
+      <button class="map-btn ultron" onclick="setMode('ultron')">ULTRON</button>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="sb right">
+
+    <!-- CONNECTION STATUS -->
+    <div class="panel" style="flex:1.3">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/></svg>
+          CONNECTION STATUS
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="conn-row">
+        <div><svg viewBox="0 0 24 24" fill="rgba(0,180,255,0.5)"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9z"/></svg></div>
+        <span class="conn-lbl">TOTAL CONNECTIONS</span><span class="conn-val" id="cs-total">12,478</span>
+      </div>
+      <div class="conn-row">
+        <div><svg viewBox="0 0 24 24" fill="rgba(0,180,255,0.5)"><circle cx="12" cy="12" r="5"/></svg></div>
+        <span class="conn-lbl">ACTIVE CONNECTIONS</span><span class="conn-val g" id="cs-active">9,842</span>
+      </div>
+      <div class="conn-row">
+        <div><svg viewBox="0 0 24 24" fill="rgba(0,200,100,0.6)"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/></svg></div>
+        <span class="conn-lbl">SECURE CONNECTIONS</span><span class="conn-val g" id="cs-secure">9,215</span>
+      </div>
+      <div class="conn-row threat-row">
+        <div><svg viewBox="0 0 24 24" fill="var(--r)"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg></div>
+        <span class="conn-lbl">THREAT DETECTED</span><span class="conn-val r" id="cs-threat">23</span>
+      </div>
+    </div>
+
+    <!-- TOP ROUTES -->
+    <div class="panel" style="flex:1.6">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          TOP ROUTES
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div id="top-routes-list"></div>
+    </div>
+
+    <!-- NEURAL BUS -->
+    <div class="panel" style="flex:1">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/></svg>
+          NEURAL BUS
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="nb-row"><span class="nb-lbl">SYNAPSE IMPULSES</span><div class="nb-bar-track"><div class="nb-bar" id="nb-syn" style="width:78%"></div></div><span class="nb-pct" id="nb-syn-v">78%</span></div>
+      <div class="nb-row"><span class="nb-lbl">COGNITIVE LOAD</span><div class="nb-bar-track"><div class="nb-bar" id="nb-cog" style="width:64%;background:linear-gradient(90deg,#0055aa,#00aaff)"></div></div><span class="nb-pct" id="nb-cog-v">64%</span></div>
+      <div class="nb-row"><span class="nb-lbl">DECISION LAYER</span><div class="nb-bar-track"><div class="nb-bar" id="nb-dec" style="width:82%"></div></div><span class="nb-pct" id="nb-dec-v">82%</span></div>
+    </div>
+
+    <!-- SYSTEM LOGS -->
+    <div class="panel" style="flex:1.8">
+      <div class="panel-hdr">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+          SYSTEM LOGS
+        </div>
+        <div class="panel-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="log-wrap" id="log-container"></div>
+      <div class="log-more">VIEW ALL LOGS &rsaquo;</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="fc">
+      <div class="fc-inner">
+        <div class="fc-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg></div>
+        <div class="fc-data">
+          <div class="fc-lbl">HUB LOCATION</div>
+          <div class="fc-title">GERMANY HUB</div>
+          <div class="fc-coord" style="font-size:8px;letter-spacing:1px;color:rgba(127,219,255,0.6);">FRANKFURT, DE</div>
+          <div class="fc-coord">50.1109° N &nbsp; 8.6821° E</div>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-lbl">NETWORK INTEGRITY</div>
+      <div class="fc-big" id="f-integrity">99.94%</div>
+      <div class="fc-sub">ALL SYSTEMS NOMINAL</div>
+    </div>
+    <div class="fc active-conn">
+      <div class="fc-lbl" style="letter-spacing:3px;font-size:9px;">ACTIVE CONNECTIONS</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(0,180,255,0.6)"><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 0 0 20A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/></svg>
+        <div>
+          <div class="fc-big" id="f-conns">9,842</div>
+          <div class="fc-sub">OF <span id="f-total">12,478</span> TOTAL</div>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-inner">
+        <div class="fc-icon"><svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg></div>
+        <div class="fc-data">
+          <div class="fc-lbl">THROUGHPUT</div>
+          <div class="thr-val" id="f-thr">8.01 Gbps</div>
+          <div class="thr-peak">PEAK <span id="f-peak">12.45 Gbps</span></div>
+          <canvas id="thr-spark" style="width:100%;height:22px;display:block;margin-top:3px;"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-lbl" style="letter-spacing:3px;">REAL TIME</div>
+      <div class="clock-date" id="f-date">24 MAY 2025</div>
+      <div class="clock-time" id="f-time">12:45:25</div>
+      <div class="clock-tz">UTC</div>
+    </div>
+  </div>
+
+</div><!-- end dash -->
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   JARVIS GLOBAL COMMAND GRID
+   github.com/xpozer/jarvis-windows-standalone
+   ═══════════════════════════════════════════════════════ */
+
+// ── BOOT ──────────────────────────────────────────────────
+const BOOT_LINES=[
+  {m:'JARVIS CORE SYSTEM LOADING...',         t:'',       c:'dim',   d:null,     p:5},
+  {m:'CHECKING RUNTIME ENVIRONMENT',          t:'PASS',   c:'ok',    d:null,     p:10},
+  {m:'LOADING AGENT REGISTRY',               t:'OK',     c:'ok',    d:'bd-core',p:18},
+  {m:'TOOLREGISTRY RISK LEVEL MAP',           t:'READY',  c:'ok',    d:null,     p:24},
+  {m:'AUDITLOG INITIALIZED',                 t:'ACTIVE', c:'active',d:null,     p:30},
+  {m:'KNOWLEDGE INDEX — INDEXED',            t:'DONE',   c:'ok',    d:'bd-agent',p:44},
+  {m:'NETWORK MONITOR STARTING',             t:'OK',     c:'ok',    d:'bd-net', p:51},
+  {m:'ESTABLISHING SECURE CHANNELS',         t:'AES-256',c:'ok',    d:'bd-sec', p:58},
+  {m:'WINDOWS ALLOWLIST VALIDATED',          t:'CLEAN',  c:'ok',    d:null,     p:64},
+  {m:'DIAGCENTER 2.0 MOUNTING',              t:'ONLINE', c:'ok',    d:'bd-diag',p:72},
+  {m:'WORKAGENT — SAP / FSM / MAIL / VDE',   t:'LOADED', c:'ok',    d:null,     p:79},
+  {m:'VOICE MODULE — MIC STANDBY',           t:'MUTED',  c:'warn',  d:null,     p:84},
+  {m:'DASHBOARD UI — 13 PAGES',              t:'READY',  c:'ok',    d:'bd-ui',  p:90},
+  {m:'THREAT SCAN — LEVEL: LOW',             t:'CLEAR',  c:'ok',    d:null,     p:95},
+  {m:'ALL SYSTEMS NOMINAL',                  t:'[ OK ]', c:'ok',    d:null,     p:100},
+];
+const bterm=document.getElementById('boot-term');
+const bfill=document.getElementById('boot-prog-fill');
+const bpct=document.getElementById('boot-prog-pct');
+const blbl=document.getElementById('boot-prog-lbl');
+const bootEl=document.getElementById('boot');
+const dashEl=document.getElementById('dash');
+const flashEl=document.getElementById('flash');
+
+function bootSetP(p){
+  bfill.style.width=p+'%';bpct.textContent=p+'%';
+  if(p<50)blbl.textContent='INITIALIZING';
+  else if(p<85)blbl.textContent='LOADING MODULES';
+  else blbl.textContent='FINALIZING';
+}
+function bootLine(i){
+  if(i>=BOOT_LINES.length){bootDone();return;}
+  const d=BOOT_LINES[i];
+  const old=document.getElementById('bcur');if(old)old.remove();
+  const div=document.createElement('div');div.className='bline';
+  div.innerHTML=`<span class="bp">&gt;</span>
+    <span class="bm">${d.m}${d.t===''?'<span id="bcur" style="display:inline-block;width:8px;height:12px;background:var(--c);vertical-align:middle;margin-left:4px;animation:blink 0.55s step-end infinite;"></span>':''}</span>
+    <span class="bt ${d.c}">${d.t}</span>`;
+  bterm.appendChild(div);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>div.classList.add('show')));
+  bootSetP(d.p);
+  if(d.d)setTimeout(()=>{const el=document.getElementById(d.d);if(el)el.classList.add('on');},160);
+  setTimeout(()=>bootLine(i+1),i===BOOT_LINES.length-1?380:190+Math.random()*120);
+}
+function bootDone(){
+  setTimeout(()=>{
+    flashEl.style.opacity='0.5';flashEl.style.transition='opacity 0.6s';
+    setTimeout(()=>{flashEl.style.opacity='0';},600);
+    bootEl.style.opacity='0';
+    setTimeout(()=>{bootEl.style.display='none';},1000);
+    // Show dashboard immediately so layout computes
+    dashEl.classList.add('on');
+    // Wait for layout + transition to settle, then init map
+    setTimeout(()=>{
+      initAll();
+    },1100);
+  },400);
+}
+setTimeout(()=>bootLine(0),1200);
+
+// ── STATIC ROUTE DATA ──────────────────────────────────────
+const ROUTE_DATA=[
+  {id:'R1',dest:'USA EAST',lat:12.7},{id:'R2',dest:'UK LONDON',lat:18.3},
+  {id:'R3',dest:'SINGAPORE',lat:36.5},{id:'R4',dest:'DUBAI',lat:24.1},{id:'R5',dest:'SAO PAULO',lat:48.2},
+];
+function buildRouteTbl(){
+  const tb=document.getElementById('route-tbody');
+  tb.innerHTML='';
+  ROUTE_DATA.forEach(r=>{
+    const q=Math.max(20,100-r.lat*1.2);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:rgba(0,212,255,0.5);font-family:Consolas,monospace;">${r.id}</td>
+      <td>${r.dest}</td>
+      <td><div class="qbar-wrap"><div class="qbar" style="width:${q}%"></div></div></td>
+      <td class="latcol">${r.lat} ms</td>`;
+    tb.appendChild(tr);
+  });
+}
+function buildTopRoutes(){
+  const el=document.getElementById('top-routes-list');
+  el.innerHTML='';
+  ROUTE_DATA.forEach((r,i)=>{
+    const w=Math.max(20,100-r.lat*1.2);
+    const div=document.createElement('div');div.className='tr-row';
+    div.innerHTML=`<span class="tr-num">${i+1}</span>
+      <span class="tr-route">Germany Hub → ${r.dest}</span>
+      <div class="tr-bar-wrap"><div class="tr-bar" style="width:${w}%"></div></div>
+      <span class="tr-lat" data-tr="${i}">${r.lat} ms</span>`;
+    el.appendChild(div);
+  });
+}
+
+// ── CLOCK ─────────────────────────────────────────────────
+function pad2(n){return String(n).padStart(2,'0');}
+const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function tickClock(){
+  const n=new Date();
+  document.getElementById('f-time').textContent=`${pad2(n.getUTCHours())}:${pad2(n.getUTCMinutes())}:${pad2(n.getUTCSeconds())}`;
+  document.getElementById('f-date').textContent=`${n.getUTCDate()} ${MONTHS[n.getUTCMonth()]} ${n.getUTCFullYear()}`;
+}
+setInterval(tickClock,1000);tickClock();
+
+// ── METRICS ───────────────────────────────────────────────
+const M={
+  lat:12.4,pkt:0.18,jit:1.7,upt:99.993,
+  csTotal:12478,csActive:9842,csSecure:9215,csThreat:23,
+  bwDonut:78,bwIn:4.32,bwOut:3.68,bwBurst:7.91,
+  nodes:1248,integrity:99.94,conns:9842,thr:8.01,peak:12.45,
+  nbSyn:78,nbCog:64,nbDec:82,
+  trLats:[12.7,18.3,36.5,24.1,48.2],
+};
+function rw(v,r,mn,mx){return Math.max(mn,Math.min(mx,v+(Math.random()-0.5)*r));}
+function fmtN(n){return n.toLocaleString('en-US');}
+function updateMetrics(){
+  M.lat=rw(M.lat,0.8,8,20);M.pkt=rw(M.pkt,0.05,0,0.5);M.jit=rw(M.jit,0.3,0.5,4);
+  M.csActive=Math.round(rw(M.csActive,40,9500,10200));
+  M.csTotal=Math.round(rw(M.csTotal,30,12000,13000));
+  M.csSecure=Math.round(rw(M.csSecure,35,9000,9800));
+  M.csThreat=Math.max(0,Math.round(rw(M.csThreat,2,0,50)));
+  M.bwDonut=Math.round(rw(M.bwDonut,2,60,92));
+  M.bwIn=rw(M.bwIn,0.2,3,6);M.bwOut=rw(M.bwOut,0.15,2.5,5);M.bwBurst=M.bwIn+M.bwOut+rw(0.5,0.3,0,1);
+  M.nodes=Math.round(rw(M.nodes,5,1200,1300));
+  M.thr=rw(M.thr,0.3,6,12);M.peak=Math.max(M.thr,M.peak);
+  M.nbSyn=Math.round(rw(M.nbSyn,3,60,95));
+  M.nbCog=Math.round(rw(M.nbCog,3,50,85));
+  M.nbDec=Math.round(rw(M.nbDec,3,65,95));
+  M.trLats=M.trLats.map(v=>parseFloat(rw(v,1.5,8,55).toFixed(1)));
+
+  // DOM
+  document.getElementById('d-lat').textContent=M.lat.toFixed(1)+' ms';
+  document.getElementById('d-pkt').textContent=M.pkt.toFixed(2)+' %';
+  document.getElementById('d-jit').textContent=M.jit.toFixed(1)+' ms';
+  document.getElementById('cs-total').textContent=fmtN(M.csTotal);
+  document.getElementById('cs-active').textContent=fmtN(M.csActive);
+  document.getElementById('cs-secure').textContent=fmtN(M.csSecure);
+  document.getElementById('cs-threat').textContent=fmtN(M.csThreat);
+  const da=2*Math.PI*28;
+  document.getElementById('bw-donut').setAttribute('stroke-dashoffset',da*(1-M.bwDonut/100));
+  document.getElementById('bw-pct').textContent=M.bwDonut+'%';
+  document.getElementById('bw-in').textContent=M.bwIn.toFixed(2)+' Gbps';
+  document.getElementById('bw-out').textContent=M.bwOut.toFixed(2)+' Gbps';
+  document.getElementById('bw-burst').textContent=M.bwBurst.toFixed(2)+' Gbps';
+  document.getElementById('node-count').textContent=fmtN(M.nodes);
+  document.getElementById('f-integrity').textContent=M.integrity.toFixed(2)+'%';
+  document.getElementById('f-conns').textContent=fmtN(M.csActive);
+  document.getElementById('f-total').textContent=fmtN(M.csTotal);
+  document.getElementById('f-thr').textContent=M.thr.toFixed(2)+' Gbps';
+  document.getElementById('f-peak').textContent=M.peak.toFixed(2)+' Gbps';
+  // neural bus
+  ['syn','cog','dec'].forEach((k,i)=>{
+    const v=[M.nbSyn,M.nbCog,M.nbDec][i];
+    document.getElementById(`nb-${k}`).style.width=v+'%';
+    document.getElementById(`nb-${k}-v`).textContent=v+'%';
+  });
+  // route latencies
+  document.querySelectorAll('[data-tr]').forEach((el,i)=>{
+    if(M.trLats[i])el.textContent=M.trLats[i]+' ms';
+  });
+}
+setInterval(updateMetrics,900);
+
+// ── SPARKLINE (main diagnostics) ──────────────────────────
+const sparkHist=Array.from({length:60},()=>30+Math.random()*50);
+let thrHist=Array.from({length:30},()=>7+Math.random()*4);
+function drawMainSpark(){
+  sparkHist.shift();sparkHist.push(M.lat*2+Math.random()*5);
+  const cv=document.getElementById('main-spark');if(!cv)return;
+  cv.width=cv.offsetWidth*2;cv.height=cv.offsetHeight*2;
+  const ctx=cv.getContext('2d');ctx.scale(2,2);
+  const w=cv.offsetWidth,h=cv.offsetHeight;
+  const mx=Math.max(...sparkHist),mn=Math.min(...sparkHist),rng=mx-mn||1;
+  ctx.clearRect(0,0,w,h);
+  // fill
+  ctx.beginPath();
+  sparkHist.forEach((v,i)=>{
+    const x=(i/(sparkHist.length-1))*w,y=h-((v-mn)/rng)*(h-4)-2;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+  ctx.fillStyle='rgba(0,150,255,0.08)';ctx.fill();
+  // line
+  ctx.beginPath();
+  sparkHist.forEach((v,i)=>{
+    const x=(i/(sparkHist.length-1))*w,y=h-((v-mn)/rng)*(h-4)-2;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='#00ff88';ctx.lineWidth=1.2;ctx.shadowColor='#00ff88';ctx.shadowBlur=5;ctx.stroke();
+  // y-axis labels
+  document.getElementById('spark-max').textContent=Math.round(mx);
+}
+function drawThrSpark(){
+  thrHist.shift();thrHist.push(M.thr+Math.random()*0.5);
+  const cv=document.getElementById('thr-spark');if(!cv)return;
+  cv.width=cv.offsetWidth*2;cv.height=cv.offsetHeight*2;
+  const ctx=cv.getContext('2d');ctx.scale(2,2);
+  const w=cv.offsetWidth,h=cv.offsetHeight;
+  const mx=Math.max(...thrHist),mn=Math.min(...thrHist),rng=mx-mn||1;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();
+  thrHist.forEach((v,i)=>{
+    const x=(i/(thrHist.length-1))*w,y=h-((v-mn)/rng)*(h-2)-1;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='var(--c)';ctx.lineWidth=1;ctx.shadowColor='var(--c)';ctx.shadowBlur=4;ctx.stroke();
+}
+function drawNodeBar(){
+  const cv=document.getElementById('node-bar');if(!cv)return;
+  cv.width=cv.offsetWidth*2;cv.height=cv.offsetHeight*2;
+  const ctx=cv.getContext('2d');ctx.scale(2,2);
+  const w=cv.offsetWidth,h=cv.offsetHeight;
+  ctx.clearRect(0,0,w,h);
+  const n=16,bw=w/n-1;
+  for(let i=0;i<n;i++){
+    const bh=(0.3+Math.random()*0.7)*h;
+    const g=ctx.createLinearGradient(0,h,0,h-bh);
+    g.addColorStop(0,'rgba(0,100,200,0.3)');g.addColorStop(1,'rgba(0,200,255,0.9)');
+    ctx.fillStyle=g;ctx.shadowColor='#00d4ff';ctx.shadowBlur=4;
+    ctx.fillRect(i*(bw+1),h-bh,bw,bh);
+  }
+}
+setInterval(()=>{drawMainSpark();drawThrSpark();drawNodeBar();},700);
+
+// ── HEARTBEAT ─────────────────────────────────────────────
+const hbHist=Array.from({length:80},()=>Math.random()<0.1?1+Math.random()*0.8:0.1+Math.random()*0.15);
+function drawHeartbeat(){
+  hbHist.shift();
+  const spike=Math.random()<0.05;
+  hbHist.push(spike?1+Math.random()*0.5:0.05+Math.random()*0.1);
+  const cv=document.getElementById('heartbeat');if(!cv)return;
+  cv.width=cv.offsetWidth*2;cv.height=cv.offsetHeight*2;
+  const ctx=cv.getContext('2d');ctx.scale(2,2);
+  const w=cv.offsetWidth,h=cv.offsetHeight;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();
+  hbHist.forEach((v,i)=>{
+    const x=(i/(hbHist.length-1))*w,y=h/2-(v/1.5)*h*0.45;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='#00ff88';ctx.lineWidth=1.2;ctx.shadowColor='#00ff88';ctx.shadowBlur=5;ctx.stroke();
+}
+setInterval(drawHeartbeat,80);
+
+// ── LOGS ──────────────────────────────────────────────────
+const LOG_POOL=[
+  {lvl:'INFO', msgs:['Secure channel established','Route optimization complete','Backup sync successful',
+    'Node handshake OK','AES-256 rotation done','DNS resolution OK','BGP convergence stable'],
+   nodes:['Node: UK-LON','Dest: SIN','Nodes: 1248','Node: JP-TYO','Node: DE-FRA','Node: US-NYC']},
+  {lvl:'WARN', msgs:['Anomaly detected','Latency spike on R3','Packet loss elevated'],
+   nodes:['Node: RU-MOW','Node: AU-SYD','Dest: BRA']},
+];
+function pushLog(){
+  const c=document.getElementById('log-container');
+  const pool=Math.random()<0.15?LOG_POOL[1]:LOG_POOL[0];
+  const msg=pool.msgs[Math.floor(Math.random()*pool.msgs.length)];
+  const node=pool.nodes[Math.floor(Math.random()*pool.nodes.length)];
+  const n=new Date();
+  const t=`${pad2(n.getUTCHours())}:${pad2(n.getUTCMinutes())}:${pad2(n.getUTCSeconds())}`;
+  const e=document.createElement('div');e.className='log-entry';
+  e.innerHTML=`<span class="log-ts">${t}</span>
+    <span class="log-lvl ${pool.lvl.toLowerCase()}">[${pool.lvl}]</span>
+    <span class="log-msg">${msg}</span>
+    <span class="log-node">${node}</span>`;
+  c.insertBefore(e,c.firstChild);
+  while(c.children.length>7)c.removeChild(c.lastChild);
+}
+setTimeout(()=>{pushLog();setInterval(()=>{if(Math.random()>0.25)pushLog();},1200);},600);
+
+// ── MODE SWITCH ───────────────────────────────────────────
+let currentMode='jarvis';
+function setMode(m){
+  currentMode=m;
+  document.querySelector('.map-btn.jarvis').classList.toggle('active',m==='jarvis');
+  document.querySelector('.map-btn.ultron').classList.toggle('active',m==='ultron');
+  // tint hub
+  const hub=document.getElementById('hub-core');
+  if(hub) hub.setAttribute('fill',m==='ultron'?'#ff6644':'#ffffff');
+}
+
+// ── MAP ───────────────────────────────────────────────────
+function initAll(){
+  buildRouteTbl();
+  buildTopRoutes();
+  initMap();
+}
+
+function initMap(){
+  const mapArea = document.querySelector('.map-area');
+  const canvas  = document.getElementById('mapCanvas');
+  const svgEl   = document.getElementById('mapSVG');
+
+  // Wait until map area has real dimensions
+  if (!mapArea.offsetWidth || !mapArea.offsetHeight) {
+    console.log('[map] waiting for layout, will retry');
+    return setTimeout(initMap, 100);
+  }
+
+  // Size canvas to actual pixels (with DPR for sharpness)
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function resizeCanvas(){
+    const w = mapArea.offsetWidth;
+    const h = mapArea.offsetHeight;
+    canvas.width  = Math.floor(w * DPR);
+    canvas.height = Math.floor(h * DPR);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas._dpr = DPR;
+    console.log('[map] canvas sized to', canvas.width, 'x', canvas.height);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', ()=>{ resizeCanvas(); buildLabels(); });
+  window.addEventListener('orientationchange', ()=>{
+    setTimeout(()=>{ resizeCanvas(); buildLabels(); }, 200);
+  });
+
+  const BITMAP=[
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000111110000111111111111111111000000111111111111111111111111111111110000111111110000000000000",
+"0000000111111111101111111111111111111111111111111111111111111111111111111111111111111111110000000000",
+"0000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000",
+"0000111111111111111111111111111111111111111111111111111111111111111111111111111111111111110000000000",
+"0001111111111111111111111111111111111111111111111111111111111111111111111111111111111111100000000000",
+"0011111111111111111111111111111111110011111111111111111111111111111111111111111111111111000000000000",
+"0111111111111111111111111111111111000001111111111111111111111111111111111111111111111110000000000000",
+"0111111111111111111111111111111100000000111111111111111111111111111111111111111111111100000000000000",
+"0111111111111111111111111111111000000000011111111111111111111111111111111111111111110000000000000000",
+"0111111111111111111111111111100000000000001111111111111111111111111111111111111111000000000000000000",
+"0011111111111111111111111111000000000000000111111111111111111111111111111111111000000000000000000000",
+"0001111111111111111111111100000000000000000011111111111111111111111111111111000000000000000000000000",
+"0000011111111111111111100000000000000000000001111111111111111111111111111100000000000000000000000000",
+"0000001111111111111110000000000000000000000000111111111111111111111111000000000000000000000000000000",
+"0000000011111111110000000000000000000000000000011111111111111111110000000000000000000000000000000000",
+"0000000111111111000000000000000000000000000000001111111111111110000000000000000000000000000000000000",
+"0000000111111110000000000000000000000000000000000111111111111100000000000000000000000000000000000000",
+"0000001111111100000000000000000000000000000000000111111111110000000000000000000000000000000000000000",
+"0000011111111000000000000000000000000000000000000111111111100000000000000000000000000000000000000000",
+"0000111111110000000000000000000000000000000000000011111111000000000000000000000000000000000000000000",
+"0001111111100000000000000000000000000000000000000011111110000000000000000000000000000000000000000000",
+"0011111111000000000000000000000000000000000000000011111100000000000000000000000000000000000000000000",
+"0011111110000000000000000000000000000000000000000011111000000000000000000000000000000000000000000000",
+"0011111100000000000000000000000000000000000000000011111000000000000000000000000000000000000000000000",
+"0011111000000000000000000000000000000000000000000011110000000000000000000000000000000000000000000000",
+"0011110000000000000000000000000000000000000000000011110000000000000000000000000000000000000000000000",
+"0011100000000000000000000000000000000000000000000011110000000000000000000000000000000000000000000000",
+"0011100000000000000000000000000000000000000000000011110000000000000000000000000000000000000000000000",
+"0011000000000000000000000000000000000000000000000011100000000000000000000000000000000000000000000000",
+"0011000000000000000000000000000000000000000000000011100000000000000000000000000000000000000000000000",
+"0010000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000",
+"0010000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000",
+"0010000000000000000000000000000000000000000000000001100000000000000000000000000000000000000000000000",
+"0010000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000",
+"0010000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000",
+"0001000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000",
+"0001000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000",
+"0000100000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000",
+"0000100000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000",
+"0000010000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  ];
+
+  const ctx = canvas.getContext('2d');
+
+  // GEO helpers — map lat/lng to canvas LOGICAL pixels
+  // (canvas.width is in device pixels, divide by DPR for logical)
+  function logicalW(){ return canvas.width / canvas._dpr; }
+  function logicalH(){ return canvas.height / canvas._dpr; }
+  function geo(lat, lng) {
+    const W = logicalW(), H = logicalH();
+    // On portrait/mobile, fit world tighter: show fewer empty bands top/bottom
+    const isPortrait = H > W * 0.7;
+    if (isPortrait) {
+      // Crop to active latitude band (-55 to +75) for less empty ocean
+      const x = (lng + 180) / 360 * W;
+      const y = (75 - lat) / 130 * H;
+      return { x, y };
+    }
+    return {
+      x: (lng + 180) / 360 * W,
+      y: (90  - lat)  / 180 * H
+    };
+  }
+
+  // Pre-compute dot positions (normalised 0-1) — denser raster like screenshot
+  const COLS = BITMAP[0].length, ROWS = BITMAP.length;
+  const DOT_POSITIONS = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (BITMAP[r][c] === '1' && Math.random() < 0.92) {
+        DOT_POSITIONS.push({
+          nx: (c + 0.5 + (Math.random()-0.5)*0.5) / COLS,
+          ny: (r + 0.5 + (Math.random()-0.5)*0.5) / ROWS,
+          r:  0.7 + Math.random() * 0.9,
+          op: 0.4 + Math.random() * 0.5,
+          bright: Math.random() > 0.55,
+          tw: Math.random() * Math.PI * 2  // twinkle phase
+        });
+      }
+    }
+  }
+
+  const HUB_GEO = {lat:50.11, lng:8.68};
+  const NODES = [
+    {name:'CANADA',    city:'TORONTO',      lat:43.7,  lng:-79.4},
+    {name:'USA WEST',  city:'SAN FRANCISCO',lat:37.8,  lng:-122.4},
+    {name:'USA EAST',  city:'NEW YORK',     lat:40.7,  lng:-74.0},
+    {name:'MEXICO',    city:'MEXICO CITY',  lat:19.4,  lng:-99.1},
+    {name:'BRAZIL',    city:'SAO PAULO',    lat:-23.5, lng:-46.6},
+    {name:'UK',        city:'LONDON',       lat:51.5,  lng:-0.1},
+    {name:'NORDICS',   city:'STOCKHOLM',    lat:59.3,  lng:18.1},
+    {name:'RUSSIA',    city:'MOSCOW',       lat:55.8,  lng:37.6},
+    {name:'S. AFRICA', city:'JOHANNESBURG', lat:-26.2, lng:28.0},
+    {name:'UAE',       city:'DUBAI',        lat:25.2,  lng:55.3},
+    {name:'INDIA',     city:'MUMBAI',       lat:19.1,  lng:72.9},
+    {name:'CHINA',     city:'BEIJING',      lat:39.9,  lng:116.4},
+    {name:'JAPAN',     city:'TOKYO',        lat:35.7,  lng:139.7},
+    {name:'SINGAPORE', city:'SINGAPORE',    lat:1.3,   lng:103.8},
+    {name:'AUSTRALIA', city:'SYDNEY',       lat:-33.9, lng:151.2},
+  ];
+
+  // Packet animations (canvas-drawn) — denser like screenshot
+  const packets = [];
+  function spawnPkt() {
+    const n = NODES[Math.floor(Math.random() * NODES.length)];
+    const threat = Math.random() < 0.18;  // more red packets like screenshot
+    packets.push({
+      srcLat: n.lat, srcLng: n.lng,
+      t: 0, dur: 1.6 + Math.random() * 1.8,
+      color: threat ? '#ff3344' : '#00d4ff',
+      threat,
+      reverse: Math.random() < 0.4  // some go hub→node
+    });
+  }
+  setInterval(spawnPkt, 110);  // 2x density
+
+  // Hub pulse rings
+  const hubRings = [];
+  setInterval(() => {
+    hubRings.push({r: 8, maxR: 65, t: 0, dur: 2.6});
+  }, 750);
+
+  // Node pulse rings
+  const nodePulses = [];
+  NODES.forEach((n, i) => {
+    setTimeout(() => {
+      setInterval(() => {
+        nodePulses.push({lat: n.lat, lng: n.lng, r: 4, maxR: 18, t: 0, dur: 2.5});
+      }, 2400);
+    }, i * 160);
+  });
+
+  // HTML labels (positioned once, updated on resize)
+  const labelsEl = document.getElementById('map-labels');
+  function buildLabels() {
+    labelsEl.innerHTML = '';
+    const W = logicalW(), H = logicalH();
+    const hub = geo(HUB_GEO.lat, HUB_GEO.lng);
+    // Hub label below dot
+    const hl = document.createElement('div');
+    hl.className = 'map-label';
+    hl.style.cssText = `left:${hub.x/W*100}%;top:${hub.y/H*100}%;
+      margin-top:34px;font-weight:700;color:#fff;
+      text-shadow:0 0 10px #00d4ff,0 0 20px #00d4ff;font-size:11px;letter-spacing:2px;`;
+    hl.innerHTML = `GERMANY HUB<span class="city-name" style="color:rgba(0,212,255,0.85);font-weight:600;">FRANKFURT</span>`;
+    labelsEl.appendChild(hl);
+    // Node labels — alternating above/below to avoid overlap with arc
+    NODES.forEach(n => {
+      const p = geo(n.lat, n.lng);
+      const lbl = document.createElement('div');
+      lbl.className = 'map-label';
+      // North hemisphere: label above; South: label below
+      const above = n.lat > 0;
+      lbl.style.cssText = `left:${p.x/W*100}%;top:${p.y/H*100}%;
+        margin-top:${above ? '-30px' : '24px'};
+        font-size:10px;font-weight:700;letter-spacing:1.5px;`;
+      lbl.innerHTML = `<strong>${n.name}</strong><span class="city-name">${n.city}</span>`;
+      labelsEl.appendChild(lbl);
+    });
+  }
+  buildLabels();
+  window.addEventListener('resize', buildLabels);
+
+  let lastTime = 0;
+  let mapTime = 0;
+  function drawMap(ts = 0) {
+    const dt = Math.min((ts - lastTime) / 1000, 0.05);
+    lastTime = ts;
+    mapTime += dt;
+    const W = logicalW(), H = logicalH();
+    const dpr = canvas._dpr;
+
+    // Reset transform and clear
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+
+    // ── BG gradient overlay for depth ──
+    const bgGrad = ctx.createRadialGradient(W/2, H*0.45, 0, W/2, H*0.45, W*0.6);
+    bgGrad.addColorStop(0, 'rgba(0,40,80,0.4)');
+    bgGrad.addColorStop(1, 'rgba(0,8,20,0)');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── DOTS with subtle twinkle ──
+    const isPortrait = H > W * 0.7;
+    const scale = W / 900;
+    DOT_POSITIONS.forEach(d => {
+      let x, y;
+      if (isPortrait) {
+        // map normalised (full 0-1) to cropped lat band (-55..75 instead of -90..90)
+        const lat = 90 - d.ny * 180;
+        const lng = d.nx * 360 - 180;
+        if (lat < -55 || lat > 75) return;
+        x = (lng + 180) / 360 * W;
+        y = (75 - lat) / 130 * H;
+      } else {
+        x = d.nx * W;
+        y = d.ny * H;
+      }
+      const tw = 0.85 + Math.sin(mapTime * 1.5 + d.tw) * 0.15;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(0.5, d.r * scale), 0, Math.PI*2);
+      if (d.bright) {
+        ctx.fillStyle = `rgba(0,180,240,${d.op * tw})`;
+        ctx.shadowColor = '#00aaff';
+        ctx.shadowBlur = 2;
+      } else {
+        ctx.fillStyle = `rgba(0,90,160,${d.op})`;
+        ctx.shadowBlur = 0;
+      }
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+
+    // ── Concentric ellipse rings (perspective sphere) ──
+    const cx = W/2, cy = H*0.5;
+    [[0.78, 0.92, 0.18],[0.58, 0.68, 0.14],[0.38, 0.45, 0.10],[0.20, 0.24, 0.07]].forEach(([rx,ry,a])=>{
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx*W/2, ry*H/2, 0, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(0,140,220,${a})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    const hub = geo(HUB_GEO.lat, HUB_GEO.lng);
+
+    // ── ARC PATHS node → hub (bright glowing curves) ──
+    NODES.forEach((n, idx) => {
+      const p = geo(n.lat, n.lng);
+      const mx = (p.x + hub.x)/2, my = (p.y + hub.y)/2;
+      const dx = hub.x - p.x, dy = hub.y - p.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      const cv = Math.min(dist*0.35, H*0.28);
+      const nx2 = -dy/dist, ny2 = dx/dist;
+      const cpx = mx + nx2*cv*0.65, cpy = my + ny2*cv*0.65 - cv*0.3;
+
+      // outer glow layer
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.quadraticCurveTo(cpx, cpy, hub.x, hub.y);
+      ctx.strokeStyle = 'rgba(0,180,255,0.18)';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = '#00aaff';
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+
+      // bright core line
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.quadraticCurveTo(cpx, cpy, hub.x, hub.y);
+      ctx.strokeStyle = 'rgba(120,220,255,0.7)';
+      ctx.lineWidth = 1.2;
+      ctx.shadowBlur = 4;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    });
+
+    // ── NODE PULSES ──
+    for (let i = nodePulses.length-1; i >= 0; i--) {
+      const p = nodePulses[i];
+      p.t += dt;
+      const prog = p.t / p.dur;
+      if (prog >= 1) { nodePulses.splice(i,1); continue; }
+      const pt = geo(p.lat, p.lng);
+      const r = p.r + (p.maxR - p.r) * prog;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, r*scale, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(0,200,255,${0.85*(1-prog)})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+
+    // ── NODE DOTS ──
+    NODES.forEach(n => {
+      const p = geo(n.lat, n.lng);
+      const s = scale;
+      // outer glow
+      const gr1 = ctx.createRadialGradient(p.x,p.y,0, p.x,p.y, 16*s);
+      gr1.addColorStop(0,'rgba(0,212,255,0.8)');
+      gr1.addColorStop(0.4,'rgba(0,170,255,0.4)');
+      gr1.addColorStop(1,'rgba(0,80,180,0)');
+      ctx.beginPath(); ctx.arc(p.x, p.y, 16*s, 0, Math.PI*2);
+      ctx.fillStyle = gr1; ctx.fill();
+      // inner glow
+      const gr2 = ctx.createRadialGradient(p.x,p.y,0, p.x,p.y, 7*s);
+      gr2.addColorStop(0,'rgba(255,255,255,1)');
+      gr2.addColorStop(0.5,'rgba(0,212,255,0.9)');
+      gr2.addColorStop(1,'rgba(0,170,255,0)');
+      ctx.beginPath(); ctx.arc(p.x, p.y, 7*s, 0, Math.PI*2);
+      ctx.fillStyle = gr2; ctx.fill();
+      // bright core
+      ctx.beginPath(); ctx.arc(p.x, p.y, 2.5*s, 0, Math.PI*2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#00d4ff'; ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+
+    // ── PACKETS (with trails) ──
+    for (let i = packets.length-1; i >= 0; i--) {
+      const pk = packets[i];
+      pk.t += dt;
+      const prog = pk.t / pk.dur;
+      if (prog >= 1) {
+        if (!pk.reverse) {
+          hubRings.push({r:8, maxR:25, t:0, dur:0.5, color: pk.color, hubFlash:true});
+        }
+        packets.splice(i,1); continue;
+      }
+      const src = geo(pk.srcLat, pk.srcLng);
+      const mx = (src.x + hub.x)/2, my = (src.y + hub.y)/2;
+      const dx = hub.x - src.x, dy = hub.y - src.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      const cv = Math.min(dist*0.35, H*0.28);
+      const nx2 = -dy/dist, ny2 = dx/dist;
+      const cpx = mx + nx2*cv*0.65, cpy = my + ny2*cv*0.65 - cv*0.3;
+      // direction
+      const t = pk.reverse ? (1 - prog) : prog;
+      const px2 = (1-t)*(1-t)*src.x + 2*(1-t)*t*cpx + t*t*hub.x;
+      const py2 = (1-t)*(1-t)*src.y + 2*(1-t)*t*cpy + t*t*hub.y;
+      // trail
+      const trailT = Math.max(0, t - 0.08);
+      const tx = (1-trailT)*(1-trailT)*src.x + 2*(1-trailT)*trailT*cpx + trailT*trailT*hub.x;
+      const ty = (1-trailT)*(1-trailT)*src.y + 2*(1-trailT)*trailT*cpy + trailT*trailT*hub.y;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty); ctx.lineTo(px2, py2);
+      ctx.strokeStyle = pk.color;
+      ctx.lineWidth = 2.5*scale;
+      ctx.shadowColor = pk.color; ctx.shadowBlur = 8;
+      ctx.stroke();
+      // head
+      ctx.beginPath(); ctx.arc(px2, py2, 2.5*scale, 0, Math.PI*2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // ── HUB EXPANDING RINGS ──
+    for (let i = hubRings.length-1; i >= 0; i--) {
+      const hr = hubRings[i];
+      hr.t += dt;
+      const prog = hr.t / hr.dur;
+      if (prog >= 1) { hubRings.splice(i,1); continue; }
+      const r = hr.r + (hr.maxR - hr.r) * prog;
+      const baseColor = hr.color || '#00ccff';
+      ctx.beginPath(); ctx.arc(hub.x, hub.y, r*scale, 0, Math.PI*2);
+      // parse color and apply fade
+      const fade = 1 - prog;
+      if (baseColor.startsWith('#')) {
+        const hex = baseColor.slice(1);
+        const rR = parseInt(hex.substr(0,2),16);
+        const gG = parseInt(hex.substr(2,2),16);
+        const bB = parseInt(hex.substr(4,2),16);
+        ctx.strokeStyle = `rgba(${rR},${gG},${bB},${fade*0.9})`;
+      } else {
+        ctx.strokeStyle = `rgba(0,200,255,${fade})`;
+      }
+      ctx.lineWidth = hr.hubFlash ? 2.5 : 1.5;
+      ctx.stroke();
+    }
+
+    // ── HUB CORE (Frankfurt) ──
+    const hs = scale;
+    // outer flare
+    const fgrad = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, 60*hs);
+    fgrad.addColorStop(0, 'rgba(255,255,255,1)');
+    fgrad.addColorStop(0.08, 'rgba(120,230,255,0.95)');
+    fgrad.addColorStop(0.25, 'rgba(0,180,255,0.7)');
+    fgrad.addColorStop(0.6, 'rgba(0,100,200,0.2)');
+    fgrad.addColorStop(1, 'rgba(0,40,100,0)');
+    ctx.beginPath(); ctx.arc(hub.x, hub.y, 60*hs, 0, Math.PI*2);
+    ctx.fillStyle = fgrad; ctx.fill();
+
+    // crosshair circle (red, dashed)
+    ctx.beginPath(); ctx.arc(hub.x, hub.y, 14*hs, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(255,80,90,0.85)';
+    ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // inner crosshair lines
+    ctx.beginPath();
+    ctx.moveTo(hub.x - 18*hs, hub.y); ctx.lineTo(hub.x - 8*hs, hub.y);
+    ctx.moveTo(hub.x + 8*hs,  hub.y); ctx.lineTo(hub.x + 18*hs, hub.y);
+    ctx.moveTo(hub.x, hub.y - 18*hs); ctx.lineTo(hub.x, hub.y - 8*hs);
+    ctx.moveTo(hub.x, hub.y + 8*hs);  ctx.lineTo(hub.x, hub.y + 18*hs);
+    ctx.strokeStyle = 'rgba(0,212,255,0.8)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // bright core
+    ctx.beginPath(); ctx.arc(hub.x, hub.y, 5*hs, 0, Math.PI*2);
+    ctx.fillStyle = currentMode === 'ultron' ? '#ffaa66' : '#ffffff';
+    ctx.shadowColor = '#00d4ff'; ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // pulsing inner ring
+    const ringR = 8 + Math.sin(mapTime * 3) * 2;
+    ctx.beginPath(); ctx.arc(hub.x, hub.y, ringR*hs, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(0,212,255,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    requestAnimationFrame(drawMap);
+  }
+  requestAnimationFrame(drawMap);
+}
+</script>
+<script>
+(function(){
+  var sent=false;
+  function notify(){
+    if(sent)return;
+    sent=true;
+    try{parent.postMessage({type:"jarvis-command-grid-boot-complete"},"*");}catch(e){}
+  }
+  var originalBootDone=window.bootDone;
+  if(typeof originalBootDone==="function"){
+    window.bootDone=function(){
+      originalBootDone.apply(this,arguments);
+      setTimeout(notify,1900);
+    };
+  }
+  setTimeout(notify,9500);
+})();
+</script>
+</body>
+</html>
