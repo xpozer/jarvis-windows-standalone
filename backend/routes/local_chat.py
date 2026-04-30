@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import threading
 import time
 import uuid
@@ -7,6 +8,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 import agent_registry
@@ -141,6 +143,10 @@ def _memory_system_block(user_text: str) -> list[dict[str, str]]:
     }]
 
 
+def _sse(event: str, data: dict[str, Any]) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
 @router.post("/chat")
 def chat(req: ChatRequest) -> dict[str, Any]:
     started = time.perf_counter()
@@ -215,6 +221,107 @@ def chat(req: ChatRequest) -> dict[str, Any]:
         log("ERROR", "Lokaler Chat fehlgeschlagen", error=str(exc), agent=agent_id)
         agent_registry.update_status(agent_id, "error", last_action=str(exc)[:160], error=True)
         raise HTTPException(status_code=500, detail=f"Chat Fehler: {exc}") from exc
+
+
+@router.post("/chat/stream")
+def chat_stream(req: ChatRequest) -> StreamingResponse:
+    started = time.perf_counter()
+    user_text = req.message.strip()
+    agent_id, reason, confidence = core.classify_agent(user_text)
+    if req.agent:
+        agent_id = req.agent.strip().lower()
+        reason = "Manuell gesetzter Agent"
+        confidence = 1.0
+
+    model = (req.model or DEFAULT_MODEL or "qwen3:8b").strip()
+    memory_messages = _memory_system_block(user_text)
+    messages = memory_messages + core.build_messages(
+        user_input=user_text,
+        history=_normalize_history(req.history),
+        memory_facts=[],
+        agent=agent_id,
+    )
+
+    def generate():
+        answer_parts: list[str] = []
+        agent_registry.update_status(agent_id, "running", last_action=user_text[:160])
+        try:
+            yield _sse("meta", {
+                "agent": agent_id,
+                "reason": reason,
+                "confidence": confidence,
+                "model": model,
+                "provider": JARVIS_PROVIDER,
+            })
+
+            stream_result = call_llm(messages, model, temperature=0.35, stream=True)
+            chunks = [stream_result] if isinstance(stream_result, str) else stream_result
+            for chunk in chunks:
+                text = str(chunk or "")
+                if not text:
+                    continue
+                answer_parts.append(text)
+                yield _sse("delta", {"text": text})
+
+            answer = "".join(answer_parts).strip()
+            if not answer:
+                answer = "Ich habe vom LLM Provider eine leere Antwort bekommen."
+                yield _sse("delta", {"text": answer})
+
+            extracted = usejarvis_runtime.extract_facts_from_text(user_text, source_ref="chat:user")
+            duration_ms = int((time.perf_counter() - started) * 1000)
+            memory = {
+                "facts_used": len(memory_messages),
+                "facts_extracted": len(extracted),
+            }
+            meta = {
+                "agent": agent_id,
+                "model": model,
+                "provider": JARVIS_PROVIDER,
+                "duration_ms": duration_ms,
+                "memory": memory,
+            }
+            session_id = _append_session_turn(
+                req.session_id,
+                user_text,
+                answer,
+                agent_id=agent_id,
+                model=model,
+                provider=JARVIS_PROVIDER,
+                duration_ms=duration_ms,
+                memory=memory,
+            )
+            usejarvis_runtime.audit(
+                "primary_agent",
+                "chat.stream.completed",
+                user_text[:180],
+                "low",
+                {"agent": agent_id, "model": model, "provider": JARVIS_PROVIDER, "memory_facts_used": memory["facts_used"], "facts_extracted": memory["facts_extracted"], "duration_ms": duration_ms},
+            )
+            agent_registry.update_status(agent_id, "idle", last_action="Antwort erstellt")
+            yield _sse("done", {
+                "ok": True,
+                "session_id": session_id,
+                "agent": agent_id,
+                "reason": reason,
+                "confidence": confidence,
+                "model": model,
+                "provider": JARVIS_PROVIDER,
+                "duration_ms": duration_ms,
+                "memory": memory,
+                "meta": meta,
+                "response": answer,
+            })
+        except Exception as exc:
+            log("ERROR", "Lokaler Chat Stream fehlgeschlagen", error=str(exc), agent=agent_id)
+            agent_registry.update_status(agent_id, "error", last_action=str(exc)[:160], error=True)
+            yield _sse("error", {"detail": f"Chat Fehler: {exc}"})
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/chat/health")

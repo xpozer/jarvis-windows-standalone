@@ -18,6 +18,8 @@ type Message = {
   link?: string;
   file?: boolean;
   meta?: ChatMessageMeta;
+  streaming?: boolean;
+  streamId?: string;
 };
 
 type ChatMessageMeta = {
@@ -50,6 +52,17 @@ type ChatApiResponse = {
   duration_ms?: number;
   meta?: ChatMessageMeta;
   memory?: { facts_used?: number; facts_extracted?: number };
+};
+
+type ChatStreamPayload = ChatApiResponse & {
+  text?: string;
+  delta?: string;
+  detail?: string;
+};
+
+type ChatStreamEvent = {
+  event: string;
+  data: ChatStreamPayload;
 };
 
 type ChatSessionSummary = {
@@ -143,6 +156,22 @@ function fmtSessionTime(value: string | undefined) {
     return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } catch {
     return "";
+  }
+}
+
+function parseSseBlock(block: string): ChatStreamEvent | null {
+  const lines = block.split(/\r?\n/);
+  let event = "message";
+  const dataLines: string[] = [];
+  for (const line of lines) {
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
+  }
+  if (!dataLines.length) return null;
+  try {
+    return { event, data: JSON.parse(dataLines.join("\n")) as ChatStreamPayload };
+  } catch {
+    return null;
   }
 }
 
@@ -286,37 +315,98 @@ export function App() {
     if (!cleanText || thinking) return;
     const sentAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const history = buildHistory(messages);
+    const streamId = `stream_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     setActiveNav("Dialog");
-    setMessages((prev) => [...prev, { role: "operator", time: sentAt, text: cleanText }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "operator", time: sentAt, text: cleanText },
+      { role: "jarvis", time: sentAt, text: "", streaming: true, streamId },
+    ]);
     setInput("");
     setThinking(true);
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chat/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: cleanText, history, session_id: activeSessionId }),
       });
-      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const detail = typeof data.detail === "string" ? data.detail : `HTTP ${response.status}`;
-        throw new Error(detail);
+        throw new Error(`HTTP ${response.status}`);
       }
-      const result = data as ChatApiResponse;
-      setLastAgent(result.agent || "general");
-      if (result.session_id) setActiveSessionId(result.session_id);
-      setMessages((prev) => [...prev, {
-        role: "jarvis",
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: readChatResponse(result),
-        meta: chatMetaFromResponse(result),
-      }]);
+      if (!response.body) {
+        throw new Error("Streaming wird von diesem Browser nicht unterstuetzt.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let receivedDone = false;
+
+      function appendDelta(delta: string) {
+        setMessages((prev) => prev.map((message) => (
+          message.streamId === streamId ? { ...message, text: message.text + delta } : message
+        )));
+      }
+
+      function finishStream(result: ChatApiResponse) {
+        receivedDone = true;
+        setLastAgent(result.agent || "general");
+        if (result.session_id) setActiveSessionId(result.session_id);
+        setMessages((prev) => prev.map((message) => {
+          if (message.streamId !== streamId) return message;
+          return {
+            ...message,
+            text: message.text.trim() ? message.text : readChatResponse(result),
+            meta: chatMetaFromResponse(result),
+            streaming: false,
+          };
+        }));
+      }
+
+      function handleEvent(item: ChatStreamEvent) {
+        if (item.event === "meta") {
+          if (item.data.agent) setLastAgent(item.data.agent);
+          return;
+        }
+        if (item.event === "delta") {
+          const delta = typeof item.data.text === "string" ? item.data.text : item.data.delta;
+          if (delta) appendDelta(delta);
+          return;
+        }
+        if (item.event === "done") {
+          finishStream(item.data);
+          return;
+        }
+        if (item.event === "error") {
+          throw new Error(item.data.detail || "Chat Stream fehlgeschlagen.");
+        }
+      }
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const blocks = buffer.split(/\n\n/);
+        buffer = blocks.pop() || "";
+        for (const block of blocks) {
+          const item = parseSseBlock(block);
+          if (item) handleEvent(item);
+        }
+      }
+      const tail = parseSseBlock(buffer);
+      if (tail) handleEvent(tail);
+      if (!receivedDone) throw new Error("Chat Stream wurde ohne Abschluss beendet.");
       await loadSessions();
     } catch (error) {
-      setMessages((prev) => [...prev, {
-        role: "jarvis",
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: `Fehler beim lokalen Chat: ${error instanceof Error ? error.message : String(error)}\n\nPruefe bitte, ob Ollama laeuft und das Modell qwen3:8b vorhanden ist.`,
-      }]);
+      setMessages((prev) => prev.map((message) => (
+        message.streamId === streamId
+          ? {
+              ...message,
+              text: `Fehler beim lokalen Chat: ${error instanceof Error ? error.message : String(error)}\n\nPruefe bitte, ob Ollama laeuft und das Modell qwen3:8b vorhanden ist.`,
+              streaming: false,
+            }
+          : message
+      )));
     } finally {
       setThinking(false);
     }
@@ -392,11 +482,11 @@ export function App() {
           </div>
           <div className="jarvis-message-list" ref={messageListRef}>
             {messages.map((message, index) => (
-              <article key={`${message.time}-${index}-${message.text}`} className="jarvis-message-card">
+              <article key={message.streamId || `${message.time}-${index}-${message.text}`} className={`jarvis-message-card ${message.streaming ? "streaming-card" : ""}`}>
                 <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "â—" : ""}</div>
                 <div className="jarvis-message-body">
                   <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "BEDIENER"}</b><span>{message.time}</span></div>
-                  <p>{message.text}</p>
+                  <p>{message.text || (message.streaming ? "JARVIS antwortet live..." : "")}</p>
                   {message.meta && (
                     <div className="jarvis-message-insights">
                       {message.meta.agent && <span>Agent: {message.meta.agent}</span>}
@@ -412,7 +502,7 @@ export function App() {
                 <button className="jarvis-dots">...</button>
               </article>
             ))}
-            {thinking && <article className="jarvis-message-card thinking-card"><div className="jarvis-avatar jarvis" /><div className="jarvis-message-body"><div className="jarvis-message-meta"><b className="cyan">JARVIS</b><span>{now}</span></div><p>Anfrage wird verarbeitet...</p></div></article>}
+            {thinking && !messages.some((message) => message.streaming) && <article className="jarvis-message-card thinking-card"><div className="jarvis-avatar jarvis" /><div className="jarvis-message-body"><div className="jarvis-message-meta"><b className="cyan">JARVIS</b><span>{now}</span></div><p>Anfrage wird verarbeitet...</p></div></article>}
           </div>
         </section>
 

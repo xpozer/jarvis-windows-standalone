@@ -250,6 +250,28 @@
   flex: 0 0 auto;
 }
 
+.streaming-card {
+  border-color: rgba(5, 216, 255, .38);
+  box-shadow: 0 0 22px rgba(5, 216, 255, .1), inset 0 0 18px rgba(5, 216, 255, .04);
+}
+
+.streaming-card .jarvis-message-body p::after {
+  content: "";
+  display: inline-block;
+  width: .55em;
+  height: 1em;
+  margin-left: 4px;
+  border-right: 2px solid rgba(5, 216, 255, .9);
+  vertical-align: -2px;
+  animation: jarvis-stream-caret .8s steps(2, start) infinite;
+}
+
+@keyframes jarvis-stream-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 1600px) {
   .dialog-mode .jarvis-main {
     width: calc(100vw - 620px);

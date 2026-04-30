@@ -50,3 +50,28 @@ def test_chat_session_can_be_renamed_and_deleted(client, monkeypatch, tmp_path):
     assert deleted.status_code == 200
     assert deleted.json()["ok"] is True
     assert client.get("/api/chat/sessions").json()["sessions"] == []
+
+
+def test_chat_stream_emits_deltas_and_persists_session(client, monkeypatch, tmp_path):
+    from routes import local_chat
+
+    monkeypatch.setattr(local_chat, "CHAT_SESSIONS_FILE", tmp_path / "chat_sessions.json")
+    monkeypatch.setattr(local_chat, "call_llm", lambda messages, model, temperature, stream=False: iter(["Hallo", " Welt"]))
+    monkeypatch.setattr(local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: [])
+    monkeypatch.setattr(local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": [])
+    monkeypatch.setattr(local_chat.usejarvis_runtime, "audit", lambda *args, **kwargs: None)
+
+    with client.stream("POST", "/api/chat/stream", json={"message": "stream test"}) as response:
+        body = "".join(response.iter_text())
+
+    assert response.status_code == 200
+    assert "event: meta" in body
+    assert "event: delta" in body
+    assert "Hallo" in body
+    assert " Welt" in body
+    assert "event: done" in body
+
+    sessions = client.get("/api/chat/sessions").json()["sessions"]
+    assert len(sessions) == 1
+    detail = client.get(f"/api/chat/sessions/{sessions[0]['id']}").json()
+    assert detail["messages"][1]["text"] == "Hallo Welt"
