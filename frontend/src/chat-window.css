@@ -3,6 +3,116 @@
   width: min(58.2vw, calc(100vw - 720px));
 }
 
+.jarvis-screen {
+  --ui-scale: 1;
+}
+
+.jarvis-metrics {
+  grid-template-columns: repeat(4, minmax(86px, 1fr)) minmax(230px, 16vw);
+}
+
+.jarvis-zoom-control {
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.jarvis-zoom-control span {
+  color: #7aa7bb;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
+
+.jarvis-zoom-control input {
+  width: min(112px, 7vw);
+  accent-color: #05d8ff;
+  cursor: pointer;
+}
+
+.jarvis-zoom-control b {
+  min-width: 42px;
+  color: #05d8ff;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-align: right;
+}
+
+.jarvis-zoom-control button {
+  width: 38px;
+  height: 30px;
+  border: 1px solid rgba(126, 231, 255, .2);
+  border-radius: 8px;
+  background: rgba(5, 18, 32, .72);
+  color: #dff8ff;
+  font-size: 11px;
+  letter-spacing: .5px;
+}
+
+.jarvis-sidebar h3 {
+  font-size: calc(clamp(11px, .68vw, 14px) * var(--ui-scale));
+}
+
+.jarvis-nav-item {
+  font-size: calc(clamp(14px, .88vw, 18px) * var(--ui-scale));
+}
+
+.jarvis-user-card strong,
+.quick-action b,
+.custom-command,
+.context-row,
+.schedule-row b,
+.snapshot-bottom li,
+.jarvis-chip-row button {
+  font-size: calc(1em * var(--ui-scale));
+}
+
+.jarvis-user-card small,
+.jarvis-user-card p,
+.quick-action small,
+.schedule-row small,
+.jarvis-message-meta,
+.snapshot-grid span,
+.snapshot-bottom span {
+  font-size: calc(1em * var(--ui-scale));
+}
+
+.jarvis-conversation h1 {
+  font-size: calc(clamp(20px, 1.22vw, 26px) * var(--ui-scale));
+}
+
+.jarvis-conversation p,
+.jarvis-message-body p {
+  font-size: calc(clamp(16px, 1vw, 20px) * var(--ui-scale));
+}
+
+.jarvis-card-title h2 {
+  font-size: calc(clamp(16px, 1vw, 20px) * var(--ui-scale));
+}
+
+.jarvis-input-row input {
+  font-size: calc(18px * var(--ui-scale));
+}
+
+.jv-module-shell,
+.runtime-control-shell,
+.jv-diagnostics-shell,
+.jv-agent-tools-shell,
+.jv-knowledge-shell,
+.security-panel,
+.organizer-panel {
+  font-size: calc(16px * var(--ui-scale));
+}
+
+.jv-module-shell :where(button, input, pre, p),
+.runtime-control-shell :where(button, input, textarea, pre, p),
+.jv-diagnostics-shell :where(button, input, pre, p),
+.jv-agent-tools-shell :where(button, input, pre, p),
+.jv-knowledge-shell :where(button, input, pre, p),
+.security-panel :where(button, input, pre, p),
+.organizer-panel :where(button, input, pre, p) {
+  font-size: calc(1em * var(--ui-scale));
+}
+
 .dialog-mode .jarvis-conversation {
   min-width: 0;
   padding-left: 1.2vw;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { Orb, OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
 import { DayStartCard } from "./components/DayStartCard";
@@ -60,6 +61,14 @@ const initialMessages: Message[] = [
   { role: "jarvis", time: "11:44", text: "Bericht erstellt. Es wurden 3 Optimierungsmoeglichkeiten erkannt,\ndie die Effizienz um bis zu 12% verbessern koennten.", file: true },
 ];
 
+function loadUiZoom() {
+  try {
+    const value = Number(localStorage.getItem("jarvis_ui_zoom") || "100");
+    if (Number.isFinite(value)) return Math.min(200, Math.max(100, value));
+  } catch {}
+  return 100;
+}
+
 function metricClass(level: Level) {
   return `metric-level ${level}`;
 }
@@ -102,12 +111,14 @@ export function App() {
   const [listening, setListening] = useState(false);
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
   const [lastAgent, setLastAgent] = useState("general");
+  const [uiZoom, setUiZoom] = useState(loadUiZoom);
   const messageListRef = useRef<HTMLDivElement | null>(null);
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
   const orbState: OrbState = thinking ? "thinking" : listening ? "listening" : "idle";
   const typingActivity = Math.min(1, input.length / 80);
   const isDialog = activeNav === "Dialog";
+  const uiScale = uiZoom / 100;
 
   useEffect(() => {
     let alive = true;
@@ -131,6 +142,12 @@ export function App() {
     if (!list) return;
     list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("jarvis_ui_zoom", String(uiZoom));
+    } catch {}
+  }, [uiZoom]);
 
   function readChatResponse(data: ChatApiResponse) {
     if (typeof data.response === "string" && data.response.trim()) return data.response;
@@ -184,7 +201,7 @@ export function App() {
   }
 
   return (
-    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""} ${isDialog ? "dialog-mode" : ""}`}>
+    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""} ${isDialog ? "dialog-mode" : ""}`} style={{ "--ui-scale": uiScale } as CSSProperties}>
       <DayStartCard onSend={sendMessage} />
       <header className="jarvis-topbar">
         <div className="jarvis-brand">
@@ -200,7 +217,20 @@ export function App() {
           <div className={metricClass(metrics.memory.level)}><span>SPEICHER</span><b>{fmtMemory(metrics)}</b></div>
           <div className={metricClass(metrics.temperature.level)}><span>TEMP</span><b>{fmtTemp(metrics.temperature.celsius)}</b></div>
           <div className={metricClass(metrics.network.level)}><span>NETZ</span><b>{metrics.network.label || "N/A"}</b></div>
-          <nav><button>↻</button><button>⚙</button><button>-</button><button>□</button><button>x</button></nav>
+          <nav className="jarvis-zoom-control" aria-label="Anzeige Zoom">
+            <span>ANZEIGE</span>
+            <input
+              type="range"
+              min="100"
+              max="200"
+              step="10"
+              value={uiZoom}
+              onChange={(event) => setUiZoom(Number(event.target.value))}
+              aria-label="Anzeige Zoom"
+            />
+            <b>{uiZoom}%</b>
+            <button type="button" onClick={() => setUiZoom(100)} title="Zoom zuruecksetzen">100</button>
+          </nav>
         </div>
       </header>
 
@@ -227,7 +257,7 @@ export function App() {
           <div className="jarvis-conversation-head">
             <div>
               <h1>Dialog mit JARVIS</h1>
-              <p><span />Online&nbsp;&nbsp;•&nbsp;&nbsp;Bereit</p>
+              <p><span />Online&nbsp;&nbsp;â€¢&nbsp;&nbsp;Bereit</p>
             </div>
             <div className="jarvis-head-actions">
               <button className={pinned ? "active" : ""} onClick={() => setPinned(!pinned)}>ANHEFTEN</button>
@@ -237,12 +267,12 @@ export function App() {
           <div className="jarvis-message-list" ref={messageListRef}>
             {messages.map((message, index) => (
               <article key={`${message.time}-${index}-${message.text}`} className="jarvis-message-card">
-                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "●" : ""}</div>
+                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "â—" : ""}</div>
                 <div className="jarvis-message-body">
                   <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "BEDIENER"}</b><span>{message.time}</span></div>
                   <p>{message.text}</p>
                   {message.link && <button className="jarvis-link-btn" onClick={() => quickAction(message.link!)}>{message.link}<span>&gt;</span></button>}
-                  {message.file && <div className="jarvis-file"><span>▣</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB • PDF Dokument</small></div><button>↓</button><button>↗</button></div>}
+                  {message.file && <div className="jarvis-file"><span>â–£</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB â€¢ PDF Dokument</small></div><button>â†“</button><button>â†—</button></div>}
                 </div>
                 <button className="jarvis-dots">...</button>
               </article>
@@ -255,23 +285,23 @@ export function App() {
           <div className="jarvis-legacy-orb-wrap">
             <Orb state={orbState} typingActivity={typingActivity} heatmapActive={thinking} />
           </div>
-          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><p>Anpassungsfaehig&nbsp;&nbsp;•&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;•&nbsp;&nbsp;Zuverlaessig</p><div /></div>
+          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><p>Anpassungsfaehig&nbsp;&nbsp;â€¢&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;â€¢&nbsp;&nbsp;Zuverlaessig</p><div /></div>
         </section>
       </main>
 
       <aside className="jarvis-right-panel">
         <TodayScheduleCard onSend={sendMessage} />
         <section className="jarvis-card context-card">
-          <div className="jarvis-card-title"><h2>DIALOGKONTEXT</h2><button>• ALLES</button></div>
+          <div className="jarvis-card-title"><h2>DIALOGKONTEXT</h2><button>â€¢ ALLES</button></div>
           {[ ["Systemleistung Zusammenfassung", "11:42"], ["Agentennetz Status", "11:43"], ["Optimierungsbericht", "11:44"] ].map(([label, time]) => <button className="context-row" key={label} onClick={() => quickAction(label)}><span /><em>{label}</em><b>{time}</b></button>)}
         </section>
         <section className="jarvis-card quick-card">
           <div className="jarvis-card-title"><h2>SCHNELLAKTIONEN</h2></div>
-          {[ ["▣", "Systemdiagnose starten", "Vollstaendiger Systemcheck"], ["S", "Datenstrom analysieren", "Analyse in Echtzeit"], ["W", "Wissensbasis durchsuchen", "Informationen schnell finden"], ["B", "Bericht erzeugen", "Detaillierten Bericht erstellen"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
+          {[ ["â–£", "Systemdiagnose starten", "Vollstaendiger Systemcheck"], ["S", "Datenstrom analysieren", "Analyse in Echtzeit"], ["W", "Wissensbasis durchsuchen", "Informationen schnell finden"], ["B", "Bericht erzeugen", "Detaillierten Bericht erstellen"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
           <button className="custom-command" onClick={() => quickAction("Eigener Befehl")}>EIGENER BEFEHL <span>&gt;</span></button>
         </section>
         <section className="jarvis-card snapshot-card">
-          <div className="jarvis-card-title"><h2>SYSTEMMOMENT</h2><button>• AKTIV</button></div>
+          <div className="jarvis-card-title"><h2>SYSTEMMOMENT</h2><button>â€¢ AKTIV</button></div>
           <div className="snapshot-grid">
             <div className={metricClass(metrics.cpu.level)}><span>CPU</span><b>{fmtPercent(metrics.cpu.percent)}</b></div>
             <div className={metricClass(metrics.memory.level)}><span>Speicher</span><b>{fmtPercent(metrics.memory.percent)}</b></div>
@@ -283,10 +313,10 @@ export function App() {
 
       <section className="jarvis-input-panel">
         <div className="jarvis-input-row">
-          <button className="voice-btn" onMouseDown={() => setListening(true)} onMouseUp={() => setListening(false)} onMouseLeave={() => setListening(false)}>≋</button>
+          <button className="voice-btn" onMouseDown={() => setListening(true)} onMouseUp={() => setListening(false)} onMouseLeave={() => setListening(false)}>â‰‹</button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Befehl oder Frage eingeben..." />
           <button className="plus-btn">+</button>
-          <button className="send-btn" onClick={() => sendMessage()}>➤</button>
+          <button className="send-btn" onClick={() => sendMessage()}>âž¤</button>
         </div>
         <div className="jarvis-chip-row">
           {["Letzte Aktivitaet zusammenfassen", "Sicherheitsstatus pruefen", "Leistung analysieren", "Beim Code helfen", "Wissensbasis durchsuchen"].map((chip) => <button key={chip} onClick={() => quickAction(chip)}>{chip}</button>)}
