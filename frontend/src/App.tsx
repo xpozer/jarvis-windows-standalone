@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Orb, OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
 import { DayStartCard } from "./components/DayStartCard";
 import { TodayScheduleCard } from "./components/TodayScheduleCard";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
+import "./chat-window.css";
 
 type Role = "operator" | "jarvis";
 type Level = "ok" | "warn" | "critical" | "unknown";
@@ -28,6 +29,9 @@ type SystemMetrics = {
 type ChatApiResponse = {
   ok?: boolean;
   response?: string;
+  answer?: string;
+  content?: string;
+  message?: string | { content?: string };
   agent?: string;
   reason?: string;
   model?: string;
@@ -98,10 +102,12 @@ export function App() {
   const [listening, setListening] = useState(false);
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
   const [lastAgent, setLastAgent] = useState("general");
+  const messageListRef = useRef<HTMLDivElement | null>(null);
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
   const orbState: OrbState = thinking ? "thinking" : listening ? "listening" : "idle";
   const typingActivity = Math.min(1, input.length / 80);
+  const isDialog = activeNav === "Dialog";
 
   useEffect(() => {
     let alive = true;
@@ -119,6 +125,21 @@ export function App() {
     const interval = window.setInterval(loadMetrics, 2500);
     return () => { alive = false; window.clearInterval(interval); };
   }, []);
+
+  useEffect(() => {
+    const list = messageListRef.current;
+    if (!list) return;
+    list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
+  }, [messages, thinking]);
+
+  function readChatResponse(data: ChatApiResponse) {
+    if (typeof data.response === "string" && data.response.trim()) return data.response;
+    if (typeof data.answer === "string" && data.answer.trim()) return data.answer;
+    if (typeof data.content === "string" && data.content.trim()) return data.content;
+    if (typeof data.message === "string" && data.message.trim()) return data.message;
+    if (data.message && typeof data.message === "object" && typeof data.message.content === "string") return data.message.content;
+    return "Ich habe keine Antwort vom lokalen Modell bekommen.";
+  }
 
   async function sendMessage(text = input.trim()) {
     const cleanText = text.trim();
@@ -145,7 +166,7 @@ export function App() {
       setMessages((prev) => [...prev, {
         role: "jarvis",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: result.response || "Ich habe keine Antwort vom lokalen Modell bekommen.",
+        text: readChatResponse(result),
       }]);
     } catch (error) {
       setMessages((prev) => [...prev, {
@@ -163,7 +184,7 @@ export function App() {
   }
 
   return (
-    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""}`}>
+    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""} ${isDialog ? "dialog-mode" : ""}`}>
       <DayStartCard onSend={sendMessage} />
       <header className="jarvis-topbar">
         <div className="jarvis-brand">
@@ -213,7 +234,7 @@ export function App() {
               <button onClick={() => setMessages(initialMessages)}>NEUER CHAT</button>
             </div>
           </div>
-          <div className="jarvis-message-list">
+          <div className="jarvis-message-list" ref={messageListRef}>
             {messages.map((message, index) => (
               <article key={`${message.time}-${index}-${message.text}`} className="jarvis-message-card">
                 <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "●" : ""}</div>

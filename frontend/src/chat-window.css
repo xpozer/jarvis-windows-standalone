@@ -1,0 +1,56 @@
+.dialog-mode .jarvis-main {
+  grid-template-columns: minmax(0, 1fr);
+  width: min(58.2vw, calc(100vw - 720px));
+}
+
+.dialog-mode .jarvis-conversation {
+  min-width: 0;
+  padding-left: 1.2vw;
+  padding-right: 0;
+}
+
+.dialog-mode .jarvis-core-stage {
+  display: none;
+}
+
+.jarvis-message-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(5, 216, 255, .48) rgba(5, 18, 32, .56);
+}
+
+.jarvis-message-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.jarvis-message-list::-webkit-scrollbar-track {
+  background: rgba(5, 18, 32, .56);
+  border-radius: 999px;
+}
+
+.jarvis-message-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(5, 216, 255, .72), rgba(0, 92, 180, .55));
+  border: 2px solid rgba(5, 18, 32, .78);
+  border-radius: 999px;
+}
+
+.dialog-mode .jarvis-message-list {
+  height: 68.8vh;
+  padding-bottom: 1.5vh;
+}
+
+.dialog-mode .jarvis-message-card {
+  min-height: 10.2vh;
+}
+
+.thinking-card {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 1600px) {
+  .dialog-mode .jarvis-main {
+    width: calc(100vw - 620px);
+  }
+}
