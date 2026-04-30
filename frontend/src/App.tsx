@@ -17,6 +17,15 @@ type Message = {
   text: string;
   link?: string;
   file?: boolean;
+  meta?: ChatMessageMeta;
+};
+
+type ChatMessageMeta = {
+  agent?: string;
+  model?: string;
+  provider?: string;
+  duration_ms?: number;
+  memory?: { facts_used?: number; facts_extracted?: number };
 };
 
 type SystemMetrics = {
@@ -29,6 +38,7 @@ type SystemMetrics = {
 
 type ChatApiResponse = {
   ok?: boolean;
+  session_id?: string;
   response?: string;
   answer?: string;
   content?: string;
@@ -36,6 +46,25 @@ type ChatApiResponse = {
   agent?: string;
   reason?: string;
   model?: string;
+  provider?: string;
+  duration_ms?: number;
+  meta?: ChatMessageMeta;
+  memory?: { facts_used?: number; facts_extracted?: number };
+};
+
+type ChatSessionSummary = {
+  id: string;
+  title: string;
+  updated_at?: string;
+  message_count?: number;
+  last_message?: string;
+  agent?: string;
+  model?: string;
+  provider?: string;
+};
+
+type ChatSessionDetail = ChatSessionSummary & {
+  messages?: Array<{ role: Role; time?: string; text?: string; meta?: ChatMessageMeta }>;
 };
 
 const fallbackMetrics: SystemMetrics = {
@@ -102,6 +131,21 @@ function buildHistory(messages: Message[]) {
   }));
 }
 
+function fmtDuration(value: number | undefined) {
+  if (typeof value !== "number") return "";
+  if (value < 1000) return `${value} ms`;
+  return `${(value / 1000).toFixed(1)} s`;
+}
+
+function fmtSessionTime(value: string | undefined) {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+}
+
 export function App() {
   const [activeNav, setActiveNav] = useState("Dialog");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -112,6 +156,9 @@ export function App() {
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
   const [lastAgent, setLastAgent] = useState("general");
   const [uiZoom, setUiZoom] = useState(loadUiZoom);
+  const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
   const messageListRef = useRef<HTMLDivElement | null>(null);
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
@@ -138,6 +185,10 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    void loadSessions();
+  }, []);
+
+  useEffect(() => {
     const list = messageListRef.current;
     if (!list) return;
     list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
@@ -158,6 +209,78 @@ export function App() {
     return "Ich habe keine Antwort vom lokalen Modell bekommen.";
   }
 
+  function chatMetaFromResponse(result: ChatApiResponse): ChatMessageMeta {
+    return result.meta || {
+      agent: result.agent,
+      model: result.model,
+      provider: result.provider,
+      duration_ms: result.duration_ms,
+      memory: result.memory,
+    };
+  }
+
+  async function loadSessions() {
+    try {
+      const response = await fetch("/api/chat/sessions", { cache: "no-store" });
+      if (!response.ok) throw new Error(String(response.status));
+      const data = await response.json().catch(() => ({}));
+      setSessions(Array.isArray(data.sessions) ? data.sessions : []);
+    } catch {
+      setSessions([]);
+    }
+  }
+
+  async function loadSession(sessionId: string) {
+    setSessionLoading(true);
+    try {
+      const response = await fetch(`/api/chat/sessions/${encodeURIComponent(sessionId)}`, { cache: "no-store" });
+      const data = await response.json().catch(() => ({})) as ChatSessionDetail;
+      if (!response.ok) throw new Error(typeof (data as any).detail === "string" ? (data as any).detail : `HTTP ${response.status}`);
+      const loaded = Array.isArray(data.messages) ? data.messages : [];
+      setMessages(loaded.map((message) => ({
+        role: message.role === "jarvis" ? "jarvis" : "operator",
+        time: message.time ? new Date(message.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+        text: message.text || "",
+        meta: message.meta,
+      })));
+      setActiveSessionId(sessionId);
+      setActiveNav("Dialog");
+    } catch (error) {
+      setMessages((prev) => [...prev, {
+        role: "jarvis",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text: `Gespräch konnte nicht geladen werden: ${error instanceof Error ? error.message : String(error)}`,
+      }]);
+    } finally {
+      setSessionLoading(false);
+    }
+  }
+
+  async function deleteSession(sessionId: string) {
+    try {
+      const response = await fetch(`/api/chat/sessions/${encodeURIComponent(sessionId)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(String(response.status));
+      if (activeSessionId === sessionId) {
+        setActiveSessionId(null);
+        setMessages([]);
+      }
+      await loadSessions();
+    } catch (error) {
+      setMessages((prev) => [...prev, {
+        role: "jarvis",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        text: `Gespräch konnte nicht gelöscht werden: ${error instanceof Error ? error.message : String(error)}`,
+      }]);
+    }
+  }
+
+  function newChat() {
+    setActiveSessionId(null);
+    setMessages([]);
+    setInput("");
+    setActiveNav("Dialog");
+  }
+
   async function sendMessage(text = input.trim()) {
     const cleanText = text.trim();
     if (!cleanText || thinking) return;
@@ -171,7 +294,7 @@ export function App() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: cleanText, history }),
+        body: JSON.stringify({ message: cleanText, history, session_id: activeSessionId }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -180,11 +303,14 @@ export function App() {
       }
       const result = data as ChatApiResponse;
       setLastAgent(result.agent || "general");
+      if (result.session_id) setActiveSessionId(result.session_id);
       setMessages((prev) => [...prev, {
         role: "jarvis",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         text: readChatResponse(result),
+        meta: chatMetaFromResponse(result),
       }]);
+      await loadSessions();
     } catch (error) {
       setMessages((prev) => [...prev, {
         role: "jarvis",
@@ -261,7 +387,7 @@ export function App() {
             </div>
             <div className="jarvis-head-actions">
               <button className={pinned ? "active" : ""} onClick={() => setPinned(!pinned)}>ANHEFTEN</button>
-              <button onClick={() => setMessages(initialMessages)}>NEUER CHAT</button>
+              <button onClick={newChat}>NEUER CHAT</button>
             </div>
           </div>
           <div className="jarvis-message-list" ref={messageListRef}>
@@ -271,6 +397,15 @@ export function App() {
                 <div className="jarvis-message-body">
                   <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "BEDIENER"}</b><span>{message.time}</span></div>
                   <p>{message.text}</p>
+                  {message.meta && (
+                    <div className="jarvis-message-insights">
+                      {message.meta.agent && <span>Agent: {message.meta.agent}</span>}
+                      {message.meta.provider && <span>Provider: {message.meta.provider}</span>}
+                      {message.meta.model && <span>Modell: {message.meta.model}</span>}
+                      {typeof message.meta.duration_ms === "number" && <span>Dauer: {fmtDuration(message.meta.duration_ms)}</span>}
+                      {message.meta.memory && <span>Memory: {message.meta.memory.facts_used || 0}/{message.meta.memory.facts_extracted || 0}</span>}
+                    </div>
+                  )}
                   {message.link && <button className="jarvis-link-btn" onClick={() => quickAction(message.link!)}>{message.link}<span>&gt;</span></button>}
                   {message.file && <div className="jarvis-file"><span>â–£</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB â€¢ PDF Dokument</small></div><button>â†“</button><button>â†—</button></div>}
                 </div>
@@ -292,8 +427,20 @@ export function App() {
       <aside className="jarvis-right-panel">
         <TodayScheduleCard onSend={sendMessage} />
         <section className="jarvis-card context-card">
-          <div className="jarvis-card-title"><h2>DIALOGKONTEXT</h2><button>â€¢ ALLES</button></div>
-          {[ ["Systemleistung Zusammenfassung", "11:42"], ["Agentennetz Status", "11:43"], ["Optimierungsbericht", "11:44"] ].map(([label, time]) => <button className="context-row" key={label} onClick={() => quickAction(label)}><span /><em>{label}</em><b>{time}</b></button>)}
+          <div className="jarvis-card-title"><h2>GESPRÄCHE</h2><button onClick={() => void loadSessions()}>{sessionLoading ? "LÄDT" : "AKTIV"}</button></div>
+          <div className="jarvis-session-list">
+            {sessions.slice(0, 4).map((session) => (
+              <div className={`jarvis-session-row ${activeSessionId === session.id ? "active" : ""}`} key={session.id}>
+                <button type="button" onClick={() => void loadSession(session.id)}>
+                  <span />
+                  <em>{session.title || "Neuer Chat"}</em>
+                  <b>{fmtSessionTime(session.updated_at)}</b>
+                </button>
+                <button type="button" className="jarvis-session-delete" onClick={() => void deleteSession(session.id)}>x</button>
+              </div>
+            ))}
+            {!sessions.length && <button className="context-row" onClick={newChat}><span /><em>Noch kein gespeicherter Chat</em><b>NEU</b></button>}
+          </div>
         </section>
         <section className="jarvis-card quick-card">
           <div className="jarvis-card-title"><h2>SCHNELLAKTIONEN</h2></div>

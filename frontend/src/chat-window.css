@@ -146,6 +146,97 @@
   border-radius: 999px;
 }
 
+.jarvis-message-insights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.jarvis-message-insights span {
+  border: 1px solid rgba(126, 231, 255, .14);
+  border-radius: 999px;
+  background: rgba(5, 18, 32, .62);
+  color: rgba(178, 232, 255, .82);
+  font-size: calc(11px * var(--ui-scale));
+  letter-spacing: .8px;
+  padding: 5px 9px;
+}
+
+.jarvis-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 12.8vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.jarvis-session-row {
+  display: grid;
+  grid-template-columns: 1fr 30px;
+  gap: 6px;
+  align-items: center;
+}
+
+.jarvis-session-row > button:first-child {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 52px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+  color: rgba(220, 240, 255, .75);
+  cursor: pointer;
+  text-align: left;
+}
+
+.jarvis-session-row span {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(5,216,255,.52);
+}
+
+.jarvis-session-row em {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(220, 240, 255, .82);
+  font-size: calc(13px * var(--ui-scale));
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-session-row b {
+  color: #98b6c6;
+  font-size: calc(12px * var(--ui-scale));
+  font-weight: 400;
+  text-align: right;
+}
+
+.jarvis-session-row.active > button:first-child em,
+.jarvis-session-row > button:first-child:hover em {
+  color: #fff;
+}
+
+.jarvis-session-row.active span {
+  background: var(--cyan);
+}
+
+.jarvis-session-delete {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 63, 103, .18);
+  border-radius: 8px;
+  background: rgba(255, 63, 103, .08);
+  color: rgba(255, 210, 220, .72);
+  cursor: pointer;
+}
+
 .dialog-mode .jarvis-message-list {
   height: 68.8vh;
   padding-bottom: 1.5vh;
