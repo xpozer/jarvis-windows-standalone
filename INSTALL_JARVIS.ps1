@@ -1,5 +1,6 @@
 param(
   [string]$InstallDir = "$env:LOCALAPPDATA\JARVIS_WINDOWS_STANDALONE",
+  [string]$SourceRoot = $PSScriptRoot,
   [switch]$SkipModel,
   [switch]$NoShortcuts,
   [switch]$NoCleanBackup
@@ -25,8 +26,23 @@ function Write-JvLine {
 function Jv-Ok { param([string]$Message) Write-JvLine "OK" $Message "Green" }
 function Jv-Warn { param([string]$Message) Write-JvLine "WARN" $Message "Yellow" }
 function Jv-Info { param([string]$Message) Write-JvLine "INFO" $Message "Gray" }
-function Jv-Step { param([string]$Message) Write-JvLine "STEP" $Message "Cyan" }
 function Jv-Fail { param([string]$Message) Write-JvLine "ERROR" $Message "Red"; throw $Message }
+function Jv-Step {
+  param([string]$Message)
+  if(-not $script:StartedAt){ $script:StartedAt = Get-Date }
+  if($null -eq $script:Step){ $script:Step = 0 }
+  if($null -eq $script:TotalSteps){ $script:TotalSteps = 0 }
+  $script:Step++
+  if($script:Step -gt $script:TotalSteps){ $script:TotalSteps = $script:Step }
+  $elapsed = (Get-Date) - $script:StartedAt
+  Write-Host ""
+  Write-Host ("=" * 68) -ForegroundColor DarkCyan
+  Write-Host ("[{0}/{1}] {2}  +{3}" -f $script:Step,$script:TotalSteps,$Message,$elapsed.ToString("mm\:ss")) -ForegroundColor Cyan
+  Write-Host ("=" * 68) -ForegroundColor DarkCyan
+  if($script:LogFile){
+    Add-Content -Path $script:LogFile -Value ("[{0}] [STEP {1}/{2}] {3}" -f (Get-Date -Format "HH:mm:ss"),$script:Step,$script:TotalSteps,$Message) -Encoding UTF8
+  }
+}
 
 function Test-IsAdmin {
   $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -202,14 +218,18 @@ function Get-NpmCmd {
 
 function Test-Port {
   param([int]$Port)
+  $c = $null
   try {
     $c = New-Object Net.Sockets.TcpClient
     $iar = $c.BeginConnect("127.0.0.1", $Port, $null, $null)
     $ok = $iar.AsyncWaitHandle.WaitOne(500, $false)
     if($ok){ $c.EndConnect($iar) }
-    $c.Close()
     return $ok
-  } catch { return $false }
+  } catch {
+    return $false
+  } finally {
+    if($c){ $c.Close() }
+  }
 }
 
 function Wait-Port {
@@ -226,61 +246,15 @@ function Invoke-Checked {
     [string]$Label,
     [string]$Command,
     [string[]]$Arguments,
-    [string]$LogName,
-    [string]$WorkingDirectory
+    [string]$LogName = "",
+    [string]$WorkingDirectory = "",
+    [string]$LogPath = ""
   )
   Jv-Step $Label
 
-  $logPath = Join-Path $script:Logs $LogName
+  if(-not $LogPath){ $LogPath = Join-Path $script:Logs $LogName }
   $argString = ConvertTo-ProcessArgumentString -Arguments $Arguments
 
-  Add-Content -Path $logPath -Value "" -Encoding UTF8
-  Add-Content -Path $logPath -Value ("[{0}] {1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $Label) -Encoding UTF8
-  Add-Content -Path $logPath -Value ("COMMAND: {0} {1}" -f $Command, $argString) -Encoding UTF8
-
-  $psi = New-Object System.Diagnostics.ProcessStartInfo
-  $psi.FileName = $Command
-  $psi.Arguments = $argString
-  $psi.WorkingDirectory = $WorkingDirectory
-  $psi.RedirectStandardOutput = $true
-  $psi.RedirectStandardError = $true
-  $psi.UseShellExecute = $false
-  $psi.CreateNoWindow = $true
-
-  $p = [System.Diagnostics.Process]::Start($psi)
-  $stdout = $p.StandardOutput.ReadToEnd()
-  $stderr = $p.StandardError.ReadToEnd()
-  $p.WaitForExit()
-
-  if($stdout){
-    Write-Host $stdout
-    Add-Content -Path $logPath -Value $stdout -Encoding UTF8
-  }
-
-  if($stderr){
-    # npm und pip schreiben Hinweise teils auf STDERR. Das ist nur kritisch, wenn der ExitCode ungleich 0 ist.
-    Write-Host $stderr -ForegroundColor DarkYellow
-    Add-Content -Path $logPath -Value $stderr -Encoding UTF8
-  }
-
-  if($p.ExitCode -ne 0){
-    Jv-Fail "$Label fehlgeschlagen. ExitCode: $($p.ExitCode). Siehe logs\$LogName"
-  }
-
-  Jv-Ok "$Label abgeschlossen"
-}
-
-function Invoke-NativeLogged {
-  param(
-    [string]$Label,
-    [string]$Command,
-    [string[]]$Arguments,
-    [string]$LogPath,
-    [string]$WorkingDirectory = ""
-  )
-  Jv-Step $Label
-
-  $argString = ConvertTo-ProcessArgumentString -Arguments $Arguments
   Add-Content -Path $LogPath -Value "" -Encoding UTF8
   Add-Content -Path $LogPath -Value ("[{0}] {1}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), $Label) -Encoding UTF8
   Add-Content -Path $LogPath -Value ("COMMAND: {0} {1}" -f $Command, $argString) -Encoding UTF8
@@ -303,7 +277,9 @@ function Invoke-NativeLogged {
     Write-Host $stdout
     Add-Content -Path $LogPath -Value $stdout -Encoding UTF8
   }
+
   if($stderr){
+    # npm und pip schreiben Hinweise teils auf STDERR. Das ist nur kritisch, wenn der ExitCode ungleich 0 ist.
     Write-Host $stderr -ForegroundColor DarkYellow
     Add-Content -Path $LogPath -Value $stderr -Encoding UTF8
   }
@@ -314,16 +290,15 @@ function Invoke-NativeLogged {
 
   Jv-Ok "$Label abgeschlossen"
 }
-function Jv-Step {
-  param([string]$Message)
-  $script:Step++
-  if($script:Step -gt $script:TotalSteps){ $script:TotalSteps = $script:Step }
-  $elapsed = (Get-Date) - $script:StartedAt
-  Write-Host ""
-  Write-Host ("=" * 68) -ForegroundColor DarkCyan
-  Write-Host ("[{0}/{1}] {2}  +{3}" -f $script:Step,$script:TotalSteps,$Message,$elapsed.ToString("mm\:ss")) -ForegroundColor Cyan
-  Write-Host ("=" * 68) -ForegroundColor DarkCyan
-  Add-Content -Path $script:LogFile -Value ("[{0}] [STEP {1}/{2}] {3}" -f (Get-Date -Format "HH:mm:ss"),$script:Step,$script:TotalSteps,$Message) -Encoding UTF8
+
+function Invoke-NativeLogged {
+  param(
+    [string]$Label,
+    [string]$Command,
+    [string[]]$Arguments,
+    [string]$LogPath
+  )
+  Invoke-Checked $Label $Command $Arguments -LogPath $LogPath
 }
 
 function Write-DesktopFailureLog {

@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "vB*.*"
+      - "B*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build release package
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python tooling only when Python files exist
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+
+          if ($PythonFiles.Count -gt 0) {
+            pip install ruff==0.8.4 black==24.10.0 pytest==8.3.4 pytest-cov==6.0.0
+          } else {
+            Write-Host "No Python files found. Skipping Python dependency install."
+          }
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Build frontend bundle
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            npm run build --if-present
+          } else {
+            Write-Host "No frontend package found. Skipping frontend build."
+          }
+
+      - name: Create installer zip
+        shell: pwsh
+        run: |
+          $TagName = "${{ github.ref_name }}"
+          $ReleaseDir = "release"
+          $ZipName = "jarvis-windows-standalone-$TagName.zip"
+          New-Item -ItemType Directory -Force -Path $ReleaseDir | Out-Null
+
+          $Exclude = @(
+            ".git",
+            ".github",
+            "node_modules",
+            ".venv",
+            "venv",
+            "env",
+            "logs",
+            "audit",
+            "knowledge_index",
+            "local_data",
+            "runtime",
+            "cache",
+            "release",
+            "artifacts"
+          )
+
+          $Items = Get-ChildItem -Force | Where-Object { $Exclude -notcontains $_.Name }
+          Compress-Archive -Path $Items.FullName -DestinationPath "$ReleaseDir\$ZipName" -Force
+          Get-FileHash -Algorithm SHA256 "$ReleaseDir\$ZipName" | Format-List | Out-File "$ReleaseDir\$ZipName.sha256.txt"
+
+      - name: Generate changelog excerpt
+        shell: pwsh
+        run: |
+          $TagName = "${{ github.ref_name }}"
+          if (Test-Path CHANGELOG.md) {
+            Get-Content CHANGELOG.md | Out-File release-notes.md -Encoding utf8
+          } else {
+            "Release $TagName" | Out-File release-notes.md -Encoding utf8
+          }
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          files: |
+            release/*.zip
+            release/*.sha256.txt

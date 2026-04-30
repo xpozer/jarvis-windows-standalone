@@ -1,0 +1,208 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  lint-python:
+    name: Lint Python
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install Python lint tooling
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff==0.8.4 black==24.10.0
+
+      - name: Run ruff when Python files exist
+        shell: pwsh
+        run: |
+          $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+
+          if ($PythonFiles.Count -gt 0) {
+            ruff check .
+          } else {
+            Write-Host "No Python files found. Skipping ruff."
+          }
+
+      - name: Run black check when Python files exist
+        shell: pwsh
+        run: |
+          $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+
+          if ($PythonFiles.Count -gt 0) {
+            black --check .
+          } else {
+            Write-Host "No Python files found. Skipping black."
+          }
+
+  test-python:
+    name: Test Python
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install Python test tooling
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest==8.3.4 pytest-cov==6.0.0
+
+      - name: Run pytest when tests exist
+        shell: pwsh
+        run: |
+          if (Test-Path tests) {
+            pytest
+          } else {
+            Write-Host "No tests directory found. Skipping pytest."
+          }
+
+  lint-typescript:
+    name: TypeScript Check
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Run typecheck when available
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            npm run typecheck --if-present
+          } else {
+            Write-Host "No frontend package found. Skipping typecheck."
+          }
+
+  test-typescript:
+    name: Test TypeScript
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Run frontend tests only when script exists
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            $Package = Get-Content package.json -Raw | ConvertFrom-Json
+            if ($Package.scripts.test) {
+              npm test
+            } else {
+              Write-Host "No frontend test script found. Skipping tests."
+            }
+          } else {
+            Write-Host "No frontend package found. Skipping tests."
+          }
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package-lock.json) {
+            cd frontend
+            npm ci
+          } elseif (Test-Path frontend/package.json) {
+            cd frontend
+            npm install
+          } else {
+            Write-Host "No frontend package found. Skipping install."
+          }
+
+      - name: Build frontend when available
+        shell: pwsh
+        run: |
+          if (Test-Path frontend/package.json) {
+            cd frontend
+            npm run build --if-present
+          } else {
+            Write-Host "No frontend package found. Skipping build."
+          }

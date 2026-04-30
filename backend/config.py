@@ -40,6 +40,7 @@ TASKS_FILE = DATA_DIR / "tasks.json"
 REMINDERS_FILE = DATA_DIR / "reminders.json"
 WORK_MEMORY_FILE = DATA_DIR / "work_memory.json"
 FILE_INDEX_FILE = DATA_DIR / "file_index.json"
+UPLOAD_DIR = DATA_DIR / "uploads"
 AGENT_STATUS_FILE = DATA_DIR / "agent_status.json"
 TOOL_REGISTRY_FILE = DATA_DIR / "tool_registry.json"
 ACTIONS_FILE = DATA_DIR / "pending_actions.json"
@@ -74,7 +75,7 @@ PIPER_DIR = BASE_DIR / "piper"
 PIPER_VOICES_DIR = PIPER_DIR / "voices"
 PIPER_OUT_DIR = DATA_DIR / "voice_output"
 
-for _dir in (BACKUP_DIR, DIAG_DIR, CONTEXT_PACK_DIR, CORRUPT_BACKUP_DIR, PIPER_OUT_DIR):
+for _dir in (BACKUP_DIR, DIAG_DIR, CONTEXT_PACK_DIR, CORRUPT_BACKUP_DIR, PIPER_OUT_DIR, UPLOAD_DIR):
     _dir.mkdir(exist_ok=True)
 
 FRONTEND_DIR = BASE_DIR / "frontend"
@@ -98,6 +99,12 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY") or None
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY") or None
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or None
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY") or None
+LLM_PROVIDER = JARVIS_PROVIDER
+OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
+OPENROUTER_HTTP_REFERER = os.environ.get("OPENROUTER_HTTP_REFERER", "http://127.0.0.1:8000")
+OPENROUTER_APP_TITLE = os.environ.get("OPENROUTER_APP_TITLE", "JARVIS Windows Standalone")
+OPENROUTER_FALLBACK_TO_OLLAMA = os.environ.get("OPENROUTER_FALLBACK_TO_OLLAMA", "true").strip().lower() not in {"0", "false", "no", "off"}
 
 PROVIDER_CONFIG: dict[str, dict[str, str | None]] = {
     "ollama": {

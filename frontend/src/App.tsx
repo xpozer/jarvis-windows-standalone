@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Orb, OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
+import { DayStartCard } from "./components/DayStartCard";
+import { TodayScheduleCard } from "./components/TodayScheduleCard";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
 
@@ -41,7 +43,7 @@ const fallbackMetrics: SystemMetrics = {
 
 const navGroups = [
   { title: "HAUPT", items: [["H", "Start"], ["D", "Dialog"], ["W", "Wissensbasis"], ["S", "Datenstroeme"], ["A", "Aufgaben & Automationen"]] },
-  { title: "SYSTEM", items: [["D", "Diagnose"], ["N", "Agentennetz"], ["M", "Speicherbanken"], ["K", "Kernsysteme"], ["S", "Sicherheitszentrale"]] },
+  { title: "SYSTEM", items: [["R", "JARVIS Runtime"], ["D", "Diagnose"], ["N", "Agentennetz"], ["M", "Speicherbanken"], ["K", "Kernsysteme"], ["S", "Sicherheitszentrale"]] },
   { title: "WERKZEUGE", items: [["C", "Code-Werkzeuge"], ["A", "Datenanalyse"], ["F", "Dateimanager"], ["R", "Websuche"], ["API", "API-Konsole"]] },
 ];
 
@@ -162,6 +164,7 @@ export function App() {
 
   return (
     <div className={`jarvis-screen ${thinking ? "is-thinking" : ""}`}>
+      <DayStartCard onSend={sendMessage} />
       <header className="jarvis-topbar">
         <div className="jarvis-brand">
           <div className="jarvis-mini-orb" />
@@ -236,6 +239,7 @@ export function App() {
       </main>
 
       <aside className="jarvis-right-panel">
+        <TodayScheduleCard onSend={sendMessage} />
         <section className="jarvis-card context-card">
           <div className="jarvis-card-title"><h2>DIALOGKONTEXT</h2><button>• ALLES</button></div>
           {[ ["Systemleistung Zusammenfassung", "11:42"], ["Agentennetz Status", "11:43"], ["Optimierungsbericht", "11:44"] ].map(([label, time]) => <button className="context-row" key={label} onClick={() => quickAction(label)}><span /><em>{label}</em><b>{time}</b></button>)}

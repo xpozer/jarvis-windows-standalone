@@ -21,7 +21,7 @@ from urllib import request, error
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi.staticfiles import StaticFiles
 from skill_system import get_skill_manager
 import audit_log as audit
@@ -1871,8 +1871,8 @@ class OrchReq(BaseModel):
     user_input: str
     api_url: str = "http://127.0.0.1:8000"
     model: str = DEFAULT_MODEL
-    memory_facts: list = []
-    history: list = []
+    memory_facts: list = Field(default_factory=list)
+    history: list = Field(default_factory=list)
 def list_orch_agents():
     return {a:{"name":a,"description":system_prompt_for(a)} for a in ["sap","calendar","research","memory","email","general","file","exam","vde"]}
 def orchestrate_run(req: OrchReq):

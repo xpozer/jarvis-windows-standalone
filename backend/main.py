@@ -40,8 +40,13 @@ from routes.system import router as system_router
 from routes.email import router as email_router
 from routes.export import router as export_router
 from routes.metrics import router as metrics_router
+from routes.calendar import router as calendar_router
+from routes.day_start import router as day_start_router
+from routes.usejarvis import router as usejarvis_router
 
 from services import _runtime as core
+from services import usejarvis_runtime
+from services import usejarvis_workflow
 
 classify_agent = core.classify_agent
 ollama_online = core.ollama_online
@@ -79,6 +84,13 @@ async def on_startup():
         log("INFO", "Agent Registry und Tool Registry initialisiert")
     except Exception as e:
         log("WARN", "Registry-Init fehlgeschlagen", error=str(e))
+    try:
+        usejarvis_runtime.init_runtime()
+        usejarvis_workflow.init_workflow_runtime()
+        usejarvis_runtime.audit("system", "runtime.startup", "UseJARVIS Runtime und Workflow Runtime initialisiert", "low", {"version": core.app_version()})
+        log("INFO", "UseJARVIS Runtime und Workflow Runtime initialisiert")
+    except Exception as e:
+        log("WARN", "UseJARVIS Runtime Init fehlgeschlagen", error=str(e))
     try:
         audit.log_action("backend_startup", agent="system", result="ok")
     except Exception:
@@ -124,6 +136,9 @@ app.include_router(system_router)
 app.include_router(email_router)
 app.include_router(export_router)
 app.include_router(metrics_router)
+app.include_router(calendar_router)
+app.include_router(day_start_router)
+app.include_router(usejarvis_router)
 
 
 @app.get("/", include_in_schema=False)
@@ -135,6 +150,9 @@ def root():
         "status": "online",
         "docs": "/docs",
         "health": "/health",
+        "runtime": "/api/runtime/status",
+        "workflows": "/api/runtime/workflows",
+        "sidecars": "/api/runtime/sidecars",
         "hint": "Frontend Build fehlt. Bitte FIRST_SETUP.bat ausfuehren.",
     }
 
