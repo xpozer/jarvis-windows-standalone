@@ -4,6 +4,21 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.1] - 2026-05-01
+
+### Added
+
+- Lokale LifeOS Beispielkonfiguration unter `config/lifeos.example.json`.
+- Beispielstruktur für Daily Briefing, Work Radar, Life Modules, Timeline und Security Vorgaben.
+
+### Changed
+
+- LifeOS Dokumentation um lokale Datenstruktur und sicheren Umgang mit `config/lifeos.json` ergänzt.
+
+### Security
+
+- Persönliche lokale LifeOS Daten sollen nicht ins Repository committed werden.
+
 ## [B6.6.0] - 2026-05-01
 
 ### Added
