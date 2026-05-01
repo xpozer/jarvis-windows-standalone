@@ -151,6 +151,15 @@ def _phase(step: str, label: str, detail: str = "") -> str:
     return _sse("phase", {"step": step, "label": label, "detail": detail})
 
 
+def _orb_event(kind: str, label: str, detail: str = "", intensity: float = 0.65) -> str:
+    return _sse("orb", {
+        "kind": kind,
+        "label": label,
+        "detail": detail,
+        "intensity": max(0.0, min(1.0, intensity)),
+    })
+
+
 @router.post("/chat")
 def chat(req: ChatRequest) -> dict[str, Any]:
     started = time.perf_counter()
@@ -258,12 +267,19 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
                 "model": model,
                 "provider": JARVIS_PROVIDER,
             })
+            yield _orb_event("agent_route", f"Agent {agent_id}", reason, 0.7)
             yield _phase("agent", f"Agent aktiv: {agent_id}", reason)
             yield _phase("memory", "Gedächtnis wird geprüft", f"{len(memory_messages)} relevante Memory-Bloecke gefunden.")
             yield _sse("memory", {"facts_used": len(memory_messages)})
+            if memory_messages:
+                yield _orb_event("memory_hit", "Memory Treffer", f"{len(memory_messages)} relevante Bloecke geladen.", 0.85)
+            else:
+                yield _orb_event("memory_scan", "Memory Scan", "Keine passenden Memory-Bloecke gefunden.", 0.45)
             yield _phase("model", f"Provider verbunden: {JARVIS_PROVIDER}", f"Modell {model}")
+            yield _orb_event("provider_contact", f"Provider {JARVIS_PROVIDER}", f"Modell {model}", 0.55)
 
             yield _phase("answer", "Antwort wird formuliert", "JARVIS schreibt live in den Verlauf.")
+            yield _orb_event("speech_start", "Antwort startet", "Ausgabe wird live in den Verlauf geschrieben.", 0.75)
             stream_result = call_llm(messages, model, temperature=0.35, stream=True)
             chunks = [stream_result] if isinstance(stream_result, str) else stream_result
             for chunk in chunks:
@@ -326,6 +342,7 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
         except Exception as exc:
             log("ERROR", "Lokaler Chat Stream fehlgeschlagen", error=str(exc), agent=agent_id)
             agent_registry.update_status(agent_id, "error", last_action=str(exc)[:160], error=True)
+            yield _orb_event("error_pulse", "Stream Fehler", str(exc)[:180], 1.0)
             yield _sse("error", {"detail": f"Chat Fehler: {exc}"})
 
     return StreamingResponse(

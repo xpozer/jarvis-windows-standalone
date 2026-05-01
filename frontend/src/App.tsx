@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { Orb, OrbState } from "./components/Orb";
+import { Orb, type OrbEventSignal, type OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
 import { DayStartCard } from "./components/DayStartCard";
 import { TodayScheduleCard } from "./components/TodayScheduleCard";
@@ -63,6 +63,8 @@ type ChatStreamPayload = ChatApiResponse & {
   detail?: string;
   step?: string;
   label?: string;
+  kind?: string;
+  intensity?: number;
   facts_used?: number;
 };
 
@@ -189,6 +191,8 @@ export function App() {
   const [thinking, setThinking] = useState(false);
   const [listening, setListening] = useState(false);
   const [interactionState, setInteractionState] = useState<OrbState>("idle");
+  const [orbSignal, setOrbSignal] = useState<OrbEventSignal | null>(null);
+  const [orbStatus, setOrbStatus] = useState("BEREIT");
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
   const [lastAgent, setLastAgent] = useState("general");
   const [uiZoom, setUiZoom] = useState(loadUiZoom);
@@ -378,6 +382,7 @@ export function App() {
       function updatePhase(label: string, detail = "", step = "") {
         if (step === "answer") setInteractionState("speaking");
         else if (step && step !== "done") setInteractionState("thinking");
+        setOrbStatus(label);
         setMessages((prev) => prev.map((message) => (
           message.streamId === streamId
             ? { ...message, phase: label, phaseDetail: detail, pulse: (message.pulse || 0) + 1 }
@@ -388,6 +393,18 @@ export function App() {
       function handleEvent(item: ChatStreamEvent) {
         if (item.event === "meta") {
           if (item.data.agent) setLastAgent(item.data.agent);
+          return;
+        }
+        if (item.event === "orb") {
+          const label = item.data.label || "Orb Signal";
+          setOrbStatus(label);
+          setOrbSignal({
+            kind: item.data.kind || "pulse",
+            label,
+            detail: item.data.detail || "",
+            intensity: item.data.intensity,
+            nonce: Date.now() + Math.random(),
+          });
           return;
         }
         if (item.event === "phase") {
@@ -404,6 +421,7 @@ export function App() {
           return;
         }
         if (item.event === "done") {
+          setOrbStatus("BEREIT");
           finishStream(item.data);
           return;
         }
@@ -429,6 +447,7 @@ export function App() {
       await loadSessions();
     } catch (error) {
       setInteractionState("idle");
+      setOrbStatus("FEHLER");
       setMessages((prev) => prev.map((message) => (
         message.streamId === streamId
           ? {
@@ -548,9 +567,9 @@ export function App() {
 
         <section className="jarvis-core-stage">
           <div className="jarvis-legacy-orb-wrap">
-            <Orb state={orbState} typingActivity={typingActivity} heatmapActive={thinking} />
+            <Orb state={orbState} typingActivity={typingActivity} heatmapActive={thinking || orbState === "speaking"} eventSignal={orbSignal} />
           </div>
-          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><p>Anpassungsfaehig&nbsp;&nbsp;â€¢&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;â€¢&nbsp;&nbsp;Zuverlaessig</p><div /></div>
+          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><small>{orbStatus}</small><p>Anpassungsfaehig&nbsp;&nbsp;â€¢&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;â€¢&nbsp;&nbsp;Zuverlaessig</p><div /></div>
         </section>
       </main>
 

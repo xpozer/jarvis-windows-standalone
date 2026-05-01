@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.10] - 2026-05-01
+
+### Added
+
+- Orb Event Layer v1 fuer echte Stream-Signale am JARVIS Kern.
+- Chat Streaming sendet nun Orb-Events fuer Agent Routing, Memory Scan, Provider Kontakt, Antwortstart und Fehlerpulse.
+- Dialog Orb zeigt den aktuellen Kernstatus direkt unter dem Label.
+
+### Changed
+
+- Orb reagiert waehrend Antworten mit zusaetzlichen Synapsen-Pulsen, Memory-Blitzen und roten Fehler/Thinking-Akzenten.
+
 ## [B6.6.9] - 2026-05-01
 
 ### Added

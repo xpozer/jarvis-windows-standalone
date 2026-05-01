@@ -2,11 +2,19 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 
 export type OrbState = "idle" | "listening" | "thinking" | "speaking";
+export type OrbEventSignal = {
+  kind: string;
+  label?: string;
+  detail?: string;
+  intensity?: number;
+  nonce: number;
+};
 
 interface OrbProps {
   state: OrbState;
   heatmapActive?: boolean;
   typingActivity?: number; // 0-1, driven by InputBar
+  eventSignal?: OrbEventSignal | null;
   onNodeClick?: (nodeId: number, state: OrbState) => void;
 }
 
@@ -49,12 +57,13 @@ interface DualChannel {
   latency: number;
 }
 
-export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeClick }: OrbProps) {
+export function Orb({ state, heatmapActive = false, typingActivity = 0, eventSignal = null, onNodeClick }: OrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lineCanvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<OrbState>(state);
   const heatmapRef = useRef(heatmapActive);
   const typingRef = useRef(typingActivity);
+  const eventPulseRef = useRef({ kind: "", intensity: 0, ttl: 0 });
   const bootDoneRef = useRef(false);
 
   const [popup, setPopup] = useState<NodePopup | null>(null);
@@ -69,6 +78,19 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { heatmapRef.current = heatmapActive; }, [heatmapActive]);
   useEffect(() => { typingRef.current = typingActivity; }, [typingActivity]);
+  useEffect(() => {
+    if (!eventSignal) return;
+    eventPulseRef.current = {
+      kind: eventSignal.kind,
+      intensity: Math.max(0.2, Math.min(1, eventSignal.intensity ?? 0.65)),
+      ttl: 1,
+    };
+    const trigger = (threeRef.current as any)?.triggerMemoryFlash;
+    if (typeof trigger === "function") {
+      const bursts = eventSignal.kind.includes("memory") ? 3 : eventSignal.kind.includes("error") ? 2 : 1;
+      for (let i = 0; i < bursts; i++) trigger();
+    }
+  }, [eventSignal]);
 
   const handleCanvasClick = useCallback((e: MouseEvent) => {
     const ref = threeRef.current;
@@ -338,6 +360,10 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
       const st = stateRef.current;
       const hm = heatmapRef.current;
       const typing = typingRef.current;
+      const eventPulse = eventPulseRef.current;
+      if (eventPulse.ttl > 0) eventPulse.ttl *= 0.96;
+      const pulsePower = eventPulse.ttl * eventPulse.intensity;
+      const pulseKind = eventPulse.kind;
 
       // ── Boot animation ───────────────────────────────────────
       if (bootProgress < 1) {
@@ -367,6 +393,12 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
         case "listening":targetRadius=22; targetSpeed=0.3;  targetBright=0.65; targetSize=0.4;  targetLineAmount=0.4;  targetElectronRate=0; break;
         case "thinking": targetRadius=16; targetSpeed=0.5;  targetBright=0.7;  targetSize=0.3;  targetLineAmount=1.0;  targetElectronRate=0.015; break;
         case "speaking": targetRadius=18; targetSpeed=0.2;  targetBright=0.7;  targetSize=0.4;  targetLineAmount=0.8;  targetElectronRate=0; break;
+      }
+      if (pulsePower > 0.03) {
+        targetBright = Math.min(1, targetBright + pulsePower * 0.3);
+        targetLineAmount = Math.min(1.25, targetLineAmount + pulsePower * 0.35);
+        targetElectronRate = Math.max(targetElectronRate, 0.01 + pulsePower * 0.012);
+        if (pulseKind.includes("error")) targetSpeed += pulsePower * 0.25;
       }
 
       const lf=0.02;
@@ -531,6 +563,14 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
               for(let i=0;i<N;i++){const dx=a[i*3]-cx,dy=a[i*3+1]-cy,dz=a[i*3+2]-cz;if(Math.sqrt(dx*dx+dy*dy+dz*dz)<radius)heatTargets[i]=(st==="thinking"?0.88:0.75)+Math.random()*(st==="thinking"?0.12:0.25);}
             }
           }
+          if(pulsePower>0.05){
+            const clusters = pulseKind.includes("memory") ? 4 : pulseKind.includes("error") ? 6 : 3;
+            const radius = pulseKind.includes("error") ? 10 : 8;
+            for(let k=0;k<clusters;k++){
+              const cx=(Math.random()-.5)*22,cy=(Math.random()-.5)*22,cz=(Math.random()-.5)*22;
+              for(let i=0;i<N;i++){const dx=a[i*3]-cx,dy=a[i*3+1]-cy,dz=a[i*3+2]-cz;if(Math.sqrt(dx*dx+dy*dy+dz*dz)<radius)heatTargets[i]=Math.max(heatTargets[i], pulseKind.includes("provider") ? 0.62 : 0.86 + pulsePower*0.12);}
+            }
+          }
         }
         for(let i=0;i<N;i++)heatValues[i]+=(heatTargets[i]-heatValues[i])*0.035;
         for(let i=0;i<N;i++){
@@ -539,11 +579,13 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
           heatColors[i*3]=r;heatColors[i*3+1]=g;heatColors[i*3+2]=b;
         }
         colorAttr.array.set(heatColors);colorAttr.needsUpdate=true;
-        heatMat.opacity=Math.max(0.7,currentBright+bass*0.1);heatMat.size=currentSize+bass*0.06;
+        heatMat.opacity=Math.max(0.7,currentBright+bass*0.1+pulsePower*0.12);heatMat.size=currentSize+bass*0.06+pulsePower*0.08;
       } else {
         heatPoints.visible=false; points.visible=true;
-        mat.opacity=currentBright+bass*0.08; mat.size=currentSize+bass*0.05;
-        if(st==="thinking"){mat.color.lerp(new THREE.Color(0xff3f67),0.02);lineMat.color.lerp(new THREE.Color(0xff3f67),0.02);}
+        mat.opacity=currentBright+bass*0.08+pulsePower*0.1; mat.size=currentSize+bass*0.05+pulsePower*0.05;
+        if(pulseKind.includes("error")){mat.color.lerp(new THREE.Color(0xff2d4f),0.04);lineMat.color.lerp(new THREE.Color(0xff2d4f),0.04);}
+        else if(pulseKind.includes("memory")){mat.color.lerp(new THREE.Color(0xffffff),0.035);lineMat.color.lerp(new THREE.Color(0x8de8ff),0.035);}
+        else if(st==="thinking"){mat.color.lerp(new THREE.Color(0xff3f67),0.02);lineMat.color.lerp(new THREE.Color(0xff3f67),0.02);}
         else if(st==="speaking"){mat.color.lerp(new THREE.Color(0x5ab8f0),0.015);lineMat.color.lerp(new THREE.Color(0x5ab8f0),0.015);}
         else{mat.color.lerp(new THREE.Color(0x4ca8e8),0.015);lineMat.color.lerp(new THREE.Color(0x4ca8e8),0.015);}
       }

@@ -164,6 +164,23 @@
   letter-spacing: 2px;
 }
 
+.dialog-mode .jarvis-core-stage .jarvis-core-label small {
+  display: block;
+  max-width: 220px;
+  margin-top: 6px;
+  overflow: hidden;
+  color: rgba(137, 225, 255, .78);
+  font-family: Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(5, 216, 255, .35);
+  white-space: nowrap;
+}
+
 .dialog-mode .jarvis-core-stage .jarvis-core-label p {
   display: none;
 }
