@@ -39,6 +39,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | Autonome Assistant Roadmap | in Arbeit | Neue fünf Block Roadmap liegt unter `docs/autonomous-assistant-roadmap.md` |
 | Screen Perception 1.1 | erledigt | Modulstruktur für Bildschirm Beobachtung ist auf `feature/screen` angelegt |
+| Screen Perception 1.2 | erledigt | Privacy First Konfiguration, Pause Status, Beispielconfig und Indikator Grundlage ergänzt |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
@@ -50,6 +51,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.0 Screen 1.2
+
+- Privacy First Konfigurationsmodell `backend/perception/screen/config.py` ergänzt.
+- Sichere Beispielkonfiguration `config/screen-perception.example.json` ergänzt.
+- Private Konfiguration `config/screen-perception.json` und temporärer Buffer `tmp/` werden ignoriert.
+- Pause Status, Runtime Status, Aktivitätsindikator und Pause Hotkey Grundlage ergänzt.
+- Screen Perception README aktualisiert.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.7.0 Screen 1.1
 
@@ -179,7 +189,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Screen Perception 1.2 | offen | Privacy First Konfiguration mit Aktivierung, Pause Status und sichtbarem Aktivitätsindikator ergänzen |
+| Hoch | Screen Perception 1.3 | offen | Performance Grundlagen mit WebP Ring Buffer Limit, Diff Detection und Speichergrenze ergänzen |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Episodic Memory | offen | Nach Abschluss Block 1 beginnen |
 | Mittel | Mail Triage | offen | Nach Abschluss Block 2 beginnen |
@@ -217,20 +227,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
-| Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
+| Private Daten im Repo | reduziert | `config/lifeos.json` und `config/screen-perception.json` sind ignoriert, trotzdem vor Commits prüfen |
 
 ## Nächster sinnvoller Schritt
 
-Nach Aufgabe 1.1 ist der nächste sinnvolle Schritt Screen Perception 1.2. Dabei wird die Privacy First Konfiguration konkretisiert, bevor irgendeine dauerhafte Beobachtung aktiviert wird.
+Nach Aufgabe 1.2 ist der nächste sinnvolle Schritt Screen Perception 1.3. Dabei werden Performance Grundlagen ergänzt, bevor später dauerhafte Beobachtung oder Vision Calls aktiviert werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Screen Perception 1.2 Privacy First Konfiguration
-2. Screen Perception 1.3 Performance
-3. Screen Perception 1.4 Kontext Datenmodell finalisieren
-4. Screen Perception 1.5 Memory Integration
-5. Screen Perception 1.6 Proaktive Trigger
+1. Screen Perception 1.3 Performance
+2. Screen Perception 1.4 Kontext Datenmodell finalisieren
+3. Screen Perception 1.5 Memory Integration
+4. Screen Perception 1.6 Proaktive Trigger
+5. Screen Perception 1.7 User Kommandos
 ```
 
 ## Pflege Ablauf
