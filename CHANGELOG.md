@@ -4,6 +4,47 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.7.0-screen-1.3] - 2026-05-01
+
+### Added
+
+- Performance Konfiguration für Screen Perception ergänzt.
+- Capturer speichert Screenshots als WebP mit konfigurierbarer Qualität.
+- Diff Detection über verkleinerten Graustufen Hash ergänzt.
+- Ring Buffer begrenzt jetzt nach Frame Anzahl und Speicherlimit.
+- `config/screen-perception.example.json` um Performance Werte ergänzt.
+
+### Changed
+
+- Bei unverändertem Bild wird keine neue Screenshot Datei geschrieben.
+- Screen Perception README um Performance First Hinweise erweitert.
+
+### Security
+
+- Temporäre Screenshots bleiben im lokalen `tmp/` Bereich und werden durch `.gitignore` ausgeschlossen.
+- Keine Cloud Calls und keine automatische dauerhafte Beobachtung in Aufgabe 1.3.
+
+## [B6.7.0-screen-1.2] - 2026-05-01
+
+### Added
+
+- Privacy First Konfigurationsmodell für Screen Perception ergänzt.
+- Sichere Beispielkonfiguration `config/screen-perception.example.json` ergänzt.
+- Laufzeitstatus für OFF, PAUSED, ACTIVE und IDLE ergänzt.
+- Aktivitätsindikator Snapshot für UI oder Tray Anzeige ergänzt.
+- Pause Hotkey Grundlage ergänzt, ohne aktiven System Hook zu schalten.
+
+### Changed
+
+- Screen Privacy Policy unterstützt jetzt expliziten Pause Status und lokale Konfigurationswerte.
+- Screen Perception README um Privacy First Konfiguration erweitert.
+
+### Security
+
+- Private Datei `config/screen-perception.json` wird ignoriert.
+- Temporärer Screenshot Buffer `tmp/` wird ignoriert.
+- Screen Perception bleibt weiterhin Default Off und führt keine automatische Beobachtung aus.
+
 ## [B6.7.0-screen-1.1] - 2026-05-01
 
 ### Added
