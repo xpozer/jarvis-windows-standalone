@@ -90,7 +90,7 @@ const fallbackMetrics: SystemMetrics = {
 
 const navGroups = [
   { title: "HAUPT", items: [["H", "Start"], ["D", "Dialog"], ["W", "Wissensbasis"], ["S", "Datenstroeme"], ["A", "Aufgaben & Automationen"]] },
-  { title: "SYSTEM", items: [["R", "JARVIS Runtime"], ["D", "Diagnose"], ["N", "Agentennetz"], ["M", "Speicherbanken"], ["K", "Kernsysteme"], ["S", "Sicherheitszentrale"]] },
+  { title: "SYSTEM", items: [["R", "JARVIS Runtime"], ["D", "Diagnose"], ["N", "Agentennetz"], ["M", "Speicherbanken"], ["K", "Kernsysteme"], ["U", "Update Center"], ["S", "Sicherheitszentrale"]] },
   { title: "WERKZEUGE", items: [["C", "Code-Werkzeuge"], ["A", "Datenanalyse"], ["F", "Dateimanager"], ["R", "Websuche"], ["API", "API-Konsole"]] },
 ];
 
