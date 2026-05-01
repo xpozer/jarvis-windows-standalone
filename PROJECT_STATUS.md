@@ -35,6 +35,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
 | LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
+| LifeOS Roadmap Module | vorbereitet | Learning, Decision, Projects, Energy, Finance, Memory und Automation sind local-first im Briefing und UI sichtbar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
@@ -49,6 +50,13 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.22
+
+- LifeOS Briefing liefert jetzt Decision Layer, Private Projects, Energy Profile, Finance Radar, Memory Layer und Automation Layer.
+- `config/lifeos.example.json` enthaelt sichere lokale Beispielschemata fuer die restlichen LifeOS Roadmap Module.
+- LifeOS Panel zeigt die Roadmap Module als kompakte Karten, ohne die Startseite zu ueberladen.
+- `docs/lifeos-roadmap.md` wurde passend zum Umsetzungsstand aktualisiert.
 
 ### B6.6.21
 
@@ -192,13 +200,13 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
-| Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
-| Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
-| Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
-| Mittel | Finance und Contract Radar | offen | Verträge, Rechnungen, Abos, Fristen und Nachweise lokal strukturieren |
-| Mittel | Memory und Knowledge Layer | offen | Regeln, Notizen, Dokumente, Entscheidungen und Quellen lokal verwalten |
+| Mittel | Decision Assistant | vorbereitet | echte private Entscheidungen lokal in `config/lifeos.json` eintragen |
+| Mittel | Private Project Manager | vorbereitet | echte private Projekte lokal in `config/lifeos.json` eintragen |
+| Mittel | Health und Energy Radar | vorbereitet | echte Energie- und Fokusdaten lokal pflegen |
+| Mittel | Finance und Contract Radar | vorbereitet | echte Vertrags- und Fristdaten nur lokal pflegen |
+| Mittel | Memory und Knowledge Layer | vorbereitet | lokale Regeln, Notizen und Quellen weiter ausbauen |
 | Niedrig | Voice und Push to Talk | offen | Mikrofon default off, lokale TTS und bewusste Aktivierung planen |
-| Niedrig | Automation Layer | offen | lokale Automationen mit RiskLevel, Freigabe und Audit Log vorbereiten |
+| Niedrig | Automation Layer | vorbereitet | Audit Log fuer echte Ausfuehrungen anbinden |
 | Niedrig | Release ZIP | offen | GitHub Release Workflow mit echtem Tag testen |
 
 ## Roadmap Dokumente
@@ -226,16 +234,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem DiagCenter Frontend ist der nächste sinnvolle Schritt der Decision Assistant. Dort sollen Optionen, Aufwand, Risiko, Nutzen und Empfehlung als lokales Schema ergänzt werden.
+Nach den vorbereiteten LifeOS Roadmap Modulen ist der nächste sinnvolle Schritt Voice und Push to Talk. Danach sollte der Automation Layer mit echtem Audit Log verbunden werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Decision Assistant ergänzen
-2. Private Project Manager ergänzen
+1. Voice und Push to Talk vorbereiten
+2. Automation Audit Log anbinden
 3. Release ZIP Workflow testen
 4. Installer Endanwender Test durchführen
-5. Health und Energy Radar ergänzen
+5. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
 ```
 
 ## Pflege Ablauf

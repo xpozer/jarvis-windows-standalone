@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.22] - 2026-05-01
+
+### Added
+
+- LifeOS Briefing um Decision Layer, Private Projects, Energy Profile, Finance Radar, Memory Layer und Automation Layer erweitert.
+- `config/lifeos.example.json` enthaelt jetzt lokale Beispielschemata fuer die restlichen LifeOS Roadmap Module.
+- LifeOS Panel zeigt die neuen Roadmap Module als kompakte Karten im bestehenden HUD Stil.
+
+### Changed
+
+- `docs/lifeos-roadmap.md` markiert Learning Coach als erledigt und mehrere Local-First Module als vorbereitet.
+
 ## [B6.6.21] - 2026-05-01
 
 ### Added

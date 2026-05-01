@@ -23,6 +23,12 @@ FALLBACK_CONFIG: dict[str, Any] = {
     },
     "work_radar": {"items": []},
     "learning_radar": {"subjects": []},
+    "decision_layer": {"decisions": []},
+    "projects": [],
+    "energy_profile": {"energy_percent": 70, "load": "medium", "focus_windows": []},
+    "finance_radar": {"items": []},
+    "memory_layer": {"entries": []},
+    "automation_tasks": [],
     "life_modules": [],
     "timeline": [],
 }
@@ -282,6 +288,113 @@ def _learning_focus(config: dict[str, Any]) -> dict[str, Any]:
     return focus
 
 
+def _decision_layer(config: dict[str, Any]) -> dict[str, Any]:
+    layer = config.get("decision_layer") if isinstance(config.get("decision_layer"), dict) else {}
+    raw = layer.get("decisions")
+    decisions = [item for item in raw if isinstance(item, dict)] if isinstance(raw, list) else []
+    normalized: list[dict[str, Any]] = []
+    for idx, decision in enumerate(decisions):
+        options = [item for item in decision.get("options", []) if isinstance(item, dict)] if isinstance(decision.get("options"), list) else []
+        scored: list[dict[str, Any]] = []
+        for option in options:
+            benefit = int(option.get("benefit") or 0)
+            risk = int(option.get("risk") or 0)
+            effort = int(option.get("effort") or 0)
+            score = benefit * 2 - risk - effort
+            scored.append({**option, "score": score})
+        scored.sort(key=lambda item: int(item.get("score") or 0), reverse=True)
+        recommendation = str(decision.get("recommendation") or (scored[0].get("name") if scored else "Optionen klaeren"))
+        normalized.append({
+            "id": str(decision.get("id") or f"decision_{idx + 1}"),
+            "title": str(decision.get("title") or "Entscheidung"),
+            "status": str(decision.get("status") or "open"),
+            "urgency": str(decision.get("urgency") or "normal"),
+            "recommendation": recommendation,
+            "reason": str(decision.get("reason") or "Empfehlung basiert auf Nutzen, Risiko und Aufwand."),
+            "options": scored,
+        })
+    return {"items": normalized, "next": normalized[0] if normalized else None, "count": len(normalized)}
+
+
+def _projects_summary(config: dict[str, Any]) -> dict[str, Any]:
+    raw = config.get("projects")
+    projects = [item for item in raw if isinstance(item, dict)] if isinstance(raw, list) else []
+    normalized: list[dict[str, Any]] = []
+    for idx, project in enumerate(projects):
+        normalized.append({
+            "id": str(project.get("id") or f"project_{idx + 1}"),
+            "name": str(project.get("name") or "Projekt"),
+            "goal": str(project.get("goal") or ""),
+            "status": str(project.get("status") or "open"),
+            "risk": str(project.get("risk") or "medium"),
+            "next_step": str(project.get("next_step") or "Naechsten Schritt klaeren"),
+            "blocker": str(project.get("blocker") or ""),
+            "updated_at": str(project.get("updated_at") or ""),
+        })
+    blocked = [item for item in normalized if item["status"] == "blocked" or item["blocker"]]
+    return {"items": normalized, "count": len(normalized), "blocked_count": len(blocked), "next": normalized[0] if normalized else None}
+
+
+def _energy_profile(config: dict[str, Any], daily: dict[str, Any]) -> dict[str, Any]:
+    profile = config.get("energy_profile") if isinstance(config.get("energy_profile"), dict) else {}
+    energy = int(profile.get("energy_percent") or daily.get("energy_percent") or 0)
+    load = str(profile.get("load") or "medium")
+    if energy >= 75 and load != "high":
+        mode = "Fokus Tag"
+    elif energy < 45 or load == "high":
+        mode = "Schon Tag"
+    else:
+        mode = "Normaler Tag"
+    windows = [item for item in profile.get("focus_windows", []) if isinstance(item, dict)] if isinstance(profile.get("focus_windows"), list) else []
+    return {
+        "energy_percent": energy,
+        "load": load,
+        "last_break": str(profile.get("last_break") or ""),
+        "next_break": str(profile.get("next_break") or ""),
+        "mode": mode,
+        "recommendation": str(profile.get("recommendation") or f"{mode}: schwere Aufgaben passend zu Fokusfenstern planen."),
+        "focus_windows": windows,
+    }
+
+
+def _finance_radar(config: dict[str, Any]) -> dict[str, Any]:
+    radar = config.get("finance_radar") if isinstance(config.get("finance_radar"), dict) else {}
+    raw = radar.get("items")
+    items = [item for item in raw if isinstance(item, dict)] if isinstance(raw, list) else []
+    normalized: list[dict[str, Any]] = []
+    for idx, item in enumerate(items):
+        due = str(item.get("due") or item.get("deadline") or "")
+        normalized.append({
+            "id": str(item.get("id") or f"finance_{idx + 1}"),
+            "title": str(item.get("title") or item.get("name") or "Frist"),
+            "category": str(item.get("category") or "PRIVATE"),
+            "status": str(item.get("status") or "open"),
+            "due": due,
+            "due_state": _due_state(due),
+            "next_step": str(item.get("next_step") or "Frist pruefen"),
+            "proof_required": bool(item.get("proof_required")),
+        })
+    normalized.sort(key=lambda item: _date_weight(str(item.get("due") or "")), reverse=True)
+    return {"items": normalized, "count": len(normalized), "next": normalized[0] if normalized else None}
+
+
+def _memory_layer(config: dict[str, Any]) -> dict[str, Any]:
+    layer = config.get("memory_layer") if isinstance(config.get("memory_layer"), dict) else {}
+    entries = [item for item in layer.get("entries", []) if isinstance(item, dict)] if isinstance(layer.get("entries"), list) else []
+    return {
+        "count": len(entries),
+        "recent": entries[:5],
+        "recommendation": str(layer.get("recommendation") or "Regeln, Entscheidungen und Quellen lokal dokumentieren."),
+    }
+
+
+def _automation_layer(config: dict[str, Any]) -> dict[str, Any]:
+    raw = config.get("automation_tasks")
+    tasks = [item for item in raw if isinstance(item, dict)] if isinstance(raw, list) else []
+    risky = [item for item in tasks if str(item.get("risk") or "low") in {"high", "critical"} or item.get("requires_confirmation")]
+    return {"items": tasks, "count": len(tasks), "requires_confirmation": len(risky)}
+
+
 def _summary(daily: dict[str, Any], top_tasks: list[dict[str, Any]], work_items: list[dict[str, Any]]) -> str:
     energy = int(daily.get("energy_percent") or 0)
     loops = int(daily.get("open_loops") or 0)
@@ -313,6 +426,7 @@ def briefing() -> dict[str, Any]:
     items = _work_items(config)
     top_tasks = _top_tasks(config, items)
     learning_focus = _learning_focus(config)
+    energy_profile = _energy_profile(config, daily)
     summary = str(daily.get("summary") or "").strip() or _summary(daily, top_tasks, items)
     next_action = str(daily.get("next_best_action") or "").strip()
     if not next_action and top_tasks:
@@ -328,6 +442,12 @@ def briefing() -> dict[str, Any]:
         "next_best_action": next_action,
         "work_radar": _work_radar_summary(items),
         "learning_focus": learning_focus,
+        "decision_layer": _decision_layer(config),
+        "projects": _projects_summary(config),
+        "energy_profile": energy_profile,
+        "finance_radar": _finance_radar(config),
+        "memory_layer": _memory_layer(config),
+        "automation_layer": _automation_layer(config),
         "life_modules": config.get("life_modules") if isinstance(config.get("life_modules"), list) else [],
         "timeline": config.get("timeline") if isinstance(config.get("timeline"), list) else [],
     }

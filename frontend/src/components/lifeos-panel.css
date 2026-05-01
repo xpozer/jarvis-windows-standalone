@@ -138,9 +138,11 @@
 .lifeos-grid {
   display: grid;
   grid-template-columns: .9fr 1.2fr .9fr;
-  grid-template-rows: 1fr .82fr;
+  grid-auto-rows: minmax(190px, auto);
   gap: 20px;
   height: calc(100% - 178px);
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .lifeos-card {
@@ -342,6 +344,31 @@
 
 .lifeos-learning-card {
   grid-column: 3;
+}
+
+.lifeos-roadmap-card b {
+  display: block;
+  color: #eafcff;
+  font-size: 16px;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.lifeos-roadmap-card p {
+  margin: 0;
+  color: #9fc9d8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lifeos-roadmap-card small {
+  display: block;
+  margin-top: 14px;
+  border-top: 1px solid rgba(126, 231, 255, .08);
+  color: #7ee7ff;
+  font-size: 12px;
+  line-height: 1.45;
+  padding-top: 12px;
 }
 
 .lifeos-learning-focus b {

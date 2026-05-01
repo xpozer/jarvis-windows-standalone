@@ -106,6 +106,116 @@
       }
     ]
   },
+  "decision_layer": {
+    "decisions": [
+      {
+        "id": "jarvis_next_block",
+        "title": "Naechster JARVIS Ausbau",
+        "status": "open",
+        "urgency": "normal",
+        "recommendation": "LifeOS Module zuerst sichtbar machen",
+        "reason": "Hoher Nutzen, geringe Gefahr und passt zur aktuellen Roadmap.",
+        "options": [
+          { "name": "LifeOS Module", "benefit": 5, "risk": 2, "effort": 3 },
+          { "name": "Voice sofort", "benefit": 4, "risk": 4, "effort": 5 }
+        ]
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "jarvis_windows",
+      "name": "JARVIS Windows Standalone",
+      "goal": "Lokaler KI Assistent mit Chat, Agenten, LifeOS und sicherer Automation",
+      "status": "active",
+      "risk": "medium",
+      "next_step": "Roadmap Module sichtbar anbinden und dann Voice vorbereiten.",
+      "blocker": "",
+      "updated_at": "2026-05-01"
+    },
+    {
+      "id": "private_admin",
+      "name": "Private Organisation",
+      "goal": "Fristen, Vertraege und Nachweise lokal im Blick behalten",
+      "status": "open",
+      "risk": "low",
+      "next_step": "Echte private Daten nur in config/lifeos.json eintragen.",
+      "blocker": "Beispieldaten ersetzen",
+      "updated_at": "2026-05-01"
+    }
+  ],
+  "energy_profile": {
+    "energy_percent": 78,
+    "load": "medium",
+    "last_break": "12:30",
+    "next_break": "15:15",
+    "recommendation": "Fokusfenster fuer schwierige Entscheidungen nutzen, Routine danach planen.",
+    "focus_windows": [
+      { "from": "09:00", "to": "10:30", "label": "tiefer Fokus" },
+      { "from": "16:00", "to": "17:00", "label": "Lernen oder Projekt" }
+    ]
+  },
+  "finance_radar": {
+    "items": [
+      {
+        "id": "contract_review",
+        "title": "Vertragsordner pruefen",
+        "category": "Vertrag",
+        "status": "open",
+        "due": "2026-05-10",
+        "proof_required": false,
+        "next_step": "Echte Vertraege nur lokal in config/lifeos.json erfassen."
+      },
+      {
+        "id": "invoice_proofs",
+        "title": "Nachweise sammeln",
+        "category": "Nachweis",
+        "status": "open",
+        "due": "2026-05-03",
+        "proof_required": true,
+        "next_step": "Belege lokal sortieren, nichts ins Repository committen."
+      }
+    ]
+  },
+  "memory_layer": {
+    "recommendation": "Wichtige Regeln und Entscheidungen lokal dokumentieren.",
+    "entries": [
+      {
+        "id": "local_first",
+        "title": "Private Daten bleiben lokal",
+        "type": "rule",
+        "source": "Projektregel",
+        "updated_at": "2026-05-01"
+      },
+      {
+        "id": "jarvis_ui_clean",
+        "title": "Startseite bleibt clean: Chat, Orb, Status, Quick Actions",
+        "type": "design",
+        "source": "UI Vorgabe",
+        "updated_at": "2026-05-01"
+      }
+    ]
+  },
+  "automation_tasks": [
+    {
+      "id": "daily_lifeos_scan",
+      "name": "Daily LifeOS Scan",
+      "trigger": "manual",
+      "risk": "low",
+      "requires_confirmation": false,
+      "last_run": "",
+      "result": "bereit"
+    },
+    {
+      "id": "update_plan_prepare",
+      "name": "Update Plan vorbereiten",
+      "trigger": "manual",
+      "risk": "medium",
+      "requires_confirmation": true,
+      "last_run": "",
+      "result": "wartet"
+    }
+  ],
   "life_modules": [
     {
       "name": "Work",
