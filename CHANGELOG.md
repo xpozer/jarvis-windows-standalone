@@ -4,6 +4,23 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.7.1-screen-memory-bridge] - 2026-05-01
+
+### Added
+
+- `ScreenMemoryBridge` ergänzt, um erlaubte Screen Contexts in Episode Kandidaten für spätere Memory Speicherung zu überführen.
+- `ScreenEpisodeCandidate` ergänzt mit `source`, `type`, `title`, `content`, `tags`, `importance_score` und sicherem Kontextauszug.
+- Export der Memory Bridge Typen im Screen Perception Paket ergänzt.
+
+### Changed
+
+- Screen Perception README um Memory Übergabe und Eligibility Regeln erweitert.
+
+### Security
+
+- Memory Bridge schreibt keine Datenbank und speichert nichts dauerhaft.
+- Episode Kandidaten entstehen nur bei `privacy_status=allowed`, nicht blockiertem Kontext, geändertem Screenshot und ausreichender Relevanz.
+
 ## [B6.7.0-screen-rebased] - 2026-05-01
 
 ### Added
