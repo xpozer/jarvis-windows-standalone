@@ -44,6 +44,7 @@ from routes.calendar import router as calendar_router
 from routes.day_start import router as day_start_router
 from routes.usejarvis import router as usejarvis_router
 from routes.updates import router as updates_router
+from routes.lifeos import router as lifeos_router
 
 from services import _runtime as core
 from services import usejarvis_runtime
@@ -141,6 +142,7 @@ app.include_router(calendar_router)
 app.include_router(day_start_router)
 app.include_router(usejarvis_router)
 app.include_router(updates_router)
+app.include_router(lifeos_router)
 
 
 @app.get("/", include_in_schema=False)

@@ -7,6 +7,7 @@
     "focus_minutes": 92,
     "open_loops": 7,
     "energy_percent": 81,
+    "summary": "Tageslage: gute Energie, mehrere offene Schleifen und genug Fokuszeit. Starte mit den Arbeitsthemen mit hoher Aussenwirkung.",
     "today_important": [
       "Offene Rückfragen aus Arbeit und Abrechnung prüfen",
       "LNW und FSM Buchungen auf fehlende Nachweise kontrollieren",
@@ -15,6 +16,38 @@
     "next_best_action": "Zuerst die offenen Rückfragen mit hoher Außenwirkung schließen, danach LifeOS oder Lernblock weiterführen."
   },
   "work_radar": {
+    "items": [
+      {
+        "id": "lnw_billing_check",
+        "title": "LNW und Abrechnung pruefen",
+        "status": "open",
+        "risk": "high",
+        "deadline": "2026-05-01",
+        "next_step": "Fehlende Nachweise und abrechnungsrelevante Punkte zuerst klaeren.",
+        "score_percent": 72,
+        "note": "Leistungsnachweise und Abrechnung haben hohe Aussenwirkung."
+      },
+      {
+        "id": "fsm_bookings",
+        "title": "FSM Buchungen sauber halten",
+        "status": "waiting",
+        "risk": "medium",
+        "deadline": "2026-05-03",
+        "next_step": "FSM Buchungen pruefen und nicht mit CATS vermischen.",
+        "score_percent": 84,
+        "note": "Stabil, aber regelmaessig kontrollieren."
+      },
+      {
+        "id": "customer_topics",
+        "title": "Offene Kunden Rueckfragen schliessen",
+        "status": "attention",
+        "risk": "high",
+        "deadline": "2026-05-01",
+        "next_step": "Rueckfragen mit hoher Aussenwirkung aktiv beantworten.",
+        "score_percent": 38,
+        "note": "Offene Kundenrueckfragen aktiv schliessen."
+      }
+    ],
     "lnw_and_billing": {
       "status": "check",
       "score_percent": 72,

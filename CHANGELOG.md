@@ -4,6 +4,25 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.7] - 2026-05-01
+
+### Added
+
+- LifeOS Daily Command Center als eigenes JARVIS Sidebar Panel integriert.
+- Neue Backend API fuer LifeOS Status, Briefing, Regeneration und Installer Check ergaenzt.
+- Work Radar 2.0 Struktur mit sortierbaren Vorgaengen, Risiko, Status, Frist und naechstem Schritt vorbereitet.
+- Tests fuer LifeOS Briefing, Work Radar und Installer Robustheit ergaenzt.
+
+### Changed
+
+- `config/lifeos.example.json` um `daily_briefing.summary` und strukturierte `work_radar.items` erweitert.
+- `FIRST_SETUP.ps1` bereitet die private lokale LifeOS Konfiguration vor, ohne bestehende private Daten zu ueberschreiben.
+
+### Security
+
+- Private LifeOS Daten bleiben weiter in `config/lifeos.json` und werden nicht committed.
+- Installer Check prueft, ob private Config ignoriert und Setup ohne `-Force` ausgefuehrt wird.
+
 ## [B6.6.6] - 2026-05-01
 
 ### Added

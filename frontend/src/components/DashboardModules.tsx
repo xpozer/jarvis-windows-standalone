@@ -4,6 +4,7 @@ import { OrganizerPanel } from "./OrganizerPanel";
 import { RuntimeControlPanel } from "./RuntimeControlPanel";
 import { SecurityPanel } from "./SecurityPanel";
 import { UpdateCenterPanel } from "./UpdateCenterPanel";
+import { LifeOSPanel } from "./LifeOSPanel";
 import { agentToolsModules, moduleMap } from "../features/dashboard/dashboardConfig";
 import type { EndpointCard, ResultState } from "../features/dashboard/dashboardConfig";
 import "./dashboard-modules.css";
@@ -83,6 +84,10 @@ export function DashboardModules({ activeNav, onSend }: Props) {
 
   if (activeNav === "Update Center") {
     return <UpdateCenterPanel onSend={onSend} />;
+  }
+
+  if (activeNav === "LifeOS") {
+    return <LifeOSPanel onSend={onSend} />;
   }
 
   if (!visible || !module) return null;

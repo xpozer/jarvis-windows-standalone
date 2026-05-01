@@ -1,0 +1,308 @@
+.lifeos-shell {
+  position: absolute;
+  left: 17.2vw;
+  top: 10vh;
+  width: 62vw;
+  height: 78vh;
+  z-index: 25;
+  overflow: hidden;
+  border: 1px solid rgba(126, 231, 255, .16);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(4, 14, 28, .95), rgba(2, 8, 16, .9));
+  box-shadow: 0 26px 90px rgba(0, 0, 0, .52), 0 0 44px rgba(5, 216, 255, .08);
+  padding: 30px;
+}
+
+.lifeos-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(rgba(126, 231, 255, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(126, 231, 255, .018) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.lifeos-header,
+.lifeos-status-row,
+.lifeos-grid,
+.lifeos-error {
+  position: relative;
+  z-index: 2;
+}
+
+.lifeos-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.lifeos-header small {
+  display: block;
+  color: #7ee7ff;
+  font-size: 12px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.lifeos-header h1 {
+  margin: 0;
+  color: #e9fbff;
+  font-size: 34px;
+  font-weight: 650;
+  text-shadow: 0 0 18px rgba(5, 216, 255, .28);
+}
+
+.lifeos-header p {
+  margin: 10px 0 0;
+  max-width: 780px;
+  color: #8db6c7;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.lifeos-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.lifeos-actions button {
+  height: 46px;
+  border: 1px solid rgba(126, 231, 255, .24);
+  border-radius: 999px;
+  background: rgba(5, 28, 50, .74);
+  color: #dff8ff;
+  padding: 0 18px;
+  font-size: 12px;
+  letter-spacing: .12em;
+  cursor: pointer;
+  transition: .18s;
+}
+
+.lifeos-actions button:hover {
+  transform: translateY(-3px);
+  border-color: rgba(5, 216, 255, .54);
+  box-shadow: 0 0 30px rgba(5, 216, 255, .18);
+}
+
+.lifeos-error {
+  border: 1px solid rgba(255, 63, 103, .42);
+  border-radius: 14px;
+  background: rgba(255, 63, 103, .08);
+  color: #ffd1dc;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.lifeos-status-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.lifeos-status-row span {
+  min-width: 0;
+  border: 1px solid rgba(126, 231, 255, .12);
+  border-radius: 14px;
+  background: rgba(4, 16, 30, .68);
+  color: #9fc9d8;
+  padding: 14px 16px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lifeos-status-row b {
+  display: block;
+  color: #e9fbff;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.lifeos-status-row .ok b {
+  color: #45e89b;
+}
+
+.lifeos-status-row .warn b {
+  color: #ffd45a;
+}
+
+.lifeos-grid {
+  display: grid;
+  grid-template-columns: .9fr 1.2fr .9fr;
+  gap: 20px;
+  height: calc(100% - 178px);
+}
+
+.lifeos-card {
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(126, 231, 255, .13);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(7, 24, 44, .78), rgba(4, 13, 24, .70));
+  padding: 20px;
+}
+
+.lifeos-card-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.lifeos-card-title h2 {
+  margin: 0;
+  color: #05d8ff;
+  font-size: 17px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.lifeos-card-title span {
+  color: #87c4d8;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.lifeos-task-list,
+.lifeos-work-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: calc(100% - 44px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.lifeos-task,
+.lifeos-work-item {
+  border: 1px solid rgba(126, 231, 255, .12);
+  border-radius: 14px;
+  background: rgba(4, 16, 30, .7);
+  color: #dff8ff;
+}
+
+.lifeos-task {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+}
+
+.lifeos-task em {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(5, 216, 255, .36);
+  border-radius: 50%;
+  color: #05d8ff;
+  font-style: normal;
+}
+
+.lifeos-task b,
+.lifeos-work-item b {
+  display: block;
+  color: #eafcff;
+  margin-bottom: 6px;
+}
+
+.lifeos-task span,
+.lifeos-work-item span,
+.lifeos-next {
+  color: #9fc9d8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lifeos-work-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+}
+
+.lifeos-work-item em,
+.lifeos-work-item strong {
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(5, 18, 32, .72);
+  color: #bfefff;
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.lifeos-task.high,
+.lifeos-work-item.high {
+  border-color: rgba(255, 63, 103, .36);
+}
+
+.lifeos-task.medium,
+.lifeos-work-item.medium {
+  border-color: rgba(255, 212, 90, .32);
+}
+
+.lifeos-task.low,
+.lifeos-work-item.low {
+  border-color: rgba(69, 232, 155, .28);
+}
+
+.lifeos-next {
+  margin: 0;
+}
+
+.lifeos-installer-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.lifeos-installer-mini span {
+  border: 1px solid rgba(126, 231, 255, .12);
+  border-radius: 999px;
+  background: rgba(5, 18, 32, .62);
+  color: #bfefff;
+  padding: 6px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.lifeos-installer-mini .ok {
+  border-color: rgba(69, 232, 155, .3);
+  color: #baffdb;
+}
+
+.lifeos-installer-mini .warn {
+  border-color: rgba(255, 212, 90, .32);
+  color: #ffe6a2;
+}
+
+@media (max-width: 1600px) {
+  .lifeos-shell {
+    left: 280px;
+    width: calc(100vw - 620px);
+  }
+
+  .lifeos-status-row,
+  .lifeos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lifeos-grid {
+    overflow: auto;
+  }
+}

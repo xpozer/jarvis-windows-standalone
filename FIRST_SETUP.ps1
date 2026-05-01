@@ -314,4 +314,16 @@ if(Test-Path (Join-Path $Frontend "diagnose.html")){
   Copy-Item (Join-Path $Frontend "diagnose.html") (Join-Path $Dist "diagnose.html") -Force
 }
 
+$LifeOsSetup = Join-Path $Root "scripts\maintenance\setup-lifeos-config.ps1"
+if(Test-Path $LifeOsSetup){
+  Jv-Step "LifeOS private Konfiguration pruefen"
+  & powershell -NoProfile -ExecutionPolicy Bypass -File $LifeOsSetup
+  if($LASTEXITCODE -ne 0){
+    Jv-Fail "LifeOS private Konfiguration konnte nicht vorbereitet werden. ExitCode: $LASTEXITCODE"
+  }
+  Jv-Ok "LifeOS private Konfiguration bereit"
+} else {
+  Jv-Warn "LifeOS Setup Skript nicht gefunden: $LifeOsSetup"
+}
+
 Jv-Ok "FIRST_SETUP abgeschlossen"
