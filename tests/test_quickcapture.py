@@ -1,8 +1,10 @@
 # tests/test_quickcapture.py
-"""Tests fuer Quick Capture Klassifikation und lokale Speicherung."""
+"""Tests fuer Quick Capture Klassifikation, Workflow und lokale Speicherung."""
 
+from backend.quickcapture.app import QuickCaptureApp
 from backend.quickcapture.classifier import CaptureCategory, QuickCaptureClassifier
 from backend.quickcapture.persistence import QuickCaptureStore
+from backend.quickcapture.popup import PopupResult
 
 
 def test_quickcapture_classifier_detects_reminder() -> None:
@@ -58,3 +60,27 @@ def test_quickcapture_reclassify_keeps_negative_sample(tmp_path) -> None:
 
     assert records[0].category == CaptureCategory.REMINDER
     assert records[0].corrected_category == CaptureCategory.TASK
+
+
+def test_quickcapture_app_saves_classified_popup_input(tmp_path) -> None:
+    store = QuickCaptureStore(tmp_path / "quickcapture.sqlite3")
+    app = QuickCaptureApp(store=store)
+
+    app.save_capture(PopupResult(text="Morgen BANF fuer Hager Material vorbereiten"))
+    records = store.list_recent(limit=10)
+
+    assert len(records) == 1
+    assert records[0].category == CaptureCategory.REMINDER
+    assert records[0].target == "reminders"
+
+
+def test_quickcapture_app_force_plain_note(tmp_path) -> None:
+    store = QuickCaptureStore(tmp_path / "quickcapture.sqlite3")
+    app = QuickCaptureApp(store=store)
+
+    app.save_capture(PopupResult(text="Morgen BANF fuer Hager Material vorbereiten", force_plain_note=True))
+    records = store.list_recent(limit=10)
+
+    assert len(records) == 1
+    assert records[0].category == CaptureCategory.NOTE
+    assert records[0].target == "quick-notes"
