@@ -19,6 +19,10 @@ class JarvisSoundEngine {
   private volume = 0.22;
   private mode = "idle";
   private unlocked = false;
+  private unlockListenerActive = false;
+  private readonly unlockOnGesture = () => {
+    void this.unlock();
+  };
   private thinkingOsc: OscillatorNode | null = null;
   private thinkingGain: GainNode | null = null;
 
@@ -26,9 +30,11 @@ class JarvisSoundEngine {
     this.enabled = enabled;
     this.volume = Math.max(0, Math.min(1, volume));
     if (this.master) this.master.gain.value = this.volume;
+    if (enabled && !this.isUnlocked()) this.armUserGestureUnlock();
     if (!enabled) {
       this.unlocked = false;
       this.stopThinking();
+      this.disarmUserGestureUnlock();
     }
   }
 
@@ -38,9 +44,17 @@ class JarvisSoundEngine {
     try {
       if (this.ctx?.state === "suspended") await this.ctx.resume();
       this.unlocked = this.ctx?.state === "running";
+      if (this.unlocked) {
+        this.disarmUserGestureUnlock();
+        this.play("ui_toggle");
+        this.setMode(this.mode);
+      } else {
+        this.armUserGestureUnlock();
+      }
       return this.unlocked;
     } catch {
       this.unlocked = false;
+      this.armUserGestureUnlock();
       return false;
     }
   }
@@ -59,7 +73,10 @@ class JarvisSoundEngine {
   }
 
   play(event: SoundEvent | string) {
-    if (!this.enabled || !this.isUnlocked()) return;
+    if (!this.enabled || !this.isUnlocked()) {
+      if (this.enabled) this.armUserGestureUnlock();
+      return;
+    }
     switch (event) {
       case "agent_route":
         this.beep(620, 0.045, 0.08, "square");
@@ -106,6 +123,20 @@ class JarvisSoundEngine {
     this.master = this.ctx.createGain();
     this.master.gain.value = this.volume;
     this.master.connect(this.ctx.destination);
+  }
+
+  private armUserGestureUnlock() {
+    if (this.unlockListenerActive || typeof window === "undefined") return;
+    this.unlockListenerActive = true;
+    window.addEventListener("pointerdown", this.unlockOnGesture, { passive: true });
+    window.addEventListener("keydown", this.unlockOnGesture);
+  }
+
+  private disarmUserGestureUnlock() {
+    if (!this.unlockListenerActive || typeof window === "undefined") return;
+    this.unlockListenerActive = false;
+    window.removeEventListener("pointerdown", this.unlockOnGesture);
+    window.removeEventListener("keydown", this.unlockOnGesture);
   }
 
   private beep(frequency: number, duration: number, gainValue: number, type: OscillatorKind = "sine", delay = 0) {

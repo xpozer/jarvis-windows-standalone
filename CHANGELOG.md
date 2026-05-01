@@ -4,6 +4,17 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.14] - 2026-05-01
+
+### Fixed
+
+- Sound Re Unlock im Frontend ergänzt, damit ein gespeicherter aktiver Soundstatus nach Reload beim nächsten Nutzerklick wieder sauber entsperrt wird.
+- Stabile Listener Referenz für `pointerdown` und `keydown` ergänzt, damit Unlock Listener korrekt entfernt werden können.
+
+### Changed
+
+- Sound Engine setzt bei aktivem Sound und gesperrtem AudioContext automatisch einen Re Unlock Listener, statt dauerhaft stumm zu bleiben.
+
 ## [B6.6.13] - 2026-05-01
 
 ### Fixed

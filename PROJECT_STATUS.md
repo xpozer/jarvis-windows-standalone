@@ -38,12 +38,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
-| JARVIS Sound Layer | in Arbeit | Lokaler Web Audio Sound Layer vorhanden. Unlock Verhalten wurde robuster gemacht, Frontend Re Unlock nach Reload bleibt als Feinschliff offen |
+| JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.14
+
+- Sound Re Unlock im Frontend ergänzt.
+- Sound Engine setzt bei aktivem Sound und gesperrtem AudioContext automatisch Listener für den nächsten Nutzerklick oder Tastendruck.
+- Listener nutzen eine stabile Referenz und können korrekt entfernt werden.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.13
 
@@ -130,7 +137,6 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Sound Re Unlock im Frontend | offen | Wenn Sound gespeichert aktiv ist, beim nächsten Nutzerklick AudioContext erneut unlocken und Status klar anzeigen |
 | Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
 | Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
 | Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
@@ -157,7 +163,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
-| Browser Autoplay blockiert Sound nach Reload | hoch | Sound braucht nach Reload eine bewusste Nutzeraktion oder einen klaren Re Unlock Ablauf |
+| Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Installer Fehler bei Endanwendern | hoch | Installer weiterhin als eigener Schwerpunkt behandeln |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
@@ -165,16 +171,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Sound Engine Fix ist der nächste sinnvolle Schritt der kleine Frontend Feinschliff: Wenn Sound gespeichert aktiv ist, soll der nächste Nutzerklick den AudioContext wieder freischalten und der HUD Status soll nicht irreführend wirken.
+Nach dem Sound Re Unlock ist der nächste sinnvolle Schritt die Installer Robustheit. Dafür sollen Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut geprüft werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Sound Re Unlock im Frontend ergänzen
-2. Installer Robustheit erneut prüfen
-3. Backend Health Check sauber anbinden
-4. DiagCenter konkretisieren
-5. Decision Assistant ergänzen
+1. Installer Robustheit erneut prüfen
+2. Backend Health Check sauber anbinden
+3. DiagCenter konkretisieren
+4. Decision Assistant ergänzen
+5. Private Project Manager ergänzen
 ```
 
 ## Pflege Ablauf
