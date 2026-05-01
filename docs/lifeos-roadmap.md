@@ -6,13 +6,17 @@ Diese Roadmap beschreibt die größeren LifeOS Upgrade Ideen als konkrete Ausbau
 
 LifeOS bleibt Local First. Private Daten gehören in lokale Dateien wie `config/lifeos.json` und nicht ins Repository.
 
-## Übersicht
+## Aktueller Roadmap Stand
+
+Stand: B6.6.7
 
 | Priorität | Modul | Ziel | Status |
 |---|---|---|---|
-| Hoch | Daily Command Center | Tageslage, Fokus und nächster Schritt | geplant |
-| Hoch | Work Radar 2.0 | SAP, FSM, LNW, Mail, Angebote und Rückfragen strukturieren | geplant |
-| Hoch | LifeOS persönliche Vorlage | lokale `config/lifeos.json` einfacher erzeugen | geplant |
+| Hoch | Daily Command Center | Tageslage, Fokus und nächster Schritt | in Arbeit |
+| Hoch | Work Radar 2.0 | SAP, FSM, LNW, Mail, Angebote und Rückfragen strukturieren | in Arbeit |
+| Hoch | LifeOS persönliche Vorlage | lokale `config/lifeos.json` einfacher erzeugen | erledigt |
+| Hoch | Installer Robustheit | Setup, First Setup, Python Erkennung und ExecutionPolicy absichern | in Arbeit |
+| Mittel | Backend Runtime Daten | LifeOS API mit echten lokalen Runtime Daten versorgen | in Arbeit |
 | Mittel | Learning Coach | Meister, AEVO und Lernstände aktiv verfolgen | geplant |
 | Mittel | Decision Assistant | Optionen, Risiken und Empfehlung strukturiert bewerten | geplant |
 | Mittel | Private Project Manager | private Projekte mit Status und nächstem Schritt führen | geplant |
@@ -24,7 +28,26 @@ LifeOS bleibt Local First. Private Daten gehören in lokale Dateien wie `config/
 
 ## 1. Daily Command Center
 
-Ziel: JARVIS soll morgens eine klare Lage liefern und nicht nur Werte anzeigen.
+Status: in Arbeit
+
+Bereits erledigt:
+
+```text
+LifeOS Daily Command Center als JARVIS Sidebar Panel integriert
+LifeOS Status API ergänzt
+Briefing API ergänzt
+Regeneration API ergänzt
+erste Tageslage über Backend vorbereitet
+```
+
+Noch offen:
+
+```text
+Top 3 Aufgaben prominent anzeigen
+Tagesfokus klar sichtbar machen
+nächsten sinnvollen Schritt besser aus lokalen Daten ableiten
+Gewichtung nach Dringlichkeit, Außenwirkung und Aufwand einführen
+```
 
 Nutzen:
 
@@ -33,38 +56,42 @@ Nutzen:
 - weniger gedankliches Sortieren am Morgen
 - klare nächste Aktion statt langer Aufgabenliste
 
-Geplante Inhalte:
-
-```text
-Tagesfokus
-offene Schleifen
-wichtige Arbeitsthemen
-private Fristen
-Lernblock
-Energie Einschätzung
-nächster sinnvoller Schritt
-```
-
 Nächste Umsetzung:
 
 ```text
-1. daily_briefing.summary in config/lifeos.example.json erweitern
-2. LifeOS UI um Tagesfokus und Top 3 Aufgaben ergänzen
-3. Gewichtung nach Dringlichkeit, Außenwirkung und Aufwand einführen
+1. PR 30 prüfen und verwertbare Teile übernehmen oder schließen
+2. Tagesfokus und Top 3 Aufgaben in der UI sauber sichtbar machen
+3. Briefing Generator stärker an Aufgaben, Risiko und Fristen koppeln
 ```
 
 Akzeptanzkriterien:
 
 ```text
-[ ] LifeOS zeigt eine Tageslage in natürlicher Sprache
-[ ] LifeOS zeigt maximal 3 wichtigste Aufgaben
-[ ] LifeOS zeigt einen nächsten sinnvollen Schritt
-[ ] Werte kommen aus lokaler JSON oder später Backend API
+[x] LifeOS zeigt eine Tageslage in natürlicher Sprache
+[ ] LifeOS zeigt maximal 3 wichtigste Aufgaben sichtbar im UI
+[ ] LifeOS zeigt einen nächsten sinnvollen Schritt aus echten lokalen Daten
+[ ] Werte kommen aus lokaler JSON oder Backend API
 ```
 
 ## 2. Work Radar 2.0
 
-Ziel: Arbeitsthemen sollen nicht nur als Notizen existieren, sondern als strukturierte offene Vorgänge.
+Status: in Arbeit
+
+Bereits erledigt:
+
+```text
+work_radar.items Struktur vorbereitet
+Vorgänge haben Status, Risiko, Frist, Score und nächsten Schritt
+Tests für Work Radar ergänzt
+```
+
+Noch offen:
+
+```text
+UI Sortierung nach Risiko, Frist und Status
+kritische Vorgänge visuell hervorheben
+echte lokale Quellen später anbinden
+```
 
 Nutzen:
 
@@ -89,20 +116,105 @@ Abrechnung Risiken
 Nächste Umsetzung:
 
 ```text
-1. work_radar.items Array in LifeOS Config ergänzen
-2. Statuswerte definieren: open, waiting, blocked, done, attention
-3. UI nach Risiko und Dringlichkeit sortieren lassen
+1. Work Radar UI nach Risiko sortieren
+2. Statuswerte vereinheitlichen: open, waiting, blocked, done, attention
+3. echte lokale Datenquellen später anbinden
 ```
 
 Akzeptanzkriterien:
 
 ```text
-[ ] Work Radar kann mehrere Vorgänge anzeigen
-[ ] jeder Vorgang hat Status, Risiko, nächsten Schritt und Frist
+[x] Work Radar kann mehrere Vorgänge anzeigen oder verarbeiten
+[x] jeder Vorgang hat Status, Risiko, nächsten Schritt und Frist
 [ ] kritische Vorgänge werden sichtbar hervorgehoben
+[ ] UI sortiert Vorgänge nach Dringlichkeit
 ```
 
-## 3. Learning Coach
+## 3. LifeOS persönliche Vorlage
+
+Status: erledigt
+
+Erledigt:
+
+```text
+setup-lifeos-config.ps1 ergänzt
+lifeos-private-config.md ergänzt
+FIRST_SETUP.ps1 bereitet private lokale LifeOS Konfiguration vor
+config/lifeos.json bleibt lokal und wird nicht committed
+bestehende private Daten werden nicht überschrieben
+```
+
+Akzeptanzkriterien:
+
+```text
+[x] private config/lifeos.json kann aus Beispiel erzeugt werden
+[x] bestehende config/lifeos.json wird nicht ohne Force überschrieben
+[x] private Datei ist ignoriert
+[x] Dokumentation vorhanden
+```
+
+## 4. Installer Robustheit
+
+Status: in Arbeit
+
+Bereits erledigt:
+
+```text
+FIRST_SETUP.ps1 bereitet LifeOS private Config vor
+Tests für Installer Robustheit ergänzt
+```
+
+Noch offen:
+
+```text
+frisches Windows Testszenario prüfen
+Python Erkennung real testen
+PowerShell ExecutionPolicy real testen
+Start und First Setup Endanwender Ablauf prüfen
+```
+
+Akzeptanzkriterien:
+
+```text
+[ ] frisches Windows System kann Setup starten
+[ ] ExecutionPolicy blockiert nicht
+[ ] Python wird sauber erkannt oder verständlich gemeldet
+[ ] START_JARVIS.bat startet ohne manuelle Nacharbeit
+```
+
+## 5. Backend Runtime Daten
+
+Status: in Arbeit
+
+Bereits erledigt:
+
+```text
+Backend API für LifeOS Status ergänzt
+Backend API für LifeOS Briefing ergänzt
+Backend API für Regeneration ergänzt
+Backend API für Installer Check ergänzt
+```
+
+Noch offen:
+
+```text
+echte lokale Runtime Daten anbinden
+Health Check sauber mit Frontend und Installer verbinden
+DiagCenter vorbereiten
+```
+
+Akzeptanzkriterien:
+
+```text
+[x] LifeOS Backend API existiert
+[ ] API liefert echte lokale Runtime Daten
+[ ] Frontend zeigt API Health eindeutig an
+[ ] Installer kann API Status prüfen
+```
+
+## 6. Learning Coach
+
+Status: geplant
 
 Ziel: JARVIS soll Lernstände für Meister, AEVO und spätere Themen aktiv verfolgen.
 
@@ -141,7 +253,9 @@ Akzeptanzkriterien:
 [ ] Wiederholungstermine können lokal gespeichert werden
 ```
 
-## 4. Health und Energy Radar
+## 7. Health und Energy Radar
+
+Status: geplant
 
 Ziel: JARVIS soll Energie, Belastung und Pausen als Planungshilfe berücksichtigen, ohne medizinische Bewertung zu spielen.
 
@@ -179,7 +293,9 @@ Akzeptanzkriterien:
 [ ] Daten bleiben vollständig lokal
 ```
 
-## 5. Finance und Contract Radar
+## 8. Finance und Contract Radar
+
+Status: geplant
 
 Ziel: Verträge, Rechnungen, Fristen, Abos und steuerlich relevante Themen sollen lokal sichtbar werden.
 
@@ -218,7 +334,9 @@ Akzeptanzkriterien:
 [ ] keine Finanzdaten werden ins Repository committed
 ```
 
-## 6. Private Project Manager
+## 9. Private Project Manager
+
+Status: geplant
 
 Ziel: JARVIS soll private Projekte und technische Bastelthemen strukturiert verwalten.
 
@@ -257,7 +375,9 @@ Akzeptanzkriterien:
 [ ] blockierte Projekte werden sichtbar markiert
 ```
 
-## 7. Decision Assistant
+## 10. Decision Assistant
+
+Status: geplant
 
 Ziel: JARVIS soll Entscheidungen strukturieren, Optionen vergleichen und einen begründeten nächsten Schritt vorschlagen.
 
@@ -296,7 +416,9 @@ Akzeptanzkriterien:
 [ ] JARVIS zeigt keine Scheinsicherheit, sondern begründet knapp
 ```
 
-## 8. Memory und Knowledge Layer
+## 11. Memory und Knowledge Layer
+
+Status: geplant
 
 Ziel: Wiederkehrende Regeln, Projektwissen, Notizen und lokale Dokumente sollen als Wissensbasis nutzbar werden.
 
@@ -336,7 +458,9 @@ Akzeptanzkriterien:
 [ ] private Inhalte werden nicht automatisch committed
 ```
 
-## 9. Voice und Push to Talk
+## 12. Voice und Push to Talk
+
+Status: geplant
 
 Ziel: JARVIS soll später per Sprache nutzbar sein, aber nur bewusst und kontrolliert.
 
@@ -373,7 +497,9 @@ Akzeptanzkriterien:
 [ ] kritische Aktionen werden nicht automatisch ausgeführt
 ```
 
-## 10. Automation Layer
+## 13. Automation Layer
+
+Status: geplant
 
 Ziel: kleine lokale Automationen sollen Aufgaben vorbereiten, aber nicht blind handeln.
 
@@ -412,19 +538,20 @@ Akzeptanzkriterien:
 [ ] jede Ausführung wird lokal protokolliert
 ```
 
-## Empfohlene Reihenfolge
+## Empfohlene Reihenfolge ab B6.6.7
 
 ```text
-1. LifeOS persönliche Vorlage erstellen
-2. Daily Command Center erweitern
-3. Work Radar 2.0 strukturieren
-4. Installer Robustheit prüfen
-5. Learning Coach ergänzen
-6. Decision Assistant ergänzen
-7. Private Project Manager ergänzen
-8. Health und Energy Radar ergänzen
-9. Finance und Contract Radar ergänzen
-10. Memory und Knowledge Layer konkretisieren
-11. Voice und Push to Talk planen
-12. Automation Layer mit Audit Log vorbereiten
+1. PR 30 prüfen und verwertbare Teile übernehmen oder schließen
+2. Daily Command Center UI Feinschliff umsetzen
+3. Work Radar 2.0 UI Sortierung ergänzen
+4. Installer Endanwender Test durchführen
+5. Backend Runtime Daten anbinden
+6. Learning Coach ergänzen
+7. Decision Assistant ergänzen
+8. Private Project Manager ergänzen
+9. Health und Energy Radar ergänzen
+10. Finance und Contract Radar ergänzen
+11. Memory und Knowledge Layer konkretisieren
+12. Voice und Push to Talk planen
+13. Automation Layer mit Audit Log vorbereiten
 ```
