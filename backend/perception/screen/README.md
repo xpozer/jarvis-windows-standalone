@@ -6,13 +6,14 @@ Ziel: JARVIS kann lokalen Bildschirm Kontext erkennen und daraus später proakti
 
 ## Stand
 
-Umgesetzt sind die Aufgaben 1.1 bis 1.4:
+Umgesetzt sind die Aufgaben 1.1 bis 1.5:
 
 ```text
 1.1 Modulstruktur
 1.2 Privacy First Konfiguration
 1.3 Performance Grundlagen
 1.4 Kontext Datenmodell
+1.5 Memory Übergabe
 ```
 
 Es wird weiterhin keine dauerhafte Bildschirmbeobachtung automatisch aktiviert.
@@ -27,6 +28,7 @@ Es wird weiterhin keine dauerhafte Bildschirmbeobachtung automatisch aktiviert.
 | `vision.py` | lokale Vision Modell Integration vorbereiten |
 | `ocr_fallback.py` | Tesseract OCR Fallback vorbereiten |
 | `context_builder.py` | Fenster Info und Vision Ergebnis zu ScreenContext verbinden |
+| `memory_bridge.py` | ScreenContext in sichere Episode Kandidaten für späteres Memory überführen |
 | `privacy.py` | Privacy Policy mit Default Off, Pause, Allowlist und Blocklist |
 | `runtime_state.py` | Laufzeitstatus OFF, PAUSED, ACTIVE oder IDLE |
 | `indicator.py` | sichtbarer Status für UI oder Tray Anzeige |
@@ -89,10 +91,27 @@ metadata
 
 Der Context Builder setzt noch keine Aktion um. Er liefert nur Hinweise, ob ein Kontext später als Episode interessant sein könnte.
 
+## Memory Übergabe
+
+`ScreenMemoryBridge` erzeugt nur Episode Kandidaten. Es schreibt nichts dauerhaft in eine Datenbank.
+
+Ein Kontext wird nur als Kandidat vorbereitet, wenn diese Bedingungen erfüllt sind:
+
+```text
+privacy_status ist allowed
+privacy_blocked ist false
+should_store_episode ist true
+screenshot_changed ist true
+memory_summary ist nicht leer
+importance_score liegt über dem Schwellwert
+```
+
+Dadurch werden sensible oder irrelevante Screens verworfen, bevor spätere Memory Module überhaupt schreiben könnten.
+
 ## Lokale Verarbeitung
 
 Die aktuelle Struktur nutzt lokale Dateien und lokale Modelle als Zielbild. Cloud Calls sind nicht vorgesehen. Falls später Cloud Vision ergänzt wird, muss das explizit Opt In sein und mit AuditLog dokumentiert werden.
 
 ## Nächste Aufgabe
 
-Aufgabe 1.5 ergänzt die Integration mit Memory. Wichtige Kontext Snapshots werden dafür vorbereitet, aber weiterhin nicht ungefragt dauerhaft beobachtet.
+Aufgabe 1.6 ergänzt proaktive Trigger. Diese Trigger dürfen nur auf erlaubten und nicht blockierten Kontexten arbeiten.
