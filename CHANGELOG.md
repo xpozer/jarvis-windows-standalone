@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.5] - 2026-05-01
+
+### Added
+
+- Ausgearbeitete LifeOS Upgrade Roadmap unter `docs/lifeos-roadmap.md` ergänzt.
+- Roadmap Module für Daily Command Center, Work Radar 2.0, Learning Coach, Health und Energy Radar, Finance und Contract Radar, Private Project Manager, Decision Assistant, Memory und Knowledge Layer, Voice und Automation Layer dokumentiert.
+- PROJECT_STATUS.md um Roadmap Verweis und erweiterte offene Todos ergänzt.
+
+### Changed
+
+- Offene Todos sind nun stärker nach LifeOS Upgrade Modulen und nächstem sinnvollen Schritt strukturiert.
+
 ## [B6.6.4] - 2026-05-01
 
 ### Added
