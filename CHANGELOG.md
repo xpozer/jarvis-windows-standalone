@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.3] - 2026-05-01
+
+### Added
+
+- LifeOS Daily Briefing Generator ergänzt.
+- Neue generierte Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar.
+- Zusätzliche Anzeige `GENERATED DAILY BRIEFING` im LifeOS Command Center.
+
+### Changed
+
+- LifeOS zeigt nicht mehr nur die geladenen Rohwerte, sondern leitet daraus eine kurze verständliche Tagesbewertung ab.
+
 ## [B6.6.2] - 2026-05-01
 
 ### Added

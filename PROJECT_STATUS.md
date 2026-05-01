@@ -34,12 +34,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
-| LifeOS Daily Briefing | in Arbeit | Werte werden gerendert, echter Generator folgt noch |
+| LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.3
+
+- LifeOS Daily Briefing Generator ergänzt.
+- LifeOS erzeugt eine verständliche Tageslage aus JSON Daten oder Fallback Daten.
+- Die generierte Tageslage bewertet Prioritäten, offene Schleifen, Energie, Fokuszeit und Work Radar.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.2
 
@@ -76,8 +83,8 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Daily Briefing Generator | offen | Kleine Logik bauen, die aus LifeOS Daten eine Tageslage erzeugt |
 | Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
+| Hoch | LifeOS echte lokale Datei | offen | nicht versionierte `config/lifeos.json` für persönliche lokale Daten vorbereiten |
 | Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
 | Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
 | Mittel | Work Radar | offen | Struktur für SAP, FSM, Mail, LNW und offene Rückfragen weiter konkretisieren |
@@ -91,19 +98,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 |---|---|---|
 | Browser blockiert lokale JSON Datei | mittel | LifeOS über lokalen Server starten oder später Backend API nutzen |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
-| Zu viele UI Prototypen ohne Daten | reduziert | LifeOS hat jetzt erste lokale Datenbasis, nächster Schritt ist Generator Logik |
 | Installer Fehler bei Endanwendern | hoch | Installer weiterhin als eigener Schwerpunkt behandeln |
 | Private Daten im Repo | hoch | echte lokale Dateien wie `config/lifeos.json` nicht committen |
 
 ## Nächster sinnvoller Schritt
 
-LifeOS soll als Nächstes aus den geladenen Daten eine verständliche Tageslage erzeugen. Der JSON Loader ist vorbereitet. Jetzt fehlt der Daily Briefing Generator.
+Nach dem Daily Briefing Generator ist der nächste sinnvolle Schritt die lokale persönliche Datei `config/lifeos.json`. Diese Datei soll echte private Werte enthalten können, darf aber nicht ins Repository committed werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Daily Briefing aus JSON erzeugen
-2. PROJECT_STATUS.md nach jedem größeren Schritt aktualisieren
+1. config/lifeos.json als lokale, ignorierte Datei vorbereiten
+2. LifeOS bevorzugt config/lifeos.json laden lassen und danach auf lifeos.example.json fallen lassen
 3. Installer Robustheit erneut prüfen
 4. Backend Health Check sauber anbinden
 5. Erst danach größere Dependency Updates angehen
