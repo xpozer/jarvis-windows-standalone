@@ -4,6 +4,23 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.6] - 2026-05-01
+
+### Added
+
+- PowerShell Setup Skript `scripts/maintenance/setup-lifeos-config.ps1` ergänzt.
+- Dokumentation `docs/lifeos-private-config.md` ergänzt.
+- Skript erzeugt eine private lokale `config/lifeos.json` aus `config/lifeos.example.json`.
+
+### Changed
+
+- LifeOS persönliche Vorlage ist jetzt als konkreter Setup Schritt vorbereitet.
+
+### Security
+
+- Das Skript überschreibt eine bestehende `config/lifeos.json` nur mit `-Force`.
+- Private LifeOS Daten bleiben lokal und werden weiterhin nicht committed.
+
 ## [B6.6.5] - 2026-05-01
 
 ### Added
