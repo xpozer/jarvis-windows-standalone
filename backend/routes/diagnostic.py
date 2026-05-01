@@ -40,6 +40,10 @@ def api_diagnostic_deps():
 def api_diagnostic_deep():
     return system_service.api_diagnostic_deep()
 
+@router.get("/diagnostic/center")
+def api_diagnostic_center():
+    return system_service.api_diagnostic_center()
+
 @router.post("/diagnostic/analyze-text")
 async def api_diagnostic_analyze_text(req: Request):
     return await system_service.api_diagnostic_analyze_text(req=req)
