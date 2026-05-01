@@ -2,16 +2,34 @@
 
 Quick Capture ist der schnelle lokale Eingang fuer Gedanken, Reminder, Aufgaben und Arbeitsnotizen.
 
-## Aufgabe 1.1 Stand
-
-Dieses Modul legt die technische Basis an:
+## Modulstruktur
 
 ```text
+app.py           verbindet Popup, Klassifikation und Speicherung
 hotkey.py        globaler Hotkey Listener, spaeter Strg Shift Space
 popup.py         kleines Always On Top Eingabefenster
 classifier.py    lokale Erstklassifikation
 voice_input.py   vorbereiteter Voice Stub
 persistence.py   lokale SQLite Speicherung
+__main__.py      einmaliger lokaler Teststart
+```
+
+## Lokaler Teststart
+
+Aus dem Repository Root:
+
+```powershell
+python -m backend.quickcapture
+```
+
+## Bedienung
+
+```text
+Enter          speichert mit Auto Klassifikation
+Strg Enter     speichert ohne Klassifikation als plain note
+Esc            schliesst ohne Speicherung
+Strg M         reserviert fuer Voice Capture
+Strg R         reserviert fuer Reklassifikation
 ```
 
 ## Datenschutz
@@ -35,6 +53,6 @@ idea
 note
 ```
 
-## Naechster Schritt
+## Stand
 
-Aufgabe 1.2 verbindet Hotkey, Popup, Klassifikation und Speicherung zu einem bedienbaren Ablauf.
+Aufgabe 1.1 und 1.2 sind umgesetzt. Hotkey, Voice Capture, Reklassifikation, Tray Feedback und Daily Review folgen in den naechsten Aufgaben.
