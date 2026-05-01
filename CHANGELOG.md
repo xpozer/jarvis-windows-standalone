@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.18] - 2026-05-01
+
+### Added
+
+- DiagCenter Frontend Seite unter `frontend/public/jarvis-diagcenter.html` ergänzt.
+- Launcher um `DIAGCENTER` Einstieg erweitert.
+- DiagCenter Frontend ruft `GET /diagnostic/center` ab und zeigt Checks, Sections und Raw JSON an.
+
+### Changed
+
+- Diagnose ist nun nicht nur per PowerShell oder Browser JSON erreichbar, sondern auch als lokale HUD Oberfläche sichtbar.
+
 ## [B6.6.17] - 2026-05-01
 
 ### Added
