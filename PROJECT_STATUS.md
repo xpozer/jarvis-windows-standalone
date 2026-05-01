@@ -31,7 +31,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Repository Basis | erledigt | Projektstruktur, README, Changelog, Contribution Regeln und Security Hinweise vorhanden |
 | Launcher | erledigt | Startseite mit Global Themes, Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
 | Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp vorhanden |
-| Dashboard Theme System | in Arbeit | Neue Datei `frontend/public/jarvis-global-overview-themed.html` enthält JARVIS, MATRIX und ULTRON Theme Switcher |
+| Dashboard Theme System | in Prüfung | Neue Datei `frontend/public/jarvis-global-overview-themed.html` enthält JARVIS, MATRIX und ULTRON Theme Switcher. Testcheckliste liegt vor |
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
@@ -49,6 +49,11 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.8.2 Themes Checklist
+
+- Testcheckliste `docs/dashboard-theme-test-checklist.md` für lokale Prüfung des Theme Prototype ergänzt.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.8.1 Themes Prototype
 
@@ -186,7 +191,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Dashboard Theme Prüfung | offen | `jarvis-global-overview-themed.html` lokal öffnen und Layout, FPS, Theme Switcher sowie Mobile Verhalten prüfen |
+| Hoch | Dashboard Theme Prüfung | offen | `docs/dashboard-theme-test-checklist.md` abarbeiten und Ergebnis melden |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Dashboard Theme Feinschliff | offen | Nach Sichtprüfung MATRIX und ULTRON visuell nachschärfen |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
@@ -202,6 +207,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Datei | Zweck |
 |---|---|
+| `docs/dashboard-theme-test-checklist.md` | Lokale Testcheckliste für den Dashboard Theme Prototype |
 | `docs/dashboard-theme-system-implementation.md` | Umsetzungsskizze und prüfbare Snippets für JARVIS, MATRIX und ULTRON Themes |
 | `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
@@ -226,7 +232,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Theme Prototype ist der nächste sinnvolle Schritt die lokale Sichtprüfung der neuen themenfähigen Dashboard Datei. Erst danach sollte visuell nachgeschärft oder die alte Global Overview Datei ersetzt werden.
+Nach dem Theme Prototype ist der nächste sinnvolle Schritt die lokale Sichtprüfung der neuen themenfähigen Dashboard Datei anhand der Testcheckliste. Erst danach sollte visuell nachgeschärft oder die alte Global Overview Datei ersetzt werden.
 
 Empfohlene Reihenfolge:
 
