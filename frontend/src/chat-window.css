@@ -114,13 +114,67 @@
 }
 
 .dialog-mode .jarvis-conversation {
+  position: relative;
+  z-index: 2;
   min-width: 0;
   padding-left: 1.2vw;
   padding-right: 0;
 }
 
 .dialog-mode .jarvis-core-stage {
+  display: block;
+  position: absolute;
+  right: -3.2vw;
+  top: 5.2vh;
+  width: clamp(280px, 21vw, 430px);
+  height: clamp(280px, 21vw, 430px);
+  z-index: 1;
+  opacity: .42;
+  pointer-events: none;
+  filter: saturate(.9);
+}
+
+.dialog-mode .jarvis-core-stage::before {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(5,216,255,.16), transparent 64%);
+  filter: blur(18px);
+}
+
+.dialog-mode .jarvis-core-stage .jarvis-legacy-orb-wrap {
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  opacity: .9;
+  filter: drop-shadow(0 0 34px rgba(5,216,255,.28));
+}
+
+.dialog-mode .jarvis-core-stage .jarvis-core-label {
+  top: 82%;
+  opacity: .72;
+}
+
+.dialog-mode .jarvis-core-stage .jarvis-core-label h2 {
+  font-size: 13px !important;
+  letter-spacing: 2px;
+}
+
+.dialog-mode .jarvis-core-stage .jarvis-core-label p {
   display: none;
+}
+
+.dialog-mode.is-thinking .jarvis-core-stage,
+.dialog-mode.is-speaking .jarvis-core-stage {
+  opacity: .66;
+  filter: saturate(1.15);
+}
+
+.dialog-mode.is-speaking .jarvis-core-stage .jarvis-legacy-orb-wrap {
+  filter: drop-shadow(0 0 46px rgba(5,216,255,.42));
 }
 
 .jarvis-message-list {
@@ -264,6 +318,8 @@
 .dialog-mode .jarvis-message-card {
   min-height: 10.2vh;
   padding-bottom: 2.2vh;
+  background: linear-gradient(180deg, rgba(9, 28, 48, .91), rgba(4, 13, 24, .82));
+  backdrop-filter: blur(4px);
 }
 
 .thinking-card {
@@ -388,5 +444,12 @@
 @media (max-width: 1600px) {
   .dialog-mode .jarvis-main {
     width: calc(100vw - 620px);
+  }
+
+  .dialog-mode .jarvis-core-stage {
+    right: -24px;
+    width: 280px;
+    height: 280px;
+    opacity: .34;
   }
 }

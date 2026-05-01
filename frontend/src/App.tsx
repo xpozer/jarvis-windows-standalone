@@ -450,7 +450,7 @@ export function App() {
   }
 
   return (
-    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""} ${isDialog ? "dialog-mode" : ""}`} style={{ "--ui-scale": uiScale } as CSSProperties}>
+    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""} ${orbState === "speaking" ? "is-speaking" : ""} ${isDialog ? "dialog-mode" : ""}`} style={{ "--ui-scale": uiScale } as CSSProperties}>
       <DayStartCard onSend={sendMessage} />
       <header className="jarvis-topbar">
         <div className="jarvis-brand">
