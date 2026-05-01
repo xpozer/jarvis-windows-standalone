@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.19] - 2026-05-01
+
+### Added
+
+- Themable Global Overview Seite `frontend/public/jarvis-global-overview-themed.html` eingebunden.
+- Launcher Einstieg `GLOBAL THEMES` fuer JARVIS, MATRIX und ULTRON Theme Switcher ergaenzt.
+- Dokumentation und Test Checkliste fuer das Dashboard Theme System ergaenzt.
+
+### Changed
+
+- Die stabile bestehende `GLOBAL OVERVIEW` Seite bleibt erhalten und wird nicht ersetzt.
+
 ## [B6.6.18] - 2026-05-01
 
 ### Added

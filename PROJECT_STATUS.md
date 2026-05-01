@@ -43,11 +43,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Backend Health Check | erledigt | Startskript prüft Port 8000 und `/health`, bevor JARVIS als bereit gilt |
 | DiagCenter Backend | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
 | DiagCenter Frontend | erledigt | Lokale HUD Seite `frontend/public/jarvis-diagcenter.html` zeigt Checks, Sections und Raw JSON |
+| Dashboard Themes | erledigt | JARVIS, MATRIX und ULTRON sind als eigene Global Themes Seite im Launcher eingebunden |
 | Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.19
+
+- Themable Global Overview Seite `frontend/public/jarvis-global-overview-themed.html` eingebunden.
+- Launcher Einstieg `GLOBAL THEMES` fuer JARVIS, MATRIX und ULTRON Theme Switcher ergaenzt.
+- Dokumentation und Test Checkliste fuer das Dashboard Theme System ergaenzt.
+- Die stabile bestehende `GLOBAL OVERVIEW` Seite bleibt als eigener Einstieg erhalten.
 
 ### B6.6.18
 
