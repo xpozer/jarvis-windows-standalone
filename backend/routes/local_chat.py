@@ -147,6 +147,10 @@ def _sse(event: str, data: dict[str, Any]) -> str:
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
+def _phase(step: str, label: str, detail: str = "") -> str:
+    return _sse("phase", {"step": step, "label": label, "detail": detail})
+
+
 @router.post("/chat")
 def chat(req: ChatRequest) -> dict[str, Any]:
     started = time.perf_counter()
@@ -246,6 +250,7 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
         answer_parts: list[str] = []
         agent_registry.update_status(agent_id, "running", last_action=user_text[:160])
         try:
+            yield _phase("context", "Kontext wird geladen", "Lokale Historie und Laufzeitdaten werden vorbereitet.")
             yield _sse("meta", {
                 "agent": agent_id,
                 "reason": reason,
@@ -253,7 +258,12 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
                 "model": model,
                 "provider": JARVIS_PROVIDER,
             })
+            yield _phase("agent", f"Agent aktiv: {agent_id}", reason)
+            yield _phase("memory", "Gedächtnis wird geprüft", f"{len(memory_messages)} relevante Memory-Bloecke gefunden.")
+            yield _sse("memory", {"facts_used": len(memory_messages)})
+            yield _phase("model", f"Provider verbunden: {JARVIS_PROVIDER}", f"Modell {model}")
 
+            yield _phase("answer", "Antwort wird formuliert", "JARVIS schreibt live in den Verlauf.")
             stream_result = call_llm(messages, model, temperature=0.35, stream=True)
             chunks = [stream_result] if isinstance(stream_result, str) else stream_result
             for chunk in chunks:
@@ -299,6 +309,7 @@ def chat_stream(req: ChatRequest) -> StreamingResponse:
                 {"agent": agent_id, "model": model, "provider": JARVIS_PROVIDER, "memory_facts_used": memory["facts_used"], "facts_extracted": memory["facts_extracted"], "duration_ms": duration_ms},
             )
             agent_registry.update_status(agent_id, "idle", last_action="Antwort erstellt")
+            yield _phase("done", "Antwort abgeschlossen", f"Dauer {duration_ms} ms")
             yield _sse("done", {
                 "ok": True,
                 "session_id": session_id,

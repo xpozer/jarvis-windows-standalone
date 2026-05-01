@@ -4,6 +4,20 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.9] - 2026-05-01
+
+### Added
+
+- Interaction Layer v1 fuer lebendigere Chat-Antworten.
+- Chat Streaming sendet nun Phasen fuer Kontext, Agent, Memory, Modell, Antwort und Abschluss.
+- Frontend zeigt Live-Phasen direkt in der Antwortkarte.
+- Orb wechselt waehrend Streaming sichtbar zwischen Denken und Sprechen.
+- Antwortkarte nutzt dezente Scan-, Avatar- und Meta-Einblendanimationen.
+
+### Changed
+
+- Streaming Antworten wirken reaktiver und zeigen, was JARVIS gerade verarbeitet.
+
 ## [B6.6.8] - 2026-05-01
 
 ### Added

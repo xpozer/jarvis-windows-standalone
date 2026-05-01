@@ -66,6 +66,10 @@ def test_chat_stream_emits_deltas_and_persists_session(client, monkeypatch, tmp_
 
     assert response.status_code == 200
     assert "event: meta" in body
+    assert "event: phase" in body
+    assert "Kontext" in body
+    assert "Agent" in body
+    assert "Antwort" in body
     assert "event: delta" in body
     assert "Hallo" in body
     assert " Welt" in body

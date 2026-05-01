@@ -169,6 +169,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 14px;
+  animation: jarvis-insights-rise .22s ease-out both;
 }
 
 .jarvis-message-insights span {
@@ -274,6 +275,52 @@
   box-shadow: 0 0 22px rgba(5, 216, 255, .1), inset 0 0 18px rgba(5, 216, 255, .04);
 }
 
+.streaming-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(5, 216, 255, .13), transparent);
+  transform: translateX(-120%);
+  animation: jarvis-card-scan 2.2s ease-in-out infinite;
+}
+
+.streaming-card .jarvis-avatar.jarvis {
+  animation: jarvis-avatar-signal 1.1s ease-in-out infinite;
+}
+
+.jarvis-live-phase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 12px;
+  color: rgba(180, 232, 255, .78);
+  font-size: calc(12px * var(--ui-scale));
+  letter-spacing: .8px;
+}
+
+.jarvis-live-phase i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #05d8ff;
+  box-shadow: 0 0 14px rgba(5, 216, 255, .8);
+  animation: jarvis-phase-dot .9s ease-in-out infinite;
+}
+
+.jarvis-live-phase span {
+  color: #bdf3ff;
+  text-transform: uppercase;
+}
+
+.jarvis-live-phase em {
+  min-width: 0;
+  color: rgba(135, 196, 216, .9);
+  font-style: normal;
+}
+
 .streaming-card .jarvis-message-body p::after {
   content: "";
   display: inline-block;
@@ -288,6 +335,53 @@
 @keyframes jarvis-stream-caret {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes jarvis-card-scan {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  25%, 70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes jarvis-avatar-signal {
+  0%, 100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(1.38);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes jarvis-phase-dot {
+  0%, 100% {
+    opacity: .45;
+    transform: scale(.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes jarvis-insights-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

@@ -20,6 +20,9 @@ type Message = {
   meta?: ChatMessageMeta;
   streaming?: boolean;
   streamId?: string;
+  phase?: string;
+  phaseDetail?: string;
+  pulse?: number;
 };
 
 type ChatMessageMeta = {
@@ -58,6 +61,9 @@ type ChatStreamPayload = ChatApiResponse & {
   text?: string;
   delta?: string;
   detail?: string;
+  step?: string;
+  label?: string;
+  facts_used?: number;
 };
 
 type ChatStreamEvent = {
@@ -182,6 +188,7 @@ export function App() {
   const [pinned, setPinned] = useState(false);
   const [thinking, setThinking] = useState(false);
   const [listening, setListening] = useState(false);
+  const [interactionState, setInteractionState] = useState<OrbState>("idle");
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
   const [lastAgent, setLastAgent] = useState("general");
   const [uiZoom, setUiZoom] = useState(loadUiZoom);
@@ -191,7 +198,7 @@ export function App() {
   const messageListRef = useRef<HTMLDivElement | null>(null);
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
-  const orbState: OrbState = thinking ? "thinking" : listening ? "listening" : "idle";
+  const orbState: OrbState = listening ? "listening" : interactionState !== "idle" ? interactionState : thinking ? "thinking" : "idle";
   const typingActivity = Math.min(1, input.length / 80);
   const isDialog = activeNav === "Dialog";
   const uiScale = uiZoom / 100;
@@ -320,10 +327,11 @@ export function App() {
     setMessages((prev) => [
       ...prev,
       { role: "operator", time: sentAt, text: cleanText },
-      { role: "jarvis", time: sentAt, text: "", streaming: true, streamId },
+      { role: "jarvis", time: sentAt, text: "", streaming: true, streamId, phase: "JARVIS initialisiert Kontext...", pulse: 0 },
     ]);
     setInput("");
     setThinking(true);
+    setInteractionState("thinking");
     try {
       const response = await fetch("/api/chat/stream", {
         method: "POST",
@@ -343,13 +351,15 @@ export function App() {
       let receivedDone = false;
 
       function appendDelta(delta: string) {
+        setInteractionState("speaking");
         setMessages((prev) => prev.map((message) => (
-          message.streamId === streamId ? { ...message, text: message.text + delta } : message
+          message.streamId === streamId ? { ...message, text: message.text + delta, pulse: (message.pulse || 0) + 1 } : message
         )));
       }
 
       function finishStream(result: ChatApiResponse) {
         receivedDone = true;
+        setInteractionState("idle");
         setLastAgent(result.agent || "general");
         if (result.session_id) setActiveSessionId(result.session_id);
         setMessages((prev) => prev.map((message) => {
@@ -359,13 +369,33 @@ export function App() {
             text: message.text.trim() ? message.text : readChatResponse(result),
             meta: chatMetaFromResponse(result),
             streaming: false,
+            phase: "Antwort abgeschlossen",
+            phaseDetail: "",
           };
         }));
+      }
+
+      function updatePhase(label: string, detail = "", step = "") {
+        if (step === "answer") setInteractionState("speaking");
+        else if (step && step !== "done") setInteractionState("thinking");
+        setMessages((prev) => prev.map((message) => (
+          message.streamId === streamId
+            ? { ...message, phase: label, phaseDetail: detail, pulse: (message.pulse || 0) + 1 }
+            : message
+        )));
       }
 
       function handleEvent(item: ChatStreamEvent) {
         if (item.event === "meta") {
           if (item.data.agent) setLastAgent(item.data.agent);
+          return;
+        }
+        if (item.event === "phase") {
+          updatePhase(item.data.label || "JARVIS arbeitet...", item.data.detail || "", item.data.step || "");
+          return;
+        }
+        if (item.event === "memory") {
+          updatePhase("Gedächtnis geprüft", `${item.data.facts_used || 0} relevante Memory-Bloecke`, "memory");
           return;
         }
         if (item.event === "delta") {
@@ -398,17 +428,20 @@ export function App() {
       if (!receivedDone) throw new Error("Chat Stream wurde ohne Abschluss beendet.");
       await loadSessions();
     } catch (error) {
+      setInteractionState("idle");
       setMessages((prev) => prev.map((message) => (
         message.streamId === streamId
           ? {
               ...message,
               text: `Fehler beim lokalen Chat: ${error instanceof Error ? error.message : String(error)}\n\nPruefe bitte, ob Ollama laeuft und das Modell qwen3:8b vorhanden ist.`,
               streaming: false,
+              phase: "Fehler im Dialog",
             }
           : message
       )));
     } finally {
       setThinking(false);
+      setInteractionState("idle");
     }
   }
 
@@ -482,10 +515,17 @@ export function App() {
           </div>
           <div className="jarvis-message-list" ref={messageListRef}>
             {messages.map((message, index) => (
-              <article key={message.streamId || `${message.time}-${index}-${message.text}`} className={`jarvis-message-card ${message.streaming ? "streaming-card" : ""}`}>
+              <article key={message.streamId || `${message.time}-${index}-${message.text}`} className={`jarvis-message-card ${message.streaming ? "streaming-card" : ""} ${message.phase ? "has-phase" : ""}`} data-pulse={message.pulse || 0}>
                 <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "â—" : ""}</div>
                 <div className="jarvis-message-body">
                   <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "BEDIENER"}</b><span>{message.time}</span></div>
+                  {message.phase && (
+                    <div className="jarvis-live-phase">
+                      <i />
+                      <span>{message.phase}</span>
+                      {message.phaseDetail && <em>{message.phaseDetail}</em>}
+                    </div>
+                  )}
                   <p>{message.text || (message.streaming ? "JARVIS antwortet live..." : "")}</p>
                   {message.meta && (
                     <div className="jarvis-message-insights">
