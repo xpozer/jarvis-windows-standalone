@@ -1,7 +1,7 @@
 {
   "name": "jarvis-windows-standalone",
-  "version": "B6.5.1",
-  "description": "JARVIS Windows Standalone - B4 Realized Depth",
+  "version": "B6.6.24",
+  "description": "JARVIS Windows Standalone - local first HUD, LifeOS, DiagCenter and automation audit frontend",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",
