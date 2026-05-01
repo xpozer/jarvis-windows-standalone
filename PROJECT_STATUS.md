@@ -40,6 +40,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Autonome Assistant Roadmap | in Arbeit | Neue fünf Block Roadmap liegt unter `docs/autonomous-assistant-roadmap.md` |
 | Screen Perception 1.1 | erledigt | Modulstruktur für Bildschirm Beobachtung ist auf `feature/screen` angelegt |
 | Screen Perception 1.2 | erledigt | Privacy First Konfiguration, Pause Status, Beispielconfig und Indikator Grundlage ergänzt |
+| Screen Perception 1.3 | erledigt | WebP, Diff Detection, Ring Buffer nach Frames und 100 MB Speicherlimit ergänzt |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
@@ -51,6 +52,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.0 Screen 1.3
+
+- Performance Konfiguration in `backend/perception/screen/config.py` ergänzt.
+- Capturer speichert Screenshots als WebP mit konfigurierbarer Qualität.
+- Diff Detection über verkleinerten Graustufen Hash ergänzt.
+- Bei unverändertem Bild wird keine neue Datei geschrieben.
+- Ring Buffer begrenzt jetzt nach Frame Anzahl und Speicherlimit.
+- Beispielkonfiguration und README aktualisiert.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.7.0 Screen 1.2
 
@@ -189,7 +200,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Screen Perception 1.3 | offen | Performance Grundlagen mit WebP Ring Buffer Limit, Diff Detection und Speichergrenze ergänzen |
+| Hoch | Screen Perception 1.4 | offen | Kontext Datenmodell finalisieren und Felder für Timestamp, Anwendung, Fenstertitel, Text, UI Elemente und Intent Guess prüfen |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Episodic Memory | offen | Nach Abschluss Block 1 beginnen |
 | Mittel | Mail Triage | offen | Nach Abschluss Block 2 beginnen |
@@ -223,7 +234,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
 | Screen Perception erfasst sensible Daten | hoch | Default Off, Blocklist, Pause Funktion und AuditLog zwingend vor Aktivierung ausbauen |
-| Vision Modell belastet System | mittel | Diff Detection, Caching und Intervallsteuerung vor Dauerbetrieb einbauen |
+| Vision Modell belastet System | reduziert | Diff Detection, Caching Grundlage und Intervallsteuerung sind vorbereitet. Lokaler Performance Test bleibt nötig |
 | Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
@@ -231,16 +242,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach Aufgabe 1.2 ist der nächste sinnvolle Schritt Screen Perception 1.3. Dabei werden Performance Grundlagen ergänzt, bevor später dauerhafte Beobachtung oder Vision Calls aktiviert werden.
+Nach Aufgabe 1.3 ist der nächste sinnvolle Schritt Screen Perception 1.4. Dabei wird das Kontext Datenmodell finalisiert und gegen die Roadmap Felder geprüft.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Screen Perception 1.3 Performance
-2. Screen Perception 1.4 Kontext Datenmodell finalisieren
-3. Screen Perception 1.5 Memory Integration
-4. Screen Perception 1.6 Proaktive Trigger
-5. Screen Perception 1.7 User Kommandos
+1. Screen Perception 1.4 Kontext Datenmodell finalisieren
+2. Screen Perception 1.5 Memory Integration
+3. Screen Perception 1.6 Proaktive Trigger
+4. Screen Perception 1.7 User Kommandos
+5. Screen Perception 1.8 AuditLog
 ```
 
 ## Pflege Ablauf
