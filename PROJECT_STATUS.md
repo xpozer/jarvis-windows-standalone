@@ -38,11 +38,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
+| Daily Command Center Datenmodell | in Arbeit | Tagesfokus und Top 3 Aufgaben sind in der Beispielkonfiguration vorbereitet |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.0
+
+- Daily Command Center Datenfelder in `config/lifeos.example.json` ergänzt.
+- `daily_briefing.day_focus` für den Tagesfokus ergänzt.
+- `daily_briefing.top_tasks` für Top 3 Aufgaben mit Bereich, Wirkung, Aufwand und nächstem Schritt ergänzt.
+- Dokumentation `docs/lifeos-daily-command-center.md` ergänzt.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.6
 
@@ -108,7 +117,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Daily Command Center | offen | Top 3 Aufgaben, Tagesfokus und klaren nächsten Schritt aus lokalen Daten ableiten |
+| Hoch | Daily Command Center UI | offen | Tagesfokus und Top 3 Aufgaben im LifeOS Command Center anzeigen |
 | Hoch | Work Radar 2.0 | offen | strukturierte Vorgänge für SAP, FSM, LNW, Mail, Angebote und Rückfragen ergänzen |
 | Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
 | Mittel | Learning Coach | offen | Lernstände, Wiederholungen und Schwachstellen lokal abbilden |
@@ -131,6 +140,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
 | `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
+| `docs/lifeos-daily-command-center.md` | Datenmodell und Akzeptanzkriterien für Tagesfokus und Top 3 Aufgaben |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -146,12 +156,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach der persönlichen LifeOS Vorlage ist der nächste sinnvolle Schritt das Daily Command Center. Dafür soll LifeOS aus lokalen Daten Top 3 Aufgaben, Tagesfokus und einen klaren nächsten Schritt ableiten.
+Nach dem Daily Command Center Datenmodell ist der nächste sinnvolle Schritt die UI Anzeige im LifeOS Command Center. Dafür sollen Tagesfokus und Top 3 Aufgaben sichtbar gerendert und in die generierte Tageslage einbezogen werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Daily Command Center um Top 3 Aufgaben erweitern
+1. Daily Command Center UI um Tagesfokus und Top 3 Aufgaben erweitern
 2. Work Radar 2.0 Schema ergänzen
 3. Installer Robustheit erneut prüfen
 4. Backend Health Check sauber anbinden
