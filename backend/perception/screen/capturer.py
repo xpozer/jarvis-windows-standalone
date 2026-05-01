@@ -15,13 +15,17 @@ class ScreenCaptureConfig:
     interval_seconds: float = 2.0
     output_dir: Path = Path("tmp/screen-buffer")
     max_frames: int = 100
+    max_buffer_mb: int = 100
     image_format: str = "webp"
+    image_quality: int = 72
+    diff_hash_size: tuple[int, int] = (32, 18)
 
 
 class ScreenCapturer:
     def __init__(self, config: ScreenCaptureConfig | None = None) -> None:
         self.config = config or ScreenCaptureConfig()
         self._last_hash: str | None = None
+        self._last_diff_hash: str | None = None
 
     def capture_once(self) -> ScreenshotFrame:
         self.config.output_dir.mkdir(parents=True, exist_ok=True)
@@ -36,9 +40,22 @@ class ScreenCapturer:
                 monitor = screen.monitors[1]
                 raw = screen.grab(monitor)
                 image = Image.frombytes("RGB", raw.size, raw.rgb)
-                image.save(path, self.config.image_format.upper(), quality=72)
+                diff_hash = self._diff_hash(image)
+                changed = diff_hash != self._last_diff_hash
+                self._last_diff_hash = diff_hash
+
+                if not changed:
+                    return ScreenshotFrame(
+                        id=frame_id,
+                        path=None,
+                        width=image.width,
+                        height=image.height,
+                        image_hash=self._last_hash,
+                        changed=False,
+                    )
+
+                image.save(path, self.config.image_format.upper(), quality=self.config.image_quality)
                 image_hash = self._hash_file(path)
-                changed = image_hash != self._last_hash
                 self._last_hash = image_hash
                 self._prune_buffer()
                 return ScreenshotFrame(
@@ -47,7 +64,7 @@ class ScreenCapturer:
                     width=image.width,
                     height=image.height,
                     image_hash=image_hash,
-                    changed=changed,
+                    changed=True,
                 )
         except Exception:
             return ScreenshotFrame(id=frame_id, path=None, changed=False)
@@ -57,6 +74,10 @@ class ScreenCapturer:
             yield self.capture_once()
             time.sleep(max(0.25, self.config.interval_seconds))
 
+    def _diff_hash(self, image) -> str:
+        small = image.convert("L").resize(self.config.diff_hash_size)
+        return hashlib.sha256(small.tobytes()).hexdigest()
+
     def _hash_file(self, path: Path) -> str:
         digest = hashlib.sha256()
         with path.open("rb") as file:
@@ -65,9 +86,38 @@ class ScreenCapturer:
         return digest.hexdigest()
 
     def _prune_buffer(self) -> None:
-        files = sorted(self.config.output_dir.glob(f"*.{self.config.image_format}"), key=lambda item: item.stat().st_mtime, reverse=True)
+        files = sorted(
+            self.config.output_dir.glob(f"*.{self.config.image_format}"),
+            key=lambda item: item.stat().st_mtime,
+            reverse=True,
+        )
+
         for old_file in files[self.config.max_frames:]:
+            self._unlink_quietly(old_file)
+
+        self._prune_by_size()
+
+    def _prune_by_size(self) -> None:
+        max_bytes = max(1, self.config.max_buffer_mb) * 1024 * 1024
+        files = sorted(
+            self.config.output_dir.glob(f"*.{self.config.image_format}"),
+            key=lambda item: item.stat().st_mtime,
+            reverse=True,
+        )
+        total = sum(item.stat().st_size for item in files if item.exists())
+
+        for old_file in reversed(files):
+            if total <= max_bytes:
+                break
             try:
-                old_file.unlink()
+                size = old_file.stat().st_size
             except OSError:
-                pass
+                size = 0
+            self._unlink_quietly(old_file)
+            total -= size
+
+    def _unlink_quietly(self, path: Path) -> None:
+        try:
+            path.unlink()
+        except OSError:
+            pass
