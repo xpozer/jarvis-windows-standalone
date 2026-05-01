@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.17] - 2026-05-01
+
+### Added
+
+- DiagCenter Sammel Endpunkt `GET /diagnostic/center` ergänzt.
+- DiagCenter bündelt Backend Health, Self Check, Dependencies, Ports, Logs, System Status, UseJARVIS Runtime und Awareness Runtime.
+- Dokumentation `docs/diagcenter.md` ergänzt.
+
+### Changed
+
+- Diagnoseinformationen sind nun über einen zentralen Endpunkt abrufbar, statt nur über einzelne Diagnose Routen verteilt zu sein.
+
 ## [B6.6.16] - 2026-05-01
 
 ### Added
