@@ -4,6 +4,13 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.20] - 2026-05-01
+
+### Fixed
+
+- Standalone HTML Seiten aus `frontend/public` werden nun direkt durch FastAPI ausgeliefert, bevor der SPA Fallback greift.
+- `jarvis-global-overview-themed.html` zeigt dadurch die Theme Seite statt versehentlich die React Chat Oberflaeche.
+
 ## [B6.6.19] - 2026-05-01
 
 ### Added

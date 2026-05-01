@@ -50,6 +50,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Erledigte Updates
 
+### B6.6.20
+
+- FastAPI Static Fallback erweitert: Standalone HTML Seiten aus `frontend/public` werden jetzt direkt ausgeliefert.
+- `jarvis-global-overview-themed.html` zeigt dadurch die Theme Seite statt der React Chat Oberflaeche.
+- Regressionstest fuer Public HTML vor SPA Fallback ergaenzt.
+
 ### B6.6.19
 
 - Themable Global Overview Seite `frontend/public/jarvis-global-overview-themed.html` eingebunden.

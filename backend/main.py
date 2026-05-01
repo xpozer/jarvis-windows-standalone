@@ -18,6 +18,7 @@ from config import (
     FRONTEND_DIAG,
     FRONTEND_DIST,
     FRONTEND_INDEX,
+    FRONTEND_PUBLIC,
 )
 from utils import log, read_json, write_json
 
@@ -188,6 +189,9 @@ def spa_fallback(full_path: str):
     candidate = FRONTEND_DIST / full_path
     if candidate.exists() and candidate.is_file():
         return FileResponse(candidate)
+    public_candidate = FRONTEND_PUBLIC / full_path
+    if public_candidate.exists() and public_candidate.is_file():
+        return FileResponse(public_candidate)
     if FRONTEND_INDEX.exists():
         return FileResponse(FRONTEND_INDEX)
     return {
