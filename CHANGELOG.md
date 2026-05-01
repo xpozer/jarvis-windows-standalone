@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.15] - 2026-05-01
+
+### Added
+
+- Installer Readiness Check unter `scripts/maintenance/check-installer-readiness.ps1` ergänzt.
+- Dokumentation `docs/installer-readiness.md` ergänzt.
+- Vorprüfung für PowerShell, Root Dateien, Python, Node.js, npm, winget, Ollama, Ports und LifeOS Config ergänzt.
+
+### Changed
+
+- Installer Robustheit wird um einen nicht destruktiven Diagnose Schritt vor der eigentlichen Installation erweitert.
+
 ## [B6.6.14] - 2026-05-01
 
 ### Fixed
