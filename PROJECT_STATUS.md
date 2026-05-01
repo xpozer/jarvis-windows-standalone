@@ -38,6 +38,8 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Roadmap Module | vorbereitet | Learning, Decision, Projects, Energy, Finance, Memory und Automation sind local-first im Briefing und UI sichtbar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
+| Autonome Assistant Roadmap | in Arbeit | Neue fünf Block Roadmap liegt unter `docs/autonomous-assistant-roadmap.md` |
+| Screen Perception | in Arbeit | Aufgaben 1.1 bis 1.4 wurden auf aktuellem `main` als `feature/screen-rebased` neu aufgebaut |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Voice / Push to Talk | erledigt | Chat Mikrofon nutzt Browser Speech Recognition bewusst per gedruecktem Button, keine Daueraufnahme |
@@ -51,6 +53,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.0 Screen Rebased
+
+- Screen Perception wurde auf aktuellem `main` inklusive B6.6.23 Voice Push to Talk neu aufgebaut.
+- Alter Branch `feature/screen` bleibt als Sicherheitskopie bestehen.
+- Neuer Arbeitsbranch ist `feature/screen-rebased`.
+- Enthalten sind Modulstruktur, Privacy First, Performance Capture und finalisiertes Kontext Datenmodell.
+- Private Datei `config/screen-perception.json` und temporärer Screenshot Buffer `tmp/` werden ignoriert.
+- Screen Perception bleibt weiterhin Default Off und führt keine automatische Beobachtung aus.
 
 ### B6.6.23
 
@@ -207,6 +218,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
+| Hoch | Screen Perception 1.5 | offen | Memory Übergabe vorbereiten, ohne automatisch dauerhaft zu speichern |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Decision Assistant | vorbereitet | echte private Entscheidungen lokal in `config/lifeos.json` eintragen |
 | Mittel | Private Project Manager | vorbereitet | echte private Projekte lokal in `config/lifeos.json` eintragen |
@@ -221,6 +233,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Datei | Zweck |
 |---|---|
+| `docs/autonomous-assistant-roadmap.md` | Neue fünf Block Roadmap für autonomen Personal Assistenten |
 | `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
 | `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
@@ -234,24 +247,26 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
+| Screen Perception erfasst sensible Daten | hoch | Default Off, Blocklist, Pause Funktion und AuditLog zwingend vor Aktivierung ausbauen |
+| Vision Modell belastet System | reduziert | Diff Detection, Caching Grundlage und Intervallsteuerung sind vorbereitet. Lokaler Performance Test bleibt nötig |
 | Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
-| Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
+| Private Daten im Repo | reduziert | `config/lifeos.json` und `config/screen-perception.json` sind ignoriert, trotzdem vor Commits prüfen |
 | Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
 
 ## Nächster sinnvoller Schritt
 
-Nach Voice und den vorbereiteten LifeOS Roadmap Modulen ist der nächste sinnvolle Schritt der Automation Layer mit echtem Audit Log.
+Nach dem Rebase ist der nächste sinnvolle Schritt Screen Perception 1.5. Dabei wird die Übergabe an Memory vorbereitet, ohne schon dauerhaft zu speichern.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Automation Audit Log anbinden
-2. Release ZIP Workflow testen
-3. Installer Endanwender Test durchführen
-4. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
-5. Voice UX mit echtem Mikrofon im Browser testen
+1. Screen Perception 1.5 Memory Integration
+2. Screen Perception 1.6 Proaktive Trigger
+3. Screen Perception 1.7 User Kommandos
+4. Screen Perception 1.8 AuditLog
+5. Screen Perception 1.9 Tests
 ```
 
 ## Pflege Ablauf
