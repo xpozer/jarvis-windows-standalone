@@ -40,6 +40,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
+| Voice / Push to Talk | erledigt | Chat Mikrofon nutzt Browser Speech Recognition bewusst per gedruecktem Button, keine Daueraufnahme |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
 | Backend Health Check | erledigt | Startskript prüft Port 8000 und `/health`, bevor JARVIS als bereit gilt |
 | DiagCenter Backend | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
@@ -50,6 +51,13 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.23
+
+- Chat Mikrofon Button nutzt jetzt echte Browser Speech Recognition als Push-to-Talk.
+- Voice Status und Live Transkript sind direkt am Eingabefeld sichtbar.
+- Transkripte werden im Voice Runtime Backend gespeichert und erst bewusst in den Chat uebernommen.
+- Optionale Browser TTS fuer JARVIS Antworten nutzt vorhandene Voice Settings, bleibt aber standardmaessig aus.
 
 ### B6.6.22
 
@@ -205,7 +213,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Mittel | Health und Energy Radar | vorbereitet | echte Energie- und Fokusdaten lokal pflegen |
 | Mittel | Finance und Contract Radar | vorbereitet | echte Vertrags- und Fristdaten nur lokal pflegen |
 | Mittel | Memory und Knowledge Layer | vorbereitet | lokale Regeln, Notizen und Quellen weiter ausbauen |
-| Niedrig | Voice und Push to Talk | offen | Mikrofon default off, lokale TTS und bewusste Aktivierung planen |
+| Niedrig | Voice und Push to Talk | erledigt | Browser Speech Recognition angebunden, TTS optional ueber Voice Settings |
 | Niedrig | Automation Layer | vorbereitet | Audit Log fuer echte Ausfuehrungen anbinden |
 | Niedrig | Release ZIP | offen | GitHub Release Workflow mit echtem Tag testen |
 
@@ -234,16 +242,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach den vorbereiteten LifeOS Roadmap Modulen ist der nächste sinnvolle Schritt Voice und Push to Talk. Danach sollte der Automation Layer mit echtem Audit Log verbunden werden.
+Nach Voice und den vorbereiteten LifeOS Roadmap Modulen ist der nächste sinnvolle Schritt der Automation Layer mit echtem Audit Log.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Voice und Push to Talk vorbereiten
-2. Automation Audit Log anbinden
-3. Release ZIP Workflow testen
-4. Installer Endanwender Test durchführen
-5. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
+1. Automation Audit Log anbinden
+2. Release ZIP Workflow testen
+3. Installer Endanwender Test durchführen
+4. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
+5. Voice UX mit echtem Mikrofon im Browser testen
 ```
 
 ## Pflege Ablauf

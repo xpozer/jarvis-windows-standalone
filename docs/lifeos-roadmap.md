@@ -19,7 +19,7 @@ LifeOS bleibt Local First. Private Daten gehören in lokale Dateien wie `config/
 | Mittel | Health und Energy Radar | Energie, Belastung, Pausen und Fokusfenster berücksichtigen | vorbereitet |
 | Mittel | Finance und Contract Radar | Verträge, Rechnungen, Abos und Fristen lokal verwalten | vorbereitet |
 | Mittel | Memory und Knowledge Layer | lokale Notizen, Regeln, Dokumente und Projektwissen bündeln | vorbereitet |
-| Niedrig | Voice und Push to Talk | lokale Sprachsteuerung mit Mikrofon default off planen | geplant |
+| Niedrig | Voice und Push to Talk | lokale Sprachsteuerung mit Mikrofon default off planen | erledigt |
 | Niedrig | Automation Layer | lokale Automationen mit Freigabe und Audit Log vorbereiten | vorbereitet |
 
 ## 1. Daily Command Center
@@ -368,9 +368,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] Mikrofon ist standardmäßig aus
-[ ] Sprachfunktion braucht bewusste Aktivierung
-[ ] kritische Aktionen werden nicht automatisch ausgeführt
+[x] Mikrofon ist standardmäßig aus
+[x] Sprachfunktion braucht bewusste Aktivierung
+[x] kritische Aktionen werden nicht automatisch ausgeführt
 ```
 
 ## 10. Automation Layer

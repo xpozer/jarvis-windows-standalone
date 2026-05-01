@@ -285,6 +285,73 @@
   box-shadow: 0 0 18px rgba(69, 232, 155, .18);
 }
 
+.voice-btn {
+  font-size: 12px !important;
+  font-weight: 800;
+  letter-spacing: .8px;
+}
+
+.voice-btn.active {
+  border-color: rgba(69, 232, 155, .72);
+  background: radial-gradient(circle, rgba(69, 232, 155, .34), rgba(5, 18, 32, .92));
+  box-shadow: 0 0 34px rgba(69, 232, 155, .34), inset 0 0 18px rgba(69, 232, 155, .12);
+  color: #dffff0;
+}
+
+.voice-btn:disabled {
+  opacity: .46;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.jarvis-voice-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 20px;
+  margin: 6px 0 -4px 72px;
+  color: rgba(155, 201, 218, .82);
+  font-size: calc(11px * var(--ui-scale));
+  letter-spacing: .8px;
+  overflow: hidden;
+}
+
+.jarvis-voice-status span {
+  border: 1px solid rgba(126, 231, 255, .16);
+  border-radius: 999px;
+  background: rgba(5, 18, 32, .68);
+  color: #7ee7ff;
+  padding: 3px 8px;
+  font-size: calc(10px * var(--ui-scale));
+  font-weight: 800;
+}
+
+.jarvis-voice-status b {
+  color: rgba(219, 246, 255, .88);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.jarvis-voice-status em {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(126, 231, 255, .78);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-voice-status.active span {
+  border-color: rgba(69, 232, 155, .48);
+  color: #baffdb;
+  box-shadow: 0 0 18px rgba(69, 232, 155, .18);
+}
+
+.jarvis-voice-status.unsupported span {
+  border-color: rgba(255, 212, 90, .32);
+  color: #ffe6a2;
+}
+
 .jarvis-sidebar h3 {
   font-size: calc(clamp(11px, .68vw, 14px) * var(--ui-scale));
 }

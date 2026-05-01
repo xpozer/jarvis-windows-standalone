@@ -13,6 +13,21 @@ type Role = "operator" | "jarvis";
 type Level = "ok" | "warn" | "critical" | "unknown";
 type DashboardTheme = "jarvis" | "matrix" | "ultron";
 
+type SpeechRecognitionLike = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: ((event: { error?: string }) => void) | null;
+  onresult: ((event: any) => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
 type Message = {
   role: Role;
   time: string;
@@ -88,6 +103,17 @@ type ChatSessionSummary = {
 
 type ChatSessionDetail = ChatSessionSummary & {
   messages?: Array<{ role: Role; time?: string; text?: string; meta?: ChatMessageMeta }>;
+};
+
+type VoiceCoreResponse = {
+  settings?: {
+    language?: string;
+    send_transcript_to_chat?: boolean;
+    auto_speak?: boolean;
+    rate?: number;
+    pitch?: number;
+    volume?: number;
+  };
 };
 
 const fallbackMetrics: SystemMetrics = {
@@ -227,7 +253,18 @@ export function App() {
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("Push-to-Talk bereit");
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [voiceLanguage, setVoiceLanguage] = useState("de-DE");
+  const [voiceSendToChat, setVoiceSendToChat] = useState(true);
+  const [voiceAutoSpeak, setVoiceAutoSpeak] = useState(false);
+  const [voiceTtsRate, setVoiceTtsRate] = useState(0.96);
+  const [voiceTtsPitch, setVoiceTtsPitch] = useState(0.82);
+  const [voiceTtsVolume, setVoiceTtsVolume] = useState(0.72);
   const messageListRef = useRef<HTMLDivElement | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const voiceFinalTranscriptRef = useRef("");
 
   const now = useMemo(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), [messages.length]);
   const orbState: OrbState = listening ? "listening" : interactionState !== "idle" ? interactionState : thinking ? "thinking" : "idle";
@@ -254,6 +291,7 @@ export function App() {
 
   useEffect(() => {
     void loadSessions();
+    void loadVoiceCore();
   }, []);
 
   useEffect(() => {
@@ -286,6 +324,145 @@ export function App() {
   useEffect(() => {
     jarvisSound.setMode(orbState);
   }, [orbState]);
+
+  async function loadVoiceCore() {
+    const browserWindow = window as Window & { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor };
+    setVoiceSupported(Boolean(browserWindow.SpeechRecognition || browserWindow.webkitSpeechRecognition));
+    try {
+      const response = await fetch("/voice/core", { cache: "no-store" });
+      const data = await response.json().catch(() => ({})) as VoiceCoreResponse;
+      const settings = data.settings || {};
+      if (settings.language) setVoiceLanguage(settings.language);
+      if (typeof settings.send_transcript_to_chat === "boolean") setVoiceSendToChat(settings.send_transcript_to_chat);
+      if (typeof settings.auto_speak === "boolean") setVoiceAutoSpeak(settings.auto_speak);
+      if (typeof settings.rate === "number") setVoiceTtsRate(settings.rate);
+      if (typeof settings.pitch === "number") setVoiceTtsPitch(settings.pitch);
+      if (typeof settings.volume === "number") setVoiceTtsVolume(settings.volume);
+    } catch {
+      setVoiceStatus("Voice Backend nicht erreichbar");
+    }
+  }
+
+  async function updateVoiceRuntime(payload: Record<string, unknown>) {
+    try {
+      await fetch("/voice/runtime", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch {}
+  }
+
+  async function storeVoiceTranscript(text: string) {
+    try {
+      await fetch("/voice/transcript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+    } catch {}
+  }
+
+  function speakJarvis(text: string) {
+    if (!voiceAutoSpeak || !("speechSynthesis" in window) || !text.trim()) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.slice(0, 900));
+    utterance.lang = voiceLanguage;
+    utterance.rate = voiceTtsRate;
+    utterance.pitch = voiceTtsPitch;
+    utterance.volume = Math.max(0, Math.min(1, voiceTtsVolume));
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function getRecognition() {
+    if (recognitionRef.current) return recognitionRef.current;
+    const browserWindow = window as Window & { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor };
+    const Recognition = browserWindow.SpeechRecognition || browserWindow.webkitSpeechRecognition;
+    if (!Recognition) {
+      setVoiceSupported(false);
+      setVoiceStatus("Browser unterstuetzt Speech Recognition nicht");
+      return null;
+    }
+    const recognition = new Recognition();
+    recognition.lang = voiceLanguage;
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => {
+      setListening(true);
+      setVoiceStatus("Hoere zu...");
+      setOrbStatus("VOICE INPUT");
+      void updateVoiceRuntime({ listening: true, last_event: "listening_started" });
+    };
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      let finalText = "";
+      for (let index = event.resultIndex || 0; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const text = String(result?.[0]?.transcript || "");
+        if (result?.isFinal) finalText += text;
+        else interim += text;
+      }
+      if (finalText.trim()) voiceFinalTranscriptRef.current = `${voiceFinalTranscriptRef.current} ${finalText}`.trim();
+      const visible = `${voiceFinalTranscriptRef.current} ${interim}`.trim();
+      setVoiceTranscript(visible);
+      if (visible) setInput(visible);
+    };
+    recognition.onerror = (event: { error?: string }) => {
+      setListening(false);
+      setVoiceStatus(event.error === "not-allowed" ? "Mikrofonfreigabe blockiert" : `Voice Fehler: ${event.error || "unbekannt"}`);
+      setOrbStatus("VOICE FEHLER");
+      jarvisSound.play("error_pulse");
+      void updateVoiceRuntime({ listening: false, last_event: "voice_error" });
+    };
+    recognition.onend = () => {
+      setListening(false);
+      setOrbStatus("BEREIT");
+      const finalText = voiceFinalTranscriptRef.current.trim();
+      void updateVoiceRuntime({ listening: false, last_event: "listening_stopped", last_transcript: finalText });
+      if (!finalText) {
+        setVoiceStatus("Kein Sprachtext erkannt");
+        return;
+      }
+      setVoiceStatus(voiceSendToChat ? "Transkript wird gesendet..." : "Transkript bereit");
+      void storeVoiceTranscript(finalText);
+      if (voiceSendToChat) void sendMessage(finalText);
+    };
+    recognitionRef.current = recognition;
+    return recognition;
+  }
+
+  async function startVoiceInput() {
+    if (thinking || listening) return;
+    const recognition = getRecognition();
+    if (!recognition) return;
+    recognition.lang = voiceLanguage;
+    voiceFinalTranscriptRef.current = "";
+    setVoiceTranscript("");
+    try {
+      await fetch("/voice/microphone/enable", { method: "POST" });
+    } catch {}
+    jarvisSound.play("listening_start");
+    try {
+      recognition.start();
+    } catch {
+      setVoiceStatus("Voice ist bereits aktiv");
+    }
+  }
+
+  function stopVoiceInput() {
+    const recognition = recognitionRef.current;
+    if (!recognition) {
+      setListening(false);
+      return;
+    }
+    setVoiceStatus("Transkript wird verarbeitet...");
+    try {
+      recognition.stop();
+    } catch {
+      setListening(false);
+    }
+  }
 
   function readChatResponse(data: ChatApiResponse) {
     if (typeof data.response === "string" && data.response.trim()) return data.response;
@@ -336,7 +513,7 @@ export function App() {
       setMessages((prev) => [...prev, {
         role: "jarvis",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: `Gespräch konnte nicht geladen werden: ${error instanceof Error ? error.message : String(error)}`,
+        text: `GesprÃ¤ch konnte nicht geladen werden: ${error instanceof Error ? error.message : String(error)}`,
       }]);
     } finally {
       setSessionLoading(false);
@@ -356,7 +533,7 @@ export function App() {
       setMessages((prev) => [...prev, {
         role: "jarvis",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: `Gespräch konnte nicht gelöscht werden: ${error instanceof Error ? error.message : String(error)}`,
+        text: `GesprÃ¤ch konnte nicht gelÃ¶scht werden: ${error instanceof Error ? error.message : String(error)}`,
       }]);
     }
   }
@@ -402,8 +579,10 @@ export function App() {
       const decoder = new TextDecoder();
       let buffer = "";
       let receivedDone = false;
+      let streamedAnswer = "";
 
       function appendDelta(delta: string) {
+        streamedAnswer += delta;
         setInteractionState("speaking");
         setMessages((prev) => prev.map((message) => (
           message.streamId === streamId ? { ...message, text: message.text + delta, pulse: (message.pulse || 0) + 1 } : message
@@ -415,17 +594,19 @@ export function App() {
         setInteractionState("idle");
         setLastAgent(result.agent || "general");
         if (result.session_id) setActiveSessionId(result.session_id);
+        const finalAnswer = streamedAnswer.trim() || readChatResponse(result);
         setMessages((prev) => prev.map((message) => {
           if (message.streamId !== streamId) return message;
           return {
             ...message,
-            text: message.text.trim() ? message.text : readChatResponse(result),
+            text: finalAnswer,
             meta: chatMetaFromResponse(result),
             streaming: false,
             phase: "Antwort abgeschlossen",
             phaseDetail: "",
           };
         }));
+        if (finalAnswer) speakJarvis(finalAnswer);
       }
 
       function updatePhase(label: string, detail = "", step = "") {
@@ -462,7 +643,7 @@ export function App() {
           return;
         }
         if (item.event === "memory") {
-          updatePhase("Gedächtnis geprüft", `${item.data.facts_used || 0} relevante Memory-Bloecke`, "memory");
+          updatePhase("GedÃ¤chtnis geprÃ¼ft", `${item.data.facts_used || 0} relevante Memory-Bloecke`, "memory");
           return;
         }
         if (item.event === "delta") {
@@ -605,7 +786,7 @@ export function App() {
           <div className="jarvis-conversation-head">
             <div>
               <h1>Dialog mit JARVIS</h1>
-              <p><span />Online&nbsp;&nbsp;â€¢&nbsp;&nbsp;Bereit</p>
+              <p><span />Online&nbsp;&nbsp;Ã¢â‚¬Â¢&nbsp;&nbsp;Bereit</p>
             </div>
             <div className="jarvis-head-actions">
               <button className={pinned ? "active" : ""} onClick={() => setPinned(!pinned)}>ANHEFTEN</button>
@@ -615,7 +796,7 @@ export function App() {
           <div className="jarvis-message-list" ref={messageListRef}>
             {messages.map((message, index) => (
               <article key={message.streamId || `${message.time}-${index}-${message.text}`} className={`jarvis-message-card ${message.streaming ? "streaming-card" : ""} ${message.phase ? "has-phase" : ""}`} data-pulse={message.pulse || 0}>
-                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "â—" : ""}</div>
+                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "Ã¢â€”Â" : ""}</div>
                 <div className="jarvis-message-body">
                   <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "BEDIENER"}</b><span>{message.time}</span></div>
                   {message.phase && (
@@ -636,7 +817,7 @@ export function App() {
                     </div>
                   )}
                   {message.link && <button className="jarvis-link-btn" onClick={() => quickAction(message.link!)}>{message.link}<span>&gt;</span></button>}
-                  {message.file && <div className="jarvis-file"><span>â–£</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB â€¢ PDF Dokument</small></div><button>â†“</button><button>â†—</button></div>}
+                  {message.file && <div className="jarvis-file"><span>Ã¢â€“Â£</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB Ã¢â‚¬Â¢ PDF Dokument</small></div><button>Ã¢â€ â€œ</button><button>Ã¢â€ â€”</button></div>}
                 </div>
                 <button className="jarvis-dots">...</button>
               </article>
@@ -649,14 +830,14 @@ export function App() {
           <div className="jarvis-legacy-orb-wrap">
             <Orb state={orbState} typingActivity={typingActivity} heatmapActive={thinking || orbState === "speaking"} eventSignal={orbSignal} />
           </div>
-          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><small>{orbStatus}</small><p>Anpassungsfaehig&nbsp;&nbsp;â€¢&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;â€¢&nbsp;&nbsp;Zuverlaessig</p><div /></div>
+          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><small>{orbStatus}</small><p>Anpassungsfaehig&nbsp;&nbsp;Ã¢â‚¬Â¢&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;Ã¢â‚¬Â¢&nbsp;&nbsp;Zuverlaessig</p><div /></div>
         </section>
       </main>
 
       <aside className="jarvis-right-panel">
         <TodayScheduleCard onSend={sendMessage} />
         <section className="jarvis-card context-card">
-          <div className="jarvis-card-title"><h2>GESPRÄCHE</h2><button onClick={() => void loadSessions()}>{sessionLoading ? "LÄDT" : "AKTIV"}</button></div>
+          <div className="jarvis-card-title"><h2>GESPRÃ„CHE</h2><button onClick={() => void loadSessions()}>{sessionLoading ? "LÃ„DT" : "AKTIV"}</button></div>
           <div className="jarvis-session-list">
             {sessions.slice(0, 4).map((session) => (
               <div className={`jarvis-session-row ${activeSessionId === session.id ? "active" : ""}`} key={session.id}>
@@ -673,11 +854,11 @@ export function App() {
         </section>
         <section className="jarvis-card quick-card">
           <div className="jarvis-card-title"><h2>SCHNELLAKTIONEN</h2></div>
-          {[ ["â–£", "Systemdiagnose starten", "Vollstaendiger Systemcheck"], ["S", "Datenstrom analysieren", "Analyse in Echtzeit"], ["W", "Wissensbasis durchsuchen", "Informationen schnell finden"], ["B", "Bericht erzeugen", "Detaillierten Bericht erstellen"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
+          {[ ["Ã¢â€“Â£", "Systemdiagnose starten", "Vollstaendiger Systemcheck"], ["S", "Datenstrom analysieren", "Analyse in Echtzeit"], ["W", "Wissensbasis durchsuchen", "Informationen schnell finden"], ["B", "Bericht erzeugen", "Detaillierten Bericht erstellen"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
           <button className="custom-command" onClick={() => quickAction("Eigener Befehl")}>EIGENER BEFEHL <span>&gt;</span></button>
         </section>
         <section className="jarvis-card snapshot-card">
-          <div className="jarvis-card-title"><h2>SYSTEMMOMENT</h2><button>â€¢ AKTIV</button></div>
+          <div className="jarvis-card-title"><h2>SYSTEMMOMENT</h2><button>Ã¢â‚¬Â¢ AKTIV</button></div>
           <div className="snapshot-grid">
             <div className={metricClass(metrics.cpu.level)}><span>CPU</span><b>{fmtPercent(metrics.cpu.percent)}</b></div>
             <div className={metricClass(metrics.memory.level)}><span>Speicher</span><b>{fmtPercent(metrics.memory.percent)}</b></div>
@@ -689,10 +870,27 @@ export function App() {
 
       <section className="jarvis-input-panel">
         <div className="jarvis-input-row">
-          <button className="voice-btn" onMouseDown={() => setListening(true)} onMouseUp={() => setListening(false)} onMouseLeave={() => setListening(false)}>â‰‹</button>
+          <button
+            className={`voice-btn ${listening ? "active" : ""}`}
+            type="button"
+            disabled={!voiceSupported || thinking}
+            onMouseDown={() => void startVoiceInput()}
+            onMouseUp={stopVoiceInput}
+            onMouseLeave={() => listening && stopVoiceInput()}
+            onTouchStart={(event) => { event.preventDefault(); void startVoiceInput(); }}
+            onTouchEnd={(event) => { event.preventDefault(); stopVoiceInput(); }}
+            title={voiceSupported ? "Gedrueckt halten zum Sprechen" : "Speech Recognition wird von diesem Browser nicht unterstuetzt"}
+          >
+            MIC
+          </button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Befehl oder Frage eingeben..." />
           <button className="plus-btn">+</button>
-          <button className="send-btn" onClick={() => sendMessage()}>âž¤</button>
+          <button className="send-btn" onClick={() => sendMessage()}>Ã¢Å¾Â¤</button>
+        </div>
+        <div className={`jarvis-voice-status ${listening ? "active" : ""} ${voiceSupported ? "" : "unsupported"}`}>
+          <span>{listening ? "LIVE" : voiceSupported ? "VOICE" : "OFF"}</span>
+          <b>{voiceStatus}</b>
+          {voiceTranscript && <em>{voiceTranscript}</em>}
         </div>
         <div className="jarvis-chip-row">
           {["Letzte Aktivitaet zusammenfassen", "Sicherheitsstatus pruefen", "Leistung analysieren", "Beim Code helfen", "Wissensbasis durchsuchen"].map((chip) => <button key={chip} onClick={() => quickAction(chip)}>{chip}</button>)}
@@ -703,3 +901,4 @@ export function App() {
     </div>
   );
 }
+

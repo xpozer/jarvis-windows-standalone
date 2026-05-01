@@ -4,6 +4,19 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.23] - 2026-05-01
+
+### Added
+
+- Chat Mikrofon Button nutzt jetzt Browser Speech Recognition als echtes Push-to-Talk.
+- Voice Statuszeile zeigt Live Status, erkannte Transkripte und Browser-Unterstuetzung direkt am Chat-Eingabefeld.
+- Transkripte werden an `/voice/transcript` gespeichert und erst danach bewusst an den Chat uebergeben.
+- Optionale Browser TTS Ausgabe fuer JARVIS Antworten nutzt vorhandene Voice Settings, wenn `auto_speak` aktiviert ist.
+
+### Changed
+
+- Mikrofon bleibt weiterhin standardmaessig aus und wird nur per gedruecktem Button gestartet.
+
 ## [B6.6.22] - 2026-05-01
 
 ### Added
