@@ -4,6 +4,23 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.4] - 2026-05-01
+
+### Added
+
+- LifeOS lädt bevorzugt die private lokale Datei `config/lifeos.json`, wenn sie vorhanden ist.
+- Fallback Reihenfolge ergänzt: private Datei, Beispiel Datei, interner Fallback.
+- Datenstatus unterscheidet nun `PRIVATE JSON ACTIVE`, `EXAMPLE JSON ACTIVE` und `FALLBACK ACTIVE`.
+
+### Changed
+
+- LifeOS ist für persönliche lokale Daten vorbereitet, ohne diese Daten ins Repository aufzunehmen.
+
+### Security
+
+- `config/lifeos.json` wird über `.gitignore` ausgeschlossen.
+- Private LifeOS Daten sollen lokal bleiben und nicht committed werden.
+
 ## [B6.6.3] - 2026-05-01
 
 ### Added
