@@ -29,7 +29,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Bereich | Status | Hinweis |
 |---|---|---|
 | Repository Basis | erledigt | Projektstruktur, README, Changelog, Contribution Regeln und Security Hinweise vorhanden |
-| Launcher | erledigt | Startseite mit Global Overview, ULTRON Grid und LifeOS Einstieg vorhanden |
+| Launcher | erledigt | Startseite mit Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
 | Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp vorhanden |
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
@@ -41,12 +41,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
 | Backend Health Check | erledigt | Startskript prüft Port 8000 und `/health`, bevor JARVIS als bereit gilt |
-| DiagCenter | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
+| DiagCenter Backend | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
+| DiagCenter Frontend | erledigt | Lokale HUD Seite `frontend/public/jarvis-diagcenter.html` zeigt Checks, Sections und Raw JSON |
 | Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.18
+
+- DiagCenter Frontend Seite `frontend/public/jarvis-diagcenter.html` ergänzt.
+- Launcher um `DIAGCENTER` Einstieg erweitert.
+- DiagCenter Frontend zeigt Checks, Sections und Raw JSON aus `/diagnostic/center`.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.17
 
@@ -161,7 +169,6 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
-| Mittel | DiagCenter Frontend | offen | DiagCenter im Frontend sichtbar machen und Kernchecks lesbar darstellen |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
 | Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
 | Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
@@ -196,16 +203,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem DiagCenter Backend Endpunkt ist der nächste sinnvolle Schritt das DiagCenter Frontend. Dort sollen die Kernchecks aus `/diagnostic/center` sichtbar und verständlich dargestellt werden.
+Nach dem DiagCenter Frontend ist der nächste sinnvolle Schritt der Decision Assistant. Dort sollen Optionen, Aufwand, Risiko, Nutzen und Empfehlung als lokales Schema ergänzt werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. DiagCenter im Frontend sichtbar machen
-2. Decision Assistant ergänzen
-3. Private Project Manager ergänzen
-4. Release ZIP Workflow testen
-5. Installer Endanwender Test durchführen
+1. Decision Assistant ergänzen
+2. Private Project Manager ergänzen
+3. Release ZIP Workflow testen
+4. Installer Endanwender Test durchführen
+5. Health und Energy Radar ergänzen
 ```
 
 ## Pflege Ablauf
