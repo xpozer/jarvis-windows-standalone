@@ -1,0 +1,34 @@
+{
+  "privacy": {
+    "enabled": false,
+    "paused": false,
+    "pause_hotkey": "ctrl+alt+p",
+    "visual_indicator": true,
+    "tray_indicator": true,
+    "capture_interval_seconds": 2.0,
+    "allowlist_apps": [],
+    "blocked_apps": [
+      "1password",
+      "bitwarden",
+      "keepass",
+      "keepassxc",
+      "lastpass",
+      "dashlane",
+      "nordpass",
+      "banking",
+      "tan",
+      "authenticator"
+    ],
+    "blocked_title_words": [
+      "bank",
+      "passwort",
+      "password",
+      "pin",
+      "tan",
+      "konto",
+      "private",
+      "privat",
+      "gehalt"
+    ]
+  }
+}
