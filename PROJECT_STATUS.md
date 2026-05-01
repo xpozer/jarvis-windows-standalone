@@ -41,6 +41,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Screen Perception 1.1 | erledigt | Modulstruktur für Bildschirm Beobachtung ist auf `feature/screen` angelegt |
 | Screen Perception 1.2 | erledigt | Privacy First Konfiguration, Pause Status, Beispielconfig und Indikator Grundlage ergänzt |
 | Screen Perception 1.3 | erledigt | WebP, Diff Detection, Ring Buffer nach Frames und 100 MB Speicherlimit ergänzt |
+| Screen Perception 1.4 | erledigt | Kontext Datenmodell finalisiert und für Memory, Trigger und AuditLog vorbereitet |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
@@ -52,6 +53,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.0 Screen 1.4
+
+- Screen Kontext Datenmodell finalisiert.
+- `UiElement`, `ActivityType`, `PrivacyStatus`, `ContextSource`, `ScreenCaptureState` und `VisionProvider` exportiert.
+- `ScreenContext` um source, process_name, pid, structured_ui_elements, activity_type, confidence, privacy_status, screenshot_changed, duration_hint_seconds, should_store_episode und episode_reason erweitert.
+- Context Builder setzt Privacy Status, Prozessdaten, Screenshot Änderungsstatus und Episode Hinweise strukturiert.
+- `memory_summary()` für spätere Memory Integration ergänzt.
+- README, Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.7.0 Screen 1.3
 
@@ -200,7 +210,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Screen Perception 1.4 | offen | Kontext Datenmodell finalisieren und Felder für Timestamp, Anwendung, Fenstertitel, Text, UI Elemente und Intent Guess prüfen |
+| Hoch | Screen Perception 1.5 | offen | Integration mit Memory vorbereiten und wichtige Kontext Snapshots als Episodic Memory Übergabe strukturieren |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Episodic Memory | offen | Nach Abschluss Block 1 beginnen |
 | Mittel | Mail Triage | offen | Nach Abschluss Block 2 beginnen |
@@ -242,16 +252,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach Aufgabe 1.3 ist der nächste sinnvolle Schritt Screen Perception 1.4. Dabei wird das Kontext Datenmodell finalisiert und gegen die Roadmap Felder geprüft.
+Nach Aufgabe 1.4 ist der nächste sinnvolle Schritt Screen Perception 1.5. Dabei wird die Übergabe an Memory vorbereitet, ohne schon dauerhaft zu speichern.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Screen Perception 1.4 Kontext Datenmodell finalisieren
-2. Screen Perception 1.5 Memory Integration
-3. Screen Perception 1.6 Proaktive Trigger
-4. Screen Perception 1.7 User Kommandos
-5. Screen Perception 1.8 AuditLog
+1. Screen Perception 1.5 Memory Integration
+2. Screen Perception 1.6 Proaktive Trigger
+3. Screen Perception 1.7 User Kommandos
+4. Screen Perception 1.8 AuditLog
+5. Screen Perception 1.9 Tests
 ```
 
 ## Pflege Ablauf
