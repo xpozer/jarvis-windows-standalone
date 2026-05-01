@@ -1,6 +1,6 @@
 # backend/perception/screen/__init__.py
 from .capturer import ScreenCapturer, ScreenCaptureConfig
-from .config import ScreenPerceptionConfig, ScreenPrivacyConfig, load_screen_config, save_screen_config
+from .config import ScreenPerformanceConfig, ScreenPerceptionConfig, ScreenPrivacyConfig, load_screen_config, save_screen_config
 from .context_builder import ScreenContextBuilder
 from .hotkeys import ScreenHotkeyConfig, ScreenHotkeyRegistry
 from .indicator import ScreenActivityIndicator
@@ -22,6 +22,7 @@ __all__ = [
     "ScreenContextBuilder",
     "ScreenHotkeyConfig",
     "ScreenHotkeyRegistry",
+    "ScreenPerformanceConfig",
     "ScreenPerceptionConfig",
     "ScreenPrivacyConfig",
     "ScreenPrivacyPolicy",
