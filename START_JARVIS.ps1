@@ -295,6 +295,45 @@ function Invoke-Checked {
   Jv-Ok "$Label abgeschlossen"
 }
 
+function Get-LatestFrontendSourceTime {
+  $candidates = @(
+    (Join-Path $Frontend "package.json"),
+    (Join-Path $Frontend "package-lock.json"),
+    (Join-Path $Frontend "index.html"),
+    (Join-Path $Frontend "src")
+  )
+
+  $latest = [datetime]::MinValue
+  foreach($candidate in $candidates){
+    if(-not (Test-Path $candidate)){ continue }
+    $item = Get-Item $candidate
+    if($item.PSIsContainer){
+      $files = Get-ChildItem -Path $candidate -Recurse -File -ErrorAction SilentlyContinue
+      foreach($file in $files){
+        if($file.LastWriteTimeUtc -gt $latest){ $latest = $file.LastWriteTimeUtc }
+      }
+    } elseif($item.LastWriteTimeUtc -gt $latest) {
+      $latest = $item.LastWriteTimeUtc
+    }
+  }
+  return $latest
+}
+
+function Ensure-FrontendBuildFresh {
+  if($DevFrontend){ return }
+  if(-not (Test-Path $DistIndex)){ return }
+
+  $latestSource = Get-LatestFrontendSourceTime
+  if($latestSource -eq [datetime]::MinValue){ return }
+
+  $distTime = (Get-Item $DistIndex).LastWriteTimeUtc
+  if($latestSource -le $distTime.AddSeconds(2)){ return }
+
+  Jv-Warn "Frontend Quellen sind neuer als der Production Build. Baue Frontend neu."
+  $npm = Get-NpmCmd
+  Invoke-Checked "Frontend neu bauen" $npm @("run", "build") "frontend-build.log" $Frontend
+}
+
 
 Jv-Step "JARVIS Start beginnt"
 Jv-Info "Root: $Root"
@@ -309,6 +348,8 @@ if(-not (Test-Path $VenvPython) -or (-not $DevFrontend -and -not (Test-Path $Dis
 }
 
 if(-not (Test-Path $VenvPython)){ Jv-Fail "Python venv fehlt nach Setup" }
+
+Ensure-FrontendBuildFresh
 
 if(Test-Cmd "ollama"){
   if(-not (Test-Port 11434)){
