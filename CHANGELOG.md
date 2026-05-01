@@ -4,6 +4,12 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.8.2-themes-checklist] - 2026-05-01
+
+### Added
+
+- Lokale Testcheckliste `docs/dashboard-theme-test-checklist.md` für den Dashboard Theme Prototype ergänzt.
+
 ## [B6.8.1-themes-prototype] - 2026-05-01
 
 ### Added
@@ -135,7 +141,7 @@ Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstan
 ### Added
 
 - Orb Event Layer v1 fuer echte Stream-Signale am JARVIS Kern.
-- Chat Streaming sendet nun Orb-Events fuer Agent Routing, Memory Scan, Provider Kontakt, Antwortstart und Fehlerpulse.
+- Chat Streaming sendet nun Orb-Events fuer Agent Routing, Memory Scan, Provider Kontakt und Antwortstart und Fehlerpulse.
 - Dialog Orb zeigt den aktuellen Kernstatus direkt unter dem Label.
 
 ### Changed
