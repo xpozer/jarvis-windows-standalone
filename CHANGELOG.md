@@ -4,6 +4,19 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.7.0] - 2026-05-01
+
+### Added
+
+- Daily Command Center Datenfelder in `config/lifeos.example.json` ergänzt.
+- Neues Feld `daily_briefing.day_focus` für den Tagesfokus.
+- Neues Array `daily_briefing.top_tasks` für die drei wichtigsten Aufgaben mit Bereich, Wirkung, Aufwand und nächstem Schritt.
+- Dokumentation `docs/lifeos-daily-command-center.md` ergänzt.
+
+### Changed
+
+- LifeOS Datenmodell ist jetzt auf Tagesfokus und Top 3 Aufgaben vorbereitet.
+
 ## [B6.6.6] - 2026-05-01
 
 ### Added
