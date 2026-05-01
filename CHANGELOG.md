@@ -4,6 +4,26 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.7.0-screen-rebased] - 2026-05-01
+
+### Added
+
+- Screen Perception Modulstruktur auf aktuellem `main` neu aufgebaut.
+- Bildschirm Kontext Datenmodell, Privacy Policy, Performance Capture, Window Tracking, Vision Scaffold, OCR Fallback, Context Builder, Runtime Status, Hotkey Grundlage und Activity Indicator ergänzt.
+- Sichere Beispielkonfiguration `config/screen-perception.example.json` ergänzt.
+- Autonome Assistant Roadmap `docs/autonomous-assistant-roadmap.md` ergänzt.
+
+### Changed
+
+- Screen Perception basiert jetzt auf aktuellem `main` inklusive Voice Push to Talk Stand B6.6.23.
+- Alter Branch `feature/screen` bleibt als Sicherheitskopie erhalten, neuer Arbeitsbranch ist `feature/screen-rebased`.
+
+### Security
+
+- Screen Perception bleibt standardmäßig deaktiviert.
+- Private Datei `config/screen-perception.json` und temporärer Screenshot Buffer `tmp/` werden ignoriert.
+- Keine Cloud Calls, keine dauerhafte Beobachtung und keine automatische Speicherung in diesem Stand.
+
 ## [B6.6.23] - 2026-05-01
 
 ### Added
