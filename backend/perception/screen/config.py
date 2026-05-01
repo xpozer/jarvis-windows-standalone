@@ -6,6 +6,17 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 
+class ScreenPerformanceConfig(BaseModel):
+    capture_interval_seconds: float = 2.0
+    max_frames: int = 100
+    max_buffer_mb: int = 100
+    image_format: str = "webp"
+    image_quality: int = 72
+    diff_detection_enabled: bool = True
+    diff_hash_width: int = 32
+    diff_hash_height: int = 18
+
+
 class ScreenPrivacyConfig(BaseModel):
     enabled: bool = False
     paused: bool = False
@@ -41,6 +52,7 @@ class ScreenPrivacyConfig(BaseModel):
 
 class ScreenPerceptionConfig(BaseModel):
     privacy: ScreenPrivacyConfig = Field(default_factory=ScreenPrivacyConfig)
+    performance: ScreenPerformanceConfig = Field(default_factory=ScreenPerformanceConfig)
 
 
 DEFAULT_SCREEN_CONFIG_PATH = Path("config/screen-perception.json")
