@@ -10,6 +10,7 @@ export type SoundEvent =
   | "ui_toggle";
 
 type OscillatorKind = OscillatorType;
+type AudioContextConstructor = new () => AudioContext;
 
 class JarvisSoundEngine {
   private ctx: AudioContext | null = null;
@@ -17,6 +18,7 @@ class JarvisSoundEngine {
   private enabled = false;
   private volume = 0.22;
   private mode = "idle";
+  private unlocked = false;
   private thinkingOsc: OscillatorNode | null = null;
   private thinkingGain: GainNode | null = null;
 
@@ -24,26 +26,40 @@ class JarvisSoundEngine {
     this.enabled = enabled;
     this.volume = Math.max(0, Math.min(1, volume));
     if (this.master) this.master.gain.value = this.volume;
-    if (!enabled) this.stopThinking();
+    if (!enabled) {
+      this.unlocked = false;
+      this.stopThinking();
+    }
   }
 
   async unlock() {
+    if (!this.enabled) return false;
     if (!this.ctx) this.createContext();
-    if (this.ctx?.state === "suspended") await this.ctx.resume();
+    try {
+      if (this.ctx?.state === "suspended") await this.ctx.resume();
+      this.unlocked = this.ctx?.state === "running";
+      return this.unlocked;
+    } catch {
+      this.unlocked = false;
+      return false;
+    }
+  }
+
+  isUnlocked() {
+    return this.unlocked && this.ctx?.state === "running";
   }
 
   setMode(mode: string) {
     if (mode === this.mode) return;
     this.mode = mode;
-    if (!this.enabled) return;
+    if (!this.enabled || !this.isUnlocked()) return;
     if (mode === "thinking") this.startThinking();
     else this.stopThinking();
     if (mode === "listening") this.play("listening");
   }
 
   play(event: SoundEvent | string) {
-    if (!this.enabled) return;
-    this.ensureRunning();
+    if (!this.enabled || !this.isUnlocked()) return;
     switch (event) {
       case "agent_route":
         this.beep(620, 0.045, 0.08, "square");
@@ -83,19 +99,17 @@ class JarvisSoundEngine {
   }
 
   private createContext() {
-    this.ctx = new AudioContext();
+    const win = window as Window & { webkitAudioContext?: AudioContextConstructor };
+    const AudioCtor = window.AudioContext || win.webkitAudioContext;
+    if (!AudioCtor) return;
+    this.ctx = new AudioCtor();
     this.master = this.ctx.createGain();
     this.master.gain.value = this.volume;
     this.master.connect(this.ctx.destination);
   }
 
-  private ensureRunning() {
-    if (!this.ctx) this.createContext();
-    if (this.ctx?.state === "suspended") void this.ctx.resume();
-  }
-
   private beep(frequency: number, duration: number, gainValue: number, type: OscillatorKind = "sine", delay = 0) {
-    if (!this.ctx || !this.master) return;
+    if (!this.ctx || !this.master || !this.isUnlocked()) return;
     const start = this.ctx.currentTime + delay;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -111,7 +125,7 @@ class JarvisSoundEngine {
   }
 
   private sweep(from: number, to: number, duration: number, gainValue: number) {
-    if (!this.ctx || !this.master) return;
+    if (!this.ctx || !this.master || !this.isUnlocked()) return;
     const start = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -128,8 +142,7 @@ class JarvisSoundEngine {
   }
 
   private startThinking() {
-    this.ensureRunning();
-    if (!this.ctx || !this.master || this.thinkingOsc) return;
+    if (!this.ctx || !this.master || !this.isUnlocked() || this.thinkingOsc) return;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = "sine";
