@@ -39,11 +39,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
-| Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
+| Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
+| Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.15
+
+- Installer Readiness Check unter `scripts/maintenance/check-installer-readiness.ps1` ergänzt.
+- Dokumentation `docs/installer-readiness.md` ergänzt.
+- Vorprüfung für PowerShell, wichtige Root Dateien, Python, Node.js, npm, winget, Ollama, Ports und LifeOS Config ergänzt.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.14
 
@@ -131,13 +139,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - Dependabot ergänzt.
 - Issue und Pull Request Templates ergänzt.
 - Changelog und Contribution Dokumentation ergänzt.
-- Installer Logik teilweise verbessert.
 
 ## Offene Updates und Todos
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
+| Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
 | Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
@@ -156,6 +163,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
 | `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
+| `docs/installer-readiness.md` | Anleitung für den nicht destruktiven Installer Vorab Check |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -163,24 +171,24 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
+| Installer Fehler bei Endanwendern | reduziert | Readiness Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
-| Installer Fehler bei Endanwendern | hoch | Installer weiterhin als eigener Schwerpunkt behandeln |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
 | Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Sound Re Unlock ist der nächste sinnvolle Schritt die Installer Robustheit. Dafür sollen Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut geprüft werden.
+Nach dem Installer Readiness Check ist der nächste sinnvolle Schritt der Backend Health Check. Dafür soll der bestehende `/health` oder ein klarer Health Endpunkt sauber mit Frontend, Startskript und Diagnose verbunden werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Installer Robustheit erneut prüfen
-2. Backend Health Check sauber anbinden
-3. DiagCenter konkretisieren
-4. Decision Assistant ergänzen
-5. Private Project Manager ergänzen
+1. Backend Health Check sauber anbinden
+2. DiagCenter konkretisieren
+3. Decision Assistant ergänzen
+4. Private Project Manager ergänzen
+5. Release ZIP Workflow testen
 ```
 
 ## Pflege Ablauf
