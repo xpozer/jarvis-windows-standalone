@@ -44,6 +44,13 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Erledigte Updates
 
+### B6.6.11
+
+- Work Radar 2.0 um Kategorien, Risiko Zusammenfassung, Status Zusammenfassung, Fristlage und naechste Work Aktion erweitert.
+- LifeOS Backend normalisiert Arbeitsthemen mit Kategorie, Due State und Prioritaetswert.
+- LifeOS Panel zeigt kompakte Work Kennzahlen und Kategorien im bestehenden HUD Stil.
+- `config/lifeos.example.json` enthaelt explizite Kategorien fuer LNW, FSM und Mail.
+
 ### B6.6.6
 
 - Setup Skript `scripts/maintenance/setup-lifeos-config.ps1` ergänzt.
@@ -109,7 +116,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Daily Command Center | offen | Top 3 Aufgaben, Tagesfokus und klaren nächsten Schritt aus lokalen Daten ableiten |
-| Hoch | Work Radar 2.0 | offen | strukturierte Vorgänge für SAP, FSM, LNW, Mail, Angebote und Rückfragen ergänzen |
+| Hoch | Work Radar 2.0 | erledigt | Kategorien, Status, Risiko, Fristlage und naechste Work Aktion werden aus lokalen Daten abgeleitet |
 | Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
 | Mittel | Learning Coach | offen | Lernstände, Wiederholungen und Schwachstellen lokal abbilden |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
@@ -146,16 +153,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach der persönlichen LifeOS Vorlage ist der nächste sinnvolle Schritt das Daily Command Center. Dafür soll LifeOS aus lokalen Daten Top 3 Aufgaben, Tagesfokus und einen klaren nächsten Schritt ableiten.
+Nach Daily Command Center, Learning Coach und Work Radar 2.0 ist der nächste sinnvolle Schritt die Installer Robustheit. Dafür sollen Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut geprüft werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Daily Command Center um Top 3 Aufgaben erweitern
-2. Work Radar 2.0 Schema ergänzen
-3. Installer Robustheit erneut prüfen
-4. Backend Health Check sauber anbinden
-5. DiagCenter konkretisieren
+1. Installer Robustheit erneut prüfen
+2. Backend Health Check sauber anbinden
+3. DiagCenter konkretisieren
+4. Decision Assistant ergänzen
+5. Private Project Manager ergänzen
 ```
 
 ## Pflege Ablauf

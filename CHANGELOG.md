@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.11] - 2026-05-01
+
+### Added
+
+- Work Radar 2.0 erweitert um Kategorien, Risiko Zusammenfassung, Status Zusammenfassung, Fristlage und naechste Work Aktion.
+- LifeOS Backend normalisiert Arbeitsthemen jetzt mit Kategorie, Due State und Prioritaetswert.
+- LifeOS Panel zeigt kompakte Work Radar Kennzahlen und Kategorien ohne die Startseite zu ueberladen.
+
+### Changed
+
+- `config/lifeos.example.json` nutzt jetzt explizite Work Kategorien fuer LNW, FSM und Mail.
+
 ## [B6.6.10] - 2026-05-01
 
 ### Added

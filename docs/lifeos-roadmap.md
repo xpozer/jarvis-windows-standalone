@@ -11,8 +11,8 @@ LifeOS bleibt Local First. Private Daten gehören in lokale Dateien wie `config/
 | Priorität | Modul | Ziel | Status |
 |---|---|---|---|
 | Hoch | Daily Command Center | Tageslage, Fokus und nächster Schritt | geplant |
-| Hoch | Work Radar 2.0 | SAP, FSM, LNW, Mail, Angebote und Rückfragen strukturieren | geplant |
-| Hoch | LifeOS persönliche Vorlage | lokale `config/lifeos.json` einfacher erzeugen | geplant |
+| Hoch | Work Radar 2.0 | SAP, FSM, LNW, Mail, Angebote und Rückfragen strukturieren | erledigt |
+| Hoch | LifeOS persönliche Vorlage | lokale `config/lifeos.json` einfacher erzeugen | erledigt |
 | Mittel | Learning Coach | Meister, AEVO und Lernstände aktiv verfolgen | geplant |
 | Mittel | Decision Assistant | Optionen, Risiken und Empfehlung strukturiert bewerten | geplant |
 | Mittel | Private Project Manager | private Projekte mit Status und nächstem Schritt führen | geplant |
@@ -97,9 +97,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] Work Radar kann mehrere Vorgänge anzeigen
-[ ] jeder Vorgang hat Status, Risiko, nächsten Schritt und Frist
-[ ] kritische Vorgänge werden sichtbar hervorgehoben
+[x] Work Radar kann mehrere Vorgänge anzeigen
+[x] jeder Vorgang hat Status, Risiko, nächsten Schritt und Frist
+[x] kritische Vorgänge werden sichtbar hervorgehoben
 ```
 
 ## 3. Learning Coach

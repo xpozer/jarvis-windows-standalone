@@ -106,6 +106,37 @@ def test_lifeos_learning_focus_prioritizes_weak_due_topics(monkeypatch, tmp_path
     assert "Unterweisungsmethoden" in focus["recommendation"]
 
 
+def test_lifeos_work_radar_20_summarizes_status_risk_and_categories(monkeypatch, tmp_path):
+    from services import lifeos
+
+    private_file = tmp_path / "lifeos.json"
+    example_file = tmp_path / "lifeos.example.json"
+    private_file.write_text(json.dumps({
+        "daily_briefing": {"today_important": ["Work Radar pruefen"], "energy_percent": 75},
+        "work_radar": {
+            "items": [
+                {"id": "sap_auftrag", "title": "SAP Auftrag pruefen", "status": "blocked", "risk": "critical", "deadline": "2026-05-01", "next_step": "Bestellwert klaeren"},
+                {"id": "fsm_buchung", "title": "FSM Buchung nachziehen", "status": "waiting", "risk": "medium", "deadline": "2026-05-03", "next_step": "Nachweis suchen"},
+                {"id": "lnw_check", "title": "LNW unterschreiben lassen", "status": "open", "risk": "high", "deadline": "2026-05-02", "next_step": "Kundenfreigabe holen"},
+            ]
+        },
+    }), encoding="utf-8")
+
+    monkeypatch.setattr(lifeos, "LIFEOS_PRIVATE_FILE", private_file)
+    monkeypatch.setattr(lifeos, "LIFEOS_EXAMPLE_FILE", example_file)
+
+    result = lifeos.briefing()
+    radar = result["work_radar"]
+
+    assert radar["count"] == 3
+    assert radar["risk_summary"]["critical"] == 1
+    assert radar["status_summary"]["blocked"] == 1
+    assert radar["attention_count"] >= 2
+    assert radar["next_work_action"] == "Bestellwert klaeren"
+    assert radar["items"][0]["category"] == "SAP"
+    assert radar["categories"][0]["name"] == "SAP"
+
+
 def test_lifeos_routes_expose_briefing_and_installer_check(client):
     briefing = client.get("/api/lifeos/briefing")
     installer = client.get("/api/lifeos/installer-check")

@@ -13,12 +13,27 @@ type LifeTask = {
 type WorkItem = {
   id: string;
   title: string;
+  category?: string;
   status: string;
   risk: string;
   deadline?: string;
+  due_state?: string;
   next_step?: string;
   score_percent?: number;
   note?: string;
+  priority_score?: number;
+};
+
+type WorkRadar = {
+  items?: WorkItem[];
+  count?: number;
+  risk_summary?: Record<string, number>;
+  status_summary?: Record<string, number>;
+  due_summary?: Record<string, number>;
+  attention_count?: number;
+  overdue_count?: number;
+  next_work_action?: string;
+  categories?: Array<{ name?: string; count?: number; critical?: number; open?: number }>;
 };
 
 type LifeOSBriefing = {
@@ -34,7 +49,7 @@ type LifeOSBriefing = {
   summary?: string;
   top_tasks?: LifeTask[];
   next_best_action?: string;
-  work_radar?: { items?: WorkItem[]; count?: number };
+  work_radar?: WorkRadar;
   learning_focus?: {
     ok?: boolean;
     subject?: string;
@@ -72,6 +87,31 @@ function riskClass(value?: string) {
   return "unknown";
 }
 
+function workStatusLabel(value?: string) {
+  const map: Record<string, string> = {
+    blocked: "Blockiert",
+    attention: "Achtung",
+    open: "Offen",
+    check: "Pruefen",
+    waiting: "Wartet",
+    ready: "Bereit",
+    stable: "Stabil",
+    done: "Erledigt",
+  };
+  return map[String(value || "").toLowerCase()] || value || "Unklar";
+}
+
+function dueLabel(value?: string) {
+  const map: Record<string, string> = {
+    overdue: "Ueberfaellig",
+    today: "Heute",
+    soon: "Bald",
+    later: "Spaeter",
+    open: "Ohne Frist",
+  };
+  return map[String(value || "").toLowerCase()] || "Ohne Frist";
+}
+
 export function LifeOSPanel({ onSend }: Props) {
   const [briefing, setBriefing] = useState<LifeOSBriefing | null>(null);
   const [installer, setInstaller] = useState<InstallerCheck | null>(null);
@@ -79,7 +119,8 @@ export function LifeOSPanel({ onSend }: Props) {
   const [error, setError] = useState("");
 
   const daily = briefing?.daily_briefing || {};
-  const workItems = useMemo(() => briefing?.work_radar?.items || [], [briefing]);
+  const workRadar = briefing?.work_radar || {};
+  const workItems = useMemo(() => workRadar.items || [], [workRadar.items]);
 
   async function loadLifeOS(regenerate = false) {
     setLoading(true);
@@ -150,14 +191,29 @@ export function LifeOSPanel({ onSend }: Props) {
 
         <article className="lifeos-card lifeos-card-wide">
           <div className="lifeos-card-title"><h2>Work Radar 2.0</h2><span>{workItems.length} Vorgaenge</span></div>
+          <div className="lifeos-work-summary">
+            <span><b>{workRadar.risk_summary?.critical || 0}</b> kritisch</span>
+            <span><b>{workRadar.risk_summary?.high || 0}</b> hoch</span>
+            <span><b>{workRadar.status_summary?.waiting || 0}</b> wartend</span>
+            <span><b>{workRadar.overdue_count || 0}</b> ueberfaellig</span>
+          </div>
+          {workRadar.next_work_action && <p className="lifeos-work-action">{workRadar.next_work_action}</p>}
+          {!!workRadar.categories?.length && (
+            <div className="lifeos-work-categories">
+              {workRadar.categories.slice(0, 5).map((category) => (
+                <span key={category.name}>{category.name}<b>{category.count || 0}</b></span>
+              ))}
+            </div>
+          )}
           <div className="lifeos-work-list">
             {workItems.map((item) => (
               <div key={item.id} className={`lifeos-work-item ${riskClass(item.risk)}`}>
                 <div>
-                  <b>{item.title}</b>
+                  <b><i>{item.category || "WORK"}</i>{item.title}</b>
                   <span>{item.next_step || item.note || "Status pruefen"}</span>
                 </div>
-                <em>{item.status}</em>
+                <em>{workStatusLabel(item.status)}</em>
+                <small>{dueLabel(item.due_state)}</small>
                 <strong>{item.risk}</strong>
               </div>
             ))}

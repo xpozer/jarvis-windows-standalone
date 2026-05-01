@@ -80,6 +80,44 @@ def _date_weight(value: str) -> int:
     return 1
 
 
+def _due_state(value: str) -> str:
+    if not value:
+        return "open"
+    try:
+        days = (date.fromisoformat(value[:10]) - date.today()).days
+    except Exception:
+        return "open"
+    if days < 0:
+        return "overdue"
+    if days == 0:
+        return "today"
+    if days <= 2:
+        return "soon"
+    return "later"
+
+
+def _work_category(item: dict[str, Any]) -> str:
+    raw = str(item.get("category") or "").strip()
+    if raw:
+        return raw.upper()
+    probe = " ".join(str(item.get(key) or "") for key in ("id", "title", "note")).lower()
+    if "sap" in probe:
+        return "SAP"
+    if "fsm" in probe:
+        return "FSM"
+    if "lnw" in probe or "leistungsnachweis" in probe:
+        return "LNW"
+    if "mail" in probe or "rueckfrage" in probe or "rückfrage" in probe or "kunde" in probe:
+        return "MAIL"
+    if "angebot" in probe or "bestellwert" in probe:
+        return "ANGEBOT"
+    if "vde" in probe or "dguv" in probe:
+        return "RECHERCHE"
+    if "abrechnung" in probe or "billing" in probe:
+        return "ABRECHNUNG"
+    return "ALLGEMEIN"
+
+
 def _legacy_work_items(work_radar: dict[str, Any]) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for key, value in work_radar.items():
@@ -118,9 +156,11 @@ def _work_items(config: dict[str, Any]) -> list[dict[str, Any]]:
         normalized.append({
             "id": str(item.get("id") or f"work_{idx + 1}"),
             "title": str(item.get("title") or item.get("name") or "Arbeitsthema"),
+            "category": _work_category(item),
             "status": status_value,
             "risk": risk,
             "deadline": deadline,
+            "due_state": _due_state(deadline),
             "next_step": str(item.get("next_step") or item.get("note") or "Naechsten Schritt klaeren"),
             "score_percent": item.get("score_percent"),
             "note": str(item.get("note") or ""),
@@ -128,6 +168,41 @@ def _work_items(config: dict[str, Any]) -> list[dict[str, Any]]:
         })
     normalized.sort(key=lambda item: int(item.get("priority_score") or 0), reverse=True)
     return normalized
+
+
+def _count_by(items: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for item in items:
+        value = str(item.get(key) or "unknown").lower()
+        counts[value] = counts.get(value, 0) + 1
+    return counts
+
+
+def _work_radar_summary(items: list[dict[str, Any]]) -> dict[str, Any]:
+    categories: dict[str, dict[str, Any]] = {}
+    attention_status = {"blocked", "attention", "open", "check"}
+    for item in items:
+        category = str(item.get("category") or "ALLGEMEIN")
+        bucket = categories.setdefault(category, {"name": category, "count": 0, "critical": 0, "open": 0})
+        bucket["count"] += 1
+        if item.get("risk") in {"critical", "high"}:
+            bucket["critical"] += 1
+        if item.get("status") in attention_status:
+            bucket["open"] += 1
+
+    next_item = next((item for item in items if item.get("status") != "done"), None)
+    category_list = sorted(categories.values(), key=lambda item: (int(item["critical"]), int(item["open"]), int(item["count"])), reverse=True)
+    return {
+        "items": items,
+        "count": len(items),
+        "risk_summary": _count_by(items, "risk"),
+        "status_summary": _count_by(items, "status"),
+        "due_summary": _count_by(items, "due_state"),
+        "attention_count": len([item for item in items if item.get("status") in attention_status or item.get("risk") in {"critical", "high"}]),
+        "overdue_count": len([item for item in items if item.get("due_state") == "overdue"]),
+        "next_work_action": str(next_item.get("next_step") or next_item.get("title")) if next_item else "",
+        "categories": category_list,
+    }
 
 
 def _top_tasks(config: dict[str, Any], items: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -251,7 +326,7 @@ def briefing() -> dict[str, Any]:
         "summary": summary,
         "top_tasks": top_tasks,
         "next_best_action": next_action,
-        "work_radar": {"items": items, "count": len(items)},
+        "work_radar": _work_radar_summary(items),
         "learning_focus": learning_focus,
         "life_modules": config.get("life_modules") if isinstance(config.get("life_modules"), list) else [],
         "timeline": config.get("timeline") if isinstance(config.get("timeline"), list) else [],

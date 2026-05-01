@@ -189,6 +189,63 @@
   padding-right: 4px;
 }
 
+.lifeos-work-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.lifeos-work-summary span,
+.lifeos-work-categories span {
+  min-width: 0;
+  border: 1px solid rgba(126, 231, 255, .1);
+  border-radius: 12px;
+  background: rgba(1, 7, 14, .48);
+  color: #7faec0;
+  padding: 9px 10px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.lifeos-work-summary b {
+  display: block;
+  color: #eafcff;
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+
+.lifeos-work-action {
+  margin: 0 0 10px;
+  border-left: 2px solid rgba(5, 216, 255, .52);
+  color: #c7f5ff;
+  background: rgba(5, 216, 255, .055);
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.lifeos-work-categories {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.lifeos-work-categories span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+
+.lifeos-work-categories b {
+  color: #05d8ff;
+  font-size: 12px;
+}
+
 .lifeos-task,
 .lifeos-work-item {
   border: 1px solid rgba(126, 231, 255, .12);
@@ -232,14 +289,15 @@
 
 .lifeos-work-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 12px;
   align-items: center;
   padding: 14px;
 }
 
 .lifeos-work-item em,
-.lifeos-work-item strong {
+.lifeos-work-item strong,
+.lifeos-work-item small {
   border-radius: 999px;
   padding: 6px 9px;
   background: rgba(5, 18, 32, .72);
@@ -248,6 +306,19 @@
   font-style: normal;
   letter-spacing: .08em;
   text-transform: uppercase;
+}
+
+.lifeos-work-item small {
+  color: #87c4d8;
+}
+
+.lifeos-work-item b i {
+  display: inline-block;
+  margin-right: 8px;
+  color: #05d8ff;
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: .12em;
 }
 
 .lifeos-task.high,
@@ -353,6 +424,14 @@
   .lifeos-grid {
     grid-template-rows: none;
     overflow: auto;
+  }
+
+  .lifeos-work-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lifeos-work-item {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .lifeos-card-wide,

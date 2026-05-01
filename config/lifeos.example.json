@@ -1,5 +1,5 @@
 {
-  "version": "B6.6.1",
+  "version": "B6.6.11",
   "mode": "local-first",
   "daily_briefing": {
     "day_mode": "FOCUSED",
@@ -20,6 +20,7 @@
       {
         "id": "lnw_billing_check",
         "title": "LNW und Abrechnung pruefen",
+        "category": "LNW",
         "status": "open",
         "risk": "high",
         "deadline": "2026-05-01",
@@ -30,6 +31,7 @@
       {
         "id": "fsm_bookings",
         "title": "FSM Buchungen sauber halten",
+        "category": "FSM",
         "status": "waiting",
         "risk": "medium",
         "deadline": "2026-05-03",
@@ -40,6 +42,7 @@
       {
         "id": "customer_topics",
         "title": "Offene Kunden Rueckfragen schliessen",
+        "category": "MAIL",
         "status": "attention",
         "risk": "high",
         "deadline": "2026-05-01",
