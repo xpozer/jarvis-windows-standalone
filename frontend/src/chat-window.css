@@ -131,6 +131,24 @@
   scrollbar-color: rgba(5, 216, 255, .48) rgba(5, 18, 32, .56);
 }
 
+.jarvis-message-card {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 8.2vh;
+  align-items: start;
+  overflow: visible;
+}
+
+.jarvis-message-body {
+  min-width: 0;
+  overflow: visible;
+}
+
+.jarvis-message-body p {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
 .jarvis-message-list::-webkit-scrollbar {
   width: 10px;
 }
@@ -244,6 +262,7 @@
 
 .dialog-mode .jarvis-message-card {
   min-height: 10.2vh;
+  padding-bottom: 2.2vh;
 }
 
 .thinking-card {
