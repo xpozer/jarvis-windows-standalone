@@ -29,9 +29,9 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Bereich | Status | Hinweis |
 |---|---|---|
 | Repository Basis | erledigt | Projektstruktur, README, Changelog, Contribution Regeln und Security Hinweise vorhanden |
-| Launcher | erledigt | Startseite mit Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
-| Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp vorhanden |
-| Dashboard Theme System | in Arbeit | Konzept und Snippets für JARVIS, MATRIX und ULTRON liegen unter `docs/dashboard-theme-system-implementation.md` |
+| Launcher | erledigt | Startseite mit Global Themes, Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
+| Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp bleibt als Rückfall vorhanden |
+| Dashboard Theme System | in Arbeit | Neue Datei `frontend/public/jarvis-global-overview-themed.html` enthält JARVIS, MATRIX und ULTRON Theme Switcher |
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | DiagCenter Frontend | erledigt | Lokale HUD Seite `frontend/public/jarvis-diagcenter.html` zeigt Checks, Sections und Raw JSON |
@@ -46,6 +46,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.8.1 Themes Prototype
+
+- Neue themenfähige Dashboard Datei `frontend/public/jarvis-global-overview-themed.html` ergänzt.
+- Launcher um `GLOBAL THEMES` Einstieg erweitert.
+- Theme Switcher für JARVIS, MATRIX und ULTRON ergänzt.
+- MATRIX Theme mit Code Rain Layer ergänzt.
+- ULTRON Theme mit Circuit Layer ergänzt.
+- Stabile alte Global Overview Datei bleibt unverändert als Rückfall erhalten.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.8.0 Themes Plan
 
@@ -107,10 +117,10 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Dashboard Theme Integration | offen | Theme Switcher und MATRIX Theme in `frontend/public/jarvis-global-overview-standalone.html` integrieren |
+| Hoch | Dashboard Theme Prüfung | offen | `jarvis-global-overview-themed.html` lokal öffnen und Layout, FPS, Theme Switcher sowie Mobile Verhalten prüfen |
 | Hoch | Screen Perception 1.3 | offen | Performance Grundlagen mit WebP Ring Buffer Limit, Diff Detection und Speichergrenze ergänzen |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
-| Mittel | Dashboard ULTRON Theme | offen | ULTRON CSS Override, Circuit Layer und mechanische Canvas Parameter ergänzen |
+| Mittel | Dashboard Theme Feinschliff | offen | Nach Sichtprüfung MATRIX und ULTRON visuell nachschärfen |
 | Mittel | Episodic Memory | offen | Nach Abschluss Block 1 beginnen |
 | Mittel | Mail Triage | offen | Nach Abschluss Block 2 beginnen |
 | Mittel | Multi Agent System | offen | Nach Abschluss Block 3 beginnen |
@@ -136,7 +146,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
-| Theme Integration beschädigt Single File Dashboard | mittel | Zuerst Snippets dokumentieren, danach kleine gezielte Integration in eigener Branch |
+| Theme Integration beschädigt Single File Dashboard | reduziert | Alte stabile Dashboard Datei bleibt erhalten, neue themenfähige Datei ist separat verlinkt |
 | Matrix Code Rain belastet FPS | mittel | Viewport Reduktion, Reduced Motion und Canvas Parameter nutzen |
 | Screen Perception erfasst sensible Daten | hoch | Default Off, Blocklist, Pause Funktion und AuditLog zwingend vor Aktivierung ausbauen |
 | Vision Modell belastet System | mittel | Diff Detection, Caching und Intervallsteuerung vor Dauerbetrieb einbauen |
@@ -145,15 +155,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Theme Plan ist der nächste sinnvolle Schritt die kleine Integration des Theme Switchers und des MATRIX Themes in das bestehende Global Overview Dashboard.
+Nach dem Theme Prototype ist der nächste sinnvolle Schritt die lokale Sichtprüfung der neuen themenfähigen Dashboard Datei. Erst danach sollte visuell nachgeschärft oder die alte Global Overview Datei ersetzt werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Theme Switcher und MATRIX Theme integrieren
-2. MATRIX Code Rain lokal prüfen
-3. ULTRON Theme ergänzen
-4. Accessibility und Reduced Motion prüfen
+1. Themed Dashboard lokal öffnen
+2. JARVIS, MATRIX und ULTRON umschalten
+3. FPS und Mobile Verhalten prüfen
+4. Visuelle Fehler melden oder done bestätigen
 5. Danach zurück zu Screen Perception 1.3
 ```
 
