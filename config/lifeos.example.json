@@ -1,0 +1,85 @@
+{
+  "version": "B6.6.1",
+  "mode": "local-first",
+  "daily_briefing": {
+    "day_mode": "FOCUSED",
+    "priority_count": 3,
+    "focus_minutes": 92,
+    "open_loops": 7,
+    "energy_percent": 81,
+    "today_important": [
+      "Offene Rückfragen aus Arbeit und Abrechnung prüfen",
+      "LNW und FSM Buchungen auf fehlende Nachweise kontrollieren",
+      "Einen Lernblock oder Projektblock für den Nachmittag reservieren"
+    ],
+    "next_best_action": "Zuerst die offenen Rückfragen mit hoher Außenwirkung schließen, danach LifeOS oder Lernblock weiterführen."
+  },
+  "work_radar": {
+    "lnw_and_billing": {
+      "status": "check",
+      "score_percent": 72,
+      "note": "Leistungsnachweise und abrechnungsrelevante Themen zuerst prüfen."
+    },
+    "fsm_bookings": {
+      "status": "stable",
+      "score_percent": 84,
+      "note": "FSM Buchungen weiter sauber halten, nicht mit CATS mischen."
+    },
+    "customer_topics": {
+      "status": "attention",
+      "open_count": 2,
+      "score_percent": 38,
+      "note": "Offene Kundenrückfragen aktiv schließen."
+    },
+    "vde_dguv_research": {
+      "status": "ready",
+      "note": "Normenrecherche für Angebote und Prüftexte verfügbar."
+    }
+  },
+  "life_modules": [
+    {
+      "name": "Work",
+      "description": "SAP, FSM, Mail, LNW, Angebote und offene Klärungen"
+    },
+    {
+      "name": "Learn",
+      "description": "Meister, AEVO, Wiederholungen und Schwachstellen"
+    },
+    {
+      "name": "Health",
+      "description": "Pausen, Energie, Konzentration und Belastung"
+    },
+    {
+      "name": "Private",
+      "description": "Verträge, Finanzen, Termine und persönliche Projekte"
+    }
+  ],
+  "timeline": [
+    {
+      "time": "07:30",
+      "title": "Daily Scan",
+      "tag": "auto"
+    },
+    {
+      "time": "09:00",
+      "title": "Arbeits Radar prüfen",
+      "tag": "work"
+    },
+    {
+      "time": "12:30",
+      "title": "kurzer Reset",
+      "tag": "energy"
+    },
+    {
+      "time": "16:10",
+      "title": "Lernblock oder Projektblock",
+      "tag": "focus"
+    }
+  ],
+  "security": {
+    "external_telemetry": false,
+    "microphone_default": "off",
+    "secrets_allowed": false,
+    "private_paths_allowed": false
+  }
+}
