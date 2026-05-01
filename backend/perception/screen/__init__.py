@@ -4,7 +4,19 @@ from .config import ScreenPerformanceConfig, ScreenPerceptionConfig, ScreenPriva
 from .context_builder import ScreenContextBuilder
 from .hotkeys import ScreenHotkeyConfig, ScreenHotkeyRegistry
 from .indicator import ScreenActivityIndicator
-from .models import ActiveWindowInfo, PrivacyDecision, ScreenContext, ScreenshotFrame, VisionResult
+from .models import (
+    ActiveWindowInfo,
+    ActivityType,
+    ContextSource,
+    PrivacyDecision,
+    PrivacyStatus,
+    ScreenContext,
+    ScreenCaptureState,
+    ScreenshotFrame,
+    UiElement,
+    VisionProvider,
+    VisionResult,
+)
 from .ocr_fallback import OcrFallback
 from .privacy import ScreenPrivacyPolicy
 from .runtime_state import ScreenRuntimeState
@@ -13,10 +25,14 @@ from .window_tracker import WindowTracker
 
 __all__ = [
     "ActiveWindowInfo",
+    "ActivityType",
+    "ContextSource",
     "OcrFallback",
     "PrivacyDecision",
+    "PrivacyStatus",
     "ScreenActivityIndicator",
     "ScreenCaptureConfig",
+    "ScreenCaptureState",
     "ScreenCapturer",
     "ScreenContext",
     "ScreenContextBuilder",
@@ -29,6 +45,8 @@ __all__ = [
     "ScreenRuntimeState",
     "ScreenVisionAnalyzer",
     "ScreenshotFrame",
+    "UiElement",
+    "VisionProvider",
     "VisionResult",
     "WindowTracker",
     "load_screen_config",
