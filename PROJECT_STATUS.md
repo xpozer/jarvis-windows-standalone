@@ -55,6 +55,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - `Update Center` wurde in der Sidebar zu `Optionen / Updates` umbenannt.
 - Der Theme Wechseler ist jetzt direkt im sichtbaren React Dashboard unter System eingebunden.
 - JARVIS, MATRIX und ULTRON koennen dort direkt gewechselt werden und bleiben per `localStorage` gespeichert.
+- MATRIX und ULTRON haben nun eigene staerkere Gestaltungskonzepte statt nur eingefaerbter JARVIS Oberflaeche.
 - `START_JARVIS.ps1` erkennt veraltete Frontend Builds nach einem Pull und baut automatisch neu.
 - Die Build-Erkennung nutzt nun auch den aktuellen Git Commit, damit alte `dist` Bundles sicher erneuert werden.
 

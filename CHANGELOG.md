@@ -10,6 +10,8 @@ Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstan
 
 - Theme Wechseler direkt im React Dashboard unter `System > Optionen / Updates` eingebunden.
 - JARVIS, MATRIX und ULTRON Theme werden im Haupt-Chat sichtbar umgeschaltet und lokal gespeichert.
+- MATRIX Theme mit dunklem Terminal Look, gruenem Digital-Regen, staerkeren Glow-Karten und Matrix-typischen Akzenten ausgebaut.
+- ULTRON Theme mit mechanischem Rot-Schwarz-Silber Look, diagonalen Metallplatten, haerteren Kanten und staerkerem Kontrollmodus ausgebaut.
 
 ### Changed
 
