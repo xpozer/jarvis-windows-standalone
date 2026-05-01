@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jarvis-windows-standalone"
-version = "6.5.1"
+version = "6.6.13"
 description = "Local first Windows standalone assistant for electrical work planning"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
