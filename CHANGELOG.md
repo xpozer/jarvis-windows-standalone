@@ -4,6 +4,24 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.19] - 2026-05-01
+
+### Changed
+
+- Root Skripte auf sechs sichtbare Batch Einstiegspunkte reduziert: `INSTALL_JARVIS.bat`, `START_JARVIS.bat`, `UPDATE_JARVIS.bat`, `UNINSTALL_JARVIS.bat`, `DIAGNOSE.bat` und `REPAIR.bat`.
+- Operative PowerShell Skripte nach `scripts/install`, `scripts/maintenance` und `scripts/dev` migriert.
+- PowerShell Wrapper nutzen nun explizite `-Root` beziehungsweise `-SourceRoot` Parameter, damit verschobene Skripte den Projekt Root sauber auflösen.
+- README auf die neue Skriptstruktur und die aktuellen Betriebsbefehle aktualisiert.
+
+### Removed
+
+- Doppelte und sekundäre Root Batch Wrapper aus dem Root entfernt.
+- `REPAIR_JARVIS.bat` entfernt, weil `REPAIR.bat` denselben Einstieg mit besserer Nutzerführung abdeckt.
+
+### Security
+
+- Schlanker Root reduziert versehentliche Nutzung alter oder doppelter Wartungsskripte.
+
 ## [B6.6.18] - 2026-05-01
 
 ### Added
