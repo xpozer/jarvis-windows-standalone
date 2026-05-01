@@ -226,6 +226,26 @@ function Wait-Port {
   return $false
 }
 
+function Test-BackendHealth {
+  param([string]$Url = "http://127.0.0.1:8000/health")
+  try {
+    $result = Invoke-RestMethod -Uri $Url -Method Get -TimeoutSec 3
+    return @{ Ok=$true; Data=$result; Error="" }
+  } catch {
+    return @{ Ok=$false; Data=$null; Error=$_.Exception.Message }
+  }
+}
+
+function Wait-BackendHealth {
+  param([int]$Seconds = 20)
+  for($i=0; $i -lt ($Seconds * 2); $i++){
+    $health = Test-BackendHealth
+    if($health.Ok){ return $health }
+    Start-Sleep -Milliseconds 500
+  }
+  return Test-BackendHealth
+}
+
 function Invoke-Checked {
   param(
     [string]$Label,
@@ -306,7 +326,18 @@ if(-not (Test-Port 8000)){
   Start-Process -FilePath "cmd.exe" -ArgumentList "/k cd /d `"$Backend`" && `"$VenvPython`" -m uvicorn main:app --host 127.0.0.1 --port 8000" -WindowStyle Normal
   if(-not (Wait-Port 8000 20)){ Jv-Fail "Backend Port 8000 wurde nicht erreichbar" }
 }
-Jv-Ok "Backend erreichbar: http://127.0.0.1:8000"
+Jv-Ok "Backend Port erreichbar: http://127.0.0.1:8000"
+
+$health = Wait-BackendHealth -Seconds 20
+if(-not $health.Ok){
+  Jv-Fail "Backend /health antwortet nicht sauber: $($health.Error)"
+}
+$healthStatus = "ok"
+try {
+  if($health.Data.status){ $healthStatus = [string]$health.Data.status }
+  elseif($health.Data.ok){ $healthStatus = "ok" }
+} catch {}
+Jv-Ok "Backend Health OK: $healthStatus"
 
 if($DevFrontend){
   $npm = Get-NpmCmd
