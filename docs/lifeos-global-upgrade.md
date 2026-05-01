@@ -31,6 +31,18 @@ Heute wichtig:
 4. Private Fristen und Termine abgleichen
 ```
 
+## Lokale Beispielkonfiguration
+
+Die Datei `config/lifeos.example.json` beschreibt den ersten lokalen Datensatz für LifeOS. Sie enthält bewusst nur Beispielwerte und keine privaten Daten.
+
+Für echte lokale Nutzung kann daraus später eine nicht versionierte Datei entstehen:
+
+```text
+config/lifeos.json
+```
+
+Diese echte lokale Datei darf nicht mit persönlichen Daten ins Repository committed werden.
+
 ## Datenprinzip
 
 LifeOS bleibt Local First.
@@ -54,6 +66,7 @@ lifeos/
   schemas.py
 
 config/
+  lifeos.example.json
   lifeos.json
 ```
 
@@ -62,8 +75,9 @@ config/
 1. LifeOS Command Center als lokale Single File Ansicht
 2. Launcher Eintrag für LifeOS
 3. Dokumentation des Zielbilds
-4. später: lokale JSON Demo Daten
-5. danach: Backend Schnittstelle für echtes Daily Briefing
+4. lokale JSON Beispiel Daten
+5. danach: Frontend Loader für lokale Werte
+6. danach: Backend Schnittstelle für echtes Daily Briefing
 
 ## Akzeptanzkriterien für die nächste Stufe
 
