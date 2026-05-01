@@ -4,6 +4,22 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.2] - 2026-05-01
+
+### Added
+
+- LifeOS Command Center lädt nun lokale Werte aus `config/lifeos.example.json`, wenn die Seite über einen lokalen Server geöffnet wird.
+- Interner Fallback Datensatz ergänzt, falls der Browser lokales Datei Laden blockiert.
+- Daily Briefing, Work Radar, Timeline, Life Modules und Next Best Action werden dynamisch gerendert.
+
+### Changed
+
+- LifeOS Anzeige von festen Demo Werten auf Daten Rendering mit JSON Grundlage umgestellt.
+
+### Fixed
+
+- LifeOS bleibt auch bei blockiertem `fetch` funktionsfähig und zeigt einen klaren Datenstatus an.
+
 ## [B6.6.1] - 2026-05-01
 
 ### Added
