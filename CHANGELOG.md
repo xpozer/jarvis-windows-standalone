@@ -4,6 +4,24 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.7.0-screen-1.4] - 2026-05-01
+
+### Added
+
+- Screen Kontext Datenmodell finalisiert und um `source`, `process_name`, `pid`, `structured_ui_elements`, `activity_type`, `confidence`, `privacy_status`, `duration_hint_seconds`, `should_store_episode` und `episode_reason` erweitert.
+- `UiElement` Modell für strukturierte UI Elemente ergänzt.
+- `memory_summary()` als kompakte Zusammenfassung für spätere Memory Integration ergänzt.
+
+### Changed
+
+- Context Builder setzt nun Privacy Status, Screenshot Änderungsstatus, Prozessdaten und Episode Hinweise strukturiert.
+- Screen Perception README um finalisiertes Kontext Modell erweitert.
+
+### Security
+
+- Aufgabe 1.4 speichert weiterhin keine Episodes und aktiviert keine Bildschirmbeobachtung.
+- Privacy Status bleibt Teil jedes ScreenContext Ergebnisses.
+
 ## [B6.7.0-screen-1.3] - 2026-05-01
 
 ### Added
@@ -153,7 +171,7 @@ Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstan
 ### Added
 
 - Work Radar 2.0 erweitert um Kategorien, Risiko Zusammenfassung, Status Zusammenfassung, Fristlage und naechste Work Aktion.
-- LifeOS Backend normalisiert Arbeitsthemen jetzt mit Kategorie, Due State und Prioritaetswert.
+- LifeOS Backend normalisiert Arbeitsthemen mit Kategorie, Due State und Prioritaetswert.
 - LifeOS Panel zeigt kompakte Work Radar Kennzahlen und Kategorien ohne die Startseite zu ueberladen.
 
 ### Changed
