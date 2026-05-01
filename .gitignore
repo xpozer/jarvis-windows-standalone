@@ -39,12 +39,14 @@ local_data/
 data/
 runtime/
 cache/
+tmp/
 
 # Lokale Konfiguration und Secrets
 .env
 .env.*
 !.env.example
 config/lifeos.json
+config/screen-perception.json
 *.local.json
 *.secret.json
 *.key
