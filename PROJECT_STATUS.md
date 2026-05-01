@@ -36,11 +36,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
 | LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
+| LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.5
+
+- LifeOS Upgrade Roadmap unter `docs/lifeos-roadmap.md` ergänzt.
+- Roadmap enthält Daily Command Center, Work Radar 2.0, Learning Coach, Health und Energy Radar, Finance und Contract Radar, Private Project Manager, Decision Assistant, Memory und Knowledge Layer, Voice und Automation Layer.
+- PROJECT_STATUS verweist auf die Roadmap und führt die wichtigsten offenen Roadmap Punkte als Todos.
 
 ### B6.6.4
 
@@ -92,14 +99,31 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
 | Hoch | LifeOS persönliche Vorlage | offen | Anleitung oder Kopierskript für `config/lifeos.json` aus `config/lifeos.example.json` ergänzen |
+| Hoch | Daily Command Center | offen | Top 3 Aufgaben, Tagesfokus und klaren nächsten Schritt aus lokalen Daten ableiten |
+| Hoch | Work Radar 2.0 | offen | strukturierte Vorgänge für SAP, FSM, LNW, Mail, Angebote und Rückfragen ergänzen |
+| Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
+| Mittel | Learning Coach | offen | Lernstände, Wiederholungen und Schwachstellen lokal abbilden |
+| Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
+| Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
+| Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
+| Mittel | Finance und Contract Radar | offen | Verträge, Rechnungen, Abos, Fristen und Nachweise lokal strukturieren |
+| Mittel | Memory und Knowledge Layer | offen | Regeln, Notizen, Dokumente, Entscheidungen und Quellen lokal verwalten |
 | Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
 | Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
-| Mittel | Work Radar | offen | Struktur für SAP, FSM, Mail, LNW und offene Rückfragen weiter konkretisieren |
-| Mittel | Knowledge Index | offen | lokale Wissensstruktur für Notizen, Dokumente und Projektwissen definieren |
+| Niedrig | Voice und Push to Talk | offen | Mikrofon default off, lokale TTS und bewusste Aktivierung planen |
+| Niedrig | Automation Layer | offen | lokale Automationen mit RiskLevel, Freigabe und Audit Log vorbereiten |
 | Niedrig | UI Feinschliff LifeOS | offen | Layout, Texte und Live Werte nach erstem lokalen Test nachschärfen |
 | Niedrig | Release ZIP | offen | GitHub Release Workflow mit echtem Tag testen |
+
+## Roadmap Dokumente
+
+| Datei | Zweck |
+|---|---|
+| `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
+| `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
+| `CHANGELOG.md` | Versionierte Änderungen |
+| `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
 ## Risiken
 
@@ -109,19 +133,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Installer Fehler bei Endanwendern | hoch | Installer weiterhin als eigener Schwerpunkt behandeln |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
+| Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
 
 ## Nächster sinnvoller Schritt
 
-Nach der privaten LifeOS Konfiguration ist der nächste sinnvolle Schritt eine einfache Anleitung oder ein kleines Skript, das aus `config/lifeos.example.json` eine lokale `config/lifeos.json` erstellt.
+Nach der Roadmap ist der nächste sinnvolle Schritt die LifeOS persönliche Vorlage. Damit kann lokal aus `config/lifeos.example.json` eine echte private `config/lifeos.json` erzeugt werden, ohne persönliche Daten ins Repository zu schreiben.
 
 Empfohlene Reihenfolge:
 
 ```text
 1. Anleitung oder Skript für config/lifeos.json ergänzen
-2. Installer Robustheit erneut prüfen
-3. Backend Health Check sauber anbinden
-4. DiagCenter konkretisieren
-5. Erst danach größere Dependency Updates angehen
+2. Daily Command Center um Top 3 Aufgaben erweitern
+3. Work Radar 2.0 Schema ergänzen
+4. Installer Robustheit erneut prüfen
+5. Backend Health Check sauber anbinden
 ```
 
 ## Pflege Ablauf
