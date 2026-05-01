@@ -524,16 +524,18 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
           heatShiftTimer=1.2+Math.random()*1.5;
           for(let i=0;i<N;i++){if(Math.random()<0.25)heatTargets[i]=Math.random();}
           if(st==="thinking"||st==="speaking"){
-            for(let k=0;k<2;k++){
+            const clusters = st === "thinking" ? 5 : 2;
+            const radius = st === "thinking" ? 9 : 7;
+            for(let k=0;k<clusters;k++){
               const cx=(Math.random()-.5)*20,cy=(Math.random()-.5)*20,cz=(Math.random()-.5)*20;
-              for(let i=0;i<N;i++){const dx=a[i*3]-cx,dy=a[i*3+1]-cy,dz=a[i*3+2]-cz;if(Math.sqrt(dx*dx+dy*dy+dz*dz)<7)heatTargets[i]=0.75+Math.random()*0.25;}
+              for(let i=0;i<N;i++){const dx=a[i*3]-cx,dy=a[i*3+1]-cy,dz=a[i*3+2]-cz;if(Math.sqrt(dx*dx+dy*dy+dz*dz)<radius)heatTargets[i]=(st==="thinking"?0.88:0.75)+Math.random()*(st==="thinking"?0.12:0.25);}
             }
           }
         }
         for(let i=0;i<N;i++)heatValues[i]+=(heatTargets[i]-heatValues[i])*0.035;
         for(let i=0;i<N;i++){
           const h=heatValues[i];let r,g,b;
-          if(h<0.25){r=0.20;g=1.00;b=0.55;}else if(h<0.50){r=0.20;g=0.55;b=1.00;}else if(h<0.75){r=1.00;g=0.80;b=0.10;}else{r=1.00;g=0.18;b=0.18;}
+          if(h<0.25){r=0.20;g=1.00;b=0.55;}else if(h<0.50){r=0.20;g=0.55;b=1.00;}else if(h<0.70){r=1.00;g=0.80;b=0.10;}else if(st==="thinking"){r=1.00;g=0.08;b=0.12;}else{r=1.00;g=0.18;b=0.18;}
           heatColors[i*3]=r;heatColors[i*3+1]=g;heatColors[i*3+2]=b;
         }
         colorAttr.array.set(heatColors);colorAttr.needsUpdate=true;
@@ -541,7 +543,7 @@ export function Orb({ state, heatmapActive = false, typingActivity = 0, onNodeCl
       } else {
         heatPoints.visible=false; points.visible=true;
         mat.opacity=currentBright+bass*0.08; mat.size=currentSize+bass*0.05;
-        if(st==="thinking"){mat.color.lerp(new THREE.Color(0x6ec4ff),0.015);lineMat.color.lerp(new THREE.Color(0x6ec4ff),0.015);}
+        if(st==="thinking"){mat.color.lerp(new THREE.Color(0xff3f67),0.02);lineMat.color.lerp(new THREE.Color(0xff3f67),0.02);}
         else if(st==="speaking"){mat.color.lerp(new THREE.Color(0x5ab8f0),0.015);lineMat.color.lerp(new THREE.Color(0x5ab8f0),0.015);}
         else{mat.color.lerp(new THREE.Color(0x4ca8e8),0.015);lineMat.color.lerp(new THREE.Color(0x4ca8e8),0.015);}
       }

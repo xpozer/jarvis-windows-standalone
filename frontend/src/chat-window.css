@@ -1,7 +1,7 @@
 .dialog-mode .jarvis-main {
-  grid-template-columns: minmax(0, 1fr) clamp(220px, 18vw, 360px);
+  grid-template-columns: minmax(0, 1fr) clamp(275px, 22.5vw, 450px);
   width: min(58.2vw, calc(100vw - 720px));
-  gap: 1.2vw;
+  gap: .35vw;
 }
 
 .jarvis-screen {
@@ -143,17 +143,19 @@
 }
 
 .dialog-mode .jarvis-core-stage .jarvis-legacy-orb-wrap {
-  left: 50%;
-  top: 36%;
-  width: clamp(220px, 18vw, 360px);
+  left: 61%;
+  top: 25%;
+  width: clamp(275px, 22.5vw, 450px);
   min-width: 0;
   max-width: none;
   opacity: .96;
+  transform: translate(-50%, -50%) scale(1.12);
   filter: drop-shadow(0 0 42px rgba(5,216,255,.36));
 }
 
 .dialog-mode .jarvis-core-stage .jarvis-core-label {
-  top: 62%;
+  left: 61%;
+  top: 56%;
   opacity: .88;
 }
 
@@ -174,6 +176,10 @@
 
 .dialog-mode.is-speaking .jarvis-core-stage .jarvis-legacy-orb-wrap {
   filter: drop-shadow(0 0 46px rgba(5,216,255,.42));
+}
+
+.dialog-mode.is-thinking .jarvis-core-stage .jarvis-legacy-orb-wrap {
+  filter: drop-shadow(0 0 52px rgba(255,63,103,.42)) drop-shadow(0 0 36px rgba(5,216,255,.28));
 }
 
 .jarvis-message-list {
@@ -442,16 +448,17 @@
 
 @media (max-width: 1600px) {
   .dialog-mode .jarvis-main {
-    grid-template-columns: minmax(0, 1fr) 240px;
+    grid-template-columns: minmax(0, 1fr) 300px;
     width: calc(100vw - 620px);
   }
 
   .dialog-mode .jarvis-core-stage {
-    width: 240px;
+    width: 300px;
     opacity: .72;
   }
 
   .dialog-mode .jarvis-core-stage .jarvis-legacy-orb-wrap {
-    width: 240px;
+    left: 58%;
+    width: 300px;
   }
 }
