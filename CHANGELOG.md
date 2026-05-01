@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.8.0-themes-plan] - 2026-05-01
+
+### Added
+
+- Umsetzungsdokument `docs/dashboard-theme-system-implementation.md` ergänzt.
+- Theme Switcher Grundsystem für JARVIS, MATRIX und ULTRON dokumentiert.
+- MATRIX CSS Override, Code Rain Layer und Theme Parameter als prüfbare Snippets vorbereitet.
+
+### Changed
+
+- Dashboard Theme System wird auf separatem Branch `feature/dashboard-themes` geplant, bevor die große Single File HTML verändert wird.
+
 ## [B6.6.18] - 2026-05-01
 
 ### Added
