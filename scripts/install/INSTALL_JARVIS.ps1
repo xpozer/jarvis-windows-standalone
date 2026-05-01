@@ -20,4 +20,6 @@ Invoke-JarvisCoreScript `
   -BoundParameters $bound `
   -LiteralReplacements @{
     'Join-Path $InstallDir "FIRST_SETUP.ps1"' = 'Join-Path $InstallDir "scripts\install\FIRST_SETUP.ps1"'
+    '& powershell -NoProfile -ExecutionPolicy Bypass -File $setup' = '& powershell -NoProfile -ExecutionPolicy Bypass -File $setup -Root $InstallDir'
+    'Start-Process -FilePath "cmd.exe" -ArgumentList "/k cd /d `"$backend`" && `"$venv`" main.py" -WindowStyle Minimized' = 'Start-Process -FilePath "cmd.exe" -ArgumentList "/c cd /d `"$backend`" && `"$venv`" -m uvicorn main:app --host 127.0.0.1 --port 8000" -WindowStyle Minimized'
   }
