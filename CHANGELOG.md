@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.13] - 2026-05-01
+
+### Fixed
+
+- Sound Engine respektiert Browser Autoplay Regeln jetzt strenger und spielt erst nach erfolgreichem Audio Unlock.
+- Reload Problem entschärft, bei dem Sound zwar im HUD als aktiviert gespeichert war, der Browser AudioContext aber noch gesperrt blieb.
+- WebKit Fallback für `webkitAudioContext` ergänzt.
+
+### Changed
+
+- Sound Events werden ignoriert, solange der AudioContext nicht wirklich freigeschaltet ist, statt stumm in einen gesperrten Context zu laufen.
+
 ## [B6.6.12] - 2026-05-01
 
 ### Added
