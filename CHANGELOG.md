@@ -4,6 +4,22 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.16] - 2026-05-01
+
+### Added
+
+- Backend Health Check im Startskript ergänzt.
+- Dokumentation `docs/backend-health-check.md` ergänzt.
+- `START_JARVIS.ps1` prüft nach Port 8000 jetzt zusätzlich `http://127.0.0.1:8000/health`.
+
+### Changed
+
+- JARVIS gilt beim Start erst als bereit, wenn Backend Port und Health Endpunkt erfolgreich antworten.
+
+### Fixed
+
+- Startskript erkennt besser, wenn zwar Port 8000 offen ist, der Backend Dienst aber nicht sauber antwortet.
+
 ## [B6.6.15] - 2026-05-01
 
 ### Added

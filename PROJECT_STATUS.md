@@ -40,11 +40,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
+| Backend Health Check | erledigt | Startskript prüft Port 8000 und `/health`, bevor JARVIS als bereit gilt |
 | Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
-| Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
+| Backend Integration | in Arbeit | Backend Health ist angebunden, weitere Diagnose Integration folgt |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.16
+
+- Backend Health Check im Startskript ergänzt.
+- `START_JARVIS.ps1` prüft nach Port 8000 zusätzlich `http://127.0.0.1:8000/health`.
+- Dokumentation `docs/backend-health-check.md` ergänzt.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.15
 
@@ -145,8 +153,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
-| Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
-| Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
+| Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config, Backend Health und Logs konkretisieren |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
 | Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
 | Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
@@ -164,6 +171,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
 | `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
 | `docs/installer-readiness.md` | Anleitung für den nicht destruktiven Installer Vorab Check |
+| `docs/backend-health-check.md` | Anleitung zum Backend Health Check beim Start |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -171,7 +179,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
-| Installer Fehler bei Endanwendern | reduziert | Readiness Check vorhanden, echter Test auf frischem Windows bleibt nötig |
+| Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
@@ -179,16 +187,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Installer Readiness Check ist der nächste sinnvolle Schritt der Backend Health Check. Dafür soll der bestehende `/health` oder ein klarer Health Endpunkt sauber mit Frontend, Startskript und Diagnose verbunden werden.
+Nach dem Backend Health Check ist der nächste sinnvolle Schritt das DiagCenter. Dort sollen Python, Node, Ports, Config, Backend Health und Logs in einem klaren Diagnose Modul zusammenlaufen.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Backend Health Check sauber anbinden
-2. DiagCenter konkretisieren
-3. Decision Assistant ergänzen
-4. Private Project Manager ergänzen
-5. Release ZIP Workflow testen
+1. DiagCenter konkretisieren
+2. Decision Assistant ergänzen
+3. Private Project Manager ergänzen
+4. Release ZIP Workflow testen
+5. Installer Endanwender Test durchführen
 ```
 
 ## Pflege Ablauf
