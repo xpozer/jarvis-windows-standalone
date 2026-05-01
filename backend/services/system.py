@@ -52,6 +52,51 @@ def api_diagnostic_deep():
         data["awareness_runtime"] = awareness_runtime.awareness_status()
     return data
 
+def api_diagnostic_center():
+    sections: Dict[str, Any] = {}
+    checks: List[Dict[str, Any]] = []
+
+    def capture(name: str, label: str, fn):
+        try:
+            data = fn()
+            sections[name] = data
+            ok = True
+            if isinstance(data, dict):
+                if data.get("ok") is False or data.get("status") in ("error", "failed", "offline"):
+                    ok = False
+            checks.append({"name": label, "ok": ok})
+        except Exception as exc:
+            sections[name] = {"ok": False, "error": str(exc)}
+            checks.append({"name": label, "ok": False, "error": str(exc)})
+
+    capture("health", "Backend Health", health)
+    capture("self_check", "Self Check", api_self_check)
+    capture("dependencies", "Dependencies", api_diagnostic_deps)
+    capture("ports", "Ports", api_diagnostic_ports)
+    capture("logs", "Logs", api_diagnostic_logs_list)
+    capture("system_status", "System Status", api_system_status)
+
+    runtime = usejarvis_runtime.runtime_status()
+    awareness = awareness_runtime.awareness_status()
+    sections["usejarvis_runtime"] = runtime
+    sections["awareness_runtime"] = awareness
+    checks.append({"name": "UseJARVIS Runtime", "ok": isinstance(runtime, dict)})
+    checks.append({"name": "Awareness Runtime", "ok": isinstance(awareness, dict)})
+
+    failed = [item for item in checks if not item.get("ok")]
+    return {
+        "ok": len(failed) == 0,
+        "status": "ok" if not failed else "attention",
+        "summary": {
+            "checks_total": len(checks),
+            "checks_ok": len(checks) - len(failed),
+            "checks_failed": len(failed),
+            "failed": failed,
+        },
+        "checks": checks,
+        "sections": sections,
+    }
+
 async def api_diagnostic_analyze_text(req: Request):
     return await core.api_diagnostic_analyze_text(req=req)
 
