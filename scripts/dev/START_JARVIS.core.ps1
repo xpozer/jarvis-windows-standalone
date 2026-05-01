@@ -6,6 +6,7 @@ param(
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Backend = Join-Path $Root "backend"
 $Frontend = Join-Path $Root "frontend"
+$FrontendBuildMarker = Join-Path $Frontend "dist\.jarvis-build-commit"
 $script:Logs = Join-Path $Root "logs"
 New-Item -ItemType Directory -Force -Path $script:Logs | Out-Null
 $script:LogFile = Join-Path $script:Logs "start.log"
@@ -295,6 +296,64 @@ function Invoke-Checked {
   Jv-Ok "$Label abgeschlossen"
 }
 
+function Get-LatestFrontendSourceTime {
+  $candidates = @(
+    (Join-Path $Frontend "package.json"),
+    (Join-Path $Frontend "package-lock.json"),
+    (Join-Path $Frontend "index.html"),
+    (Join-Path $Frontend "src")
+  )
+
+  $latest = [datetime]::MinValue
+  foreach($candidate in $candidates){
+    if(-not (Test-Path $candidate)){ continue }
+    $item = Get-Item $candidate
+    if($item.PSIsContainer){
+      $files = Get-ChildItem -Path $candidate -Recurse -File -ErrorAction SilentlyContinue
+      foreach($file in $files){
+        if($file.LastWriteTimeUtc -gt $latest){ $latest = $file.LastWriteTimeUtc }
+      }
+    } elseif($item.LastWriteTimeUtc -gt $latest) {
+      $latest = $item.LastWriteTimeUtc
+    }
+  }
+  return $latest
+}
+
+function Ensure-FrontendBuildFresh {
+  if($DevFrontend){ return }
+  if(-not (Test-Path $DistIndex)){ return }
+
+  $currentCommit = ""
+  try {
+    $currentCommit = (& git -C $Root rev-parse HEAD 2>$null).Trim()
+  } catch {}
+
+  $builtCommit = ""
+  if(Test-Path $FrontendBuildMarker){
+    try { $builtCommit = (Get-Content $FrontendBuildMarker -Raw -ErrorAction Stop).Trim() } catch {}
+  }
+
+  if($currentCommit -and $builtCommit -ne $currentCommit){
+    Jv-Warn "Frontend Build passt nicht zum aktuellen Git Stand. Baue Frontend neu."
+    $npm = Get-NpmCmd
+    Invoke-Checked "Frontend neu bauen" $npm @("run", "build") "frontend-build.log" $Frontend
+    Set-Content -Path $FrontendBuildMarker -Value $currentCommit -Encoding UTF8
+    return
+  }
+
+  $latestSource = Get-LatestFrontendSourceTime
+  if($latestSource -eq [datetime]::MinValue){ return }
+
+  $distTime = (Get-Item $DistIndex).LastWriteTimeUtc
+  if($latestSource -le $distTime.AddSeconds(2)){ return }
+
+  Jv-Warn "Frontend Quellen sind neuer als der Production Build. Baue Frontend neu."
+  $npm = Get-NpmCmd
+  Invoke-Checked "Frontend neu bauen" $npm @("run", "build") "frontend-build.log" $Frontend
+  if($currentCommit){ Set-Content -Path $FrontendBuildMarker -Value $currentCommit -Encoding UTF8 }
+}
+
 
 Jv-Step "JARVIS Start beginnt"
 Jv-Info "Root: $Root"
@@ -309,6 +368,8 @@ if(-not (Test-Path $VenvPython) -or (-not $DevFrontend -and -not (Test-Path $Dis
 }
 
 if(-not (Test-Path $VenvPython)){ Jv-Fail "Python venv fehlt nach Setup" }
+
+Ensure-FrontendBuildFresh
 
 if(Test-Cmd "ollama"){
   if(-not (Test-Port 11434)){
