@@ -12,12 +12,12 @@ echo Frontend dist:
 if exist frontend\dist\index.html (echo OK) else (echo FEHLT)
 echo.
 echo Node:
-where node 2^>nul
-node -v 2^>nul
+where node 2>nul
+node -v 2>nul
 echo.
 echo npm.cmd:
-where npm.cmd 2^>nul
-"C:\Program Files\nodejs\npm.cmd" -v 2^>nul
+where npm.cmd 2>nul
+"C:\Program Files\nodejs\npm.cmd" -v 2>nul
 echo.
 echo Ports:
 netstat -ano ^| findstr ":8000"
