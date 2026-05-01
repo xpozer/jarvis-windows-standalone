@@ -1,0 +1,44 @@
+{
+  "privacy": {
+    "enabled": false,
+    "paused": false,
+    "pause_hotkey": "ctrl+alt+p",
+    "visual_indicator": true,
+    "tray_indicator": true,
+    "capture_interval_seconds": 2.0,
+    "allowlist_apps": [],
+    "blocked_apps": [
+      "1password",
+      "bitwarden",
+      "keepass",
+      "keepassxc",
+      "lastpass",
+      "dashlane",
+      "nordpass",
+      "banking",
+      "tan",
+      "authenticator"
+    ],
+    "blocked_title_words": [
+      "bank",
+      "passwort",
+      "password",
+      "pin",
+      "tan",
+      "konto",
+      "private",
+      "privat",
+      "gehalt"
+    ]
+  },
+  "performance": {
+    "capture_interval_seconds": 2.0,
+    "max_frames": 100,
+    "max_buffer_mb": 100,
+    "image_format": "webp",
+    "image_quality": 72,
+    "diff_detection_enabled": true,
+    "diff_hash_width": 32,
+    "diff_hash_height": 18
+  }
+}
