@@ -29,6 +29,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Bereich | Status | Hinweis |
 |---|---|---|
 | Repository Basis | erledigt | Projektstruktur, README, Changelog, Contribution Regeln und Security Hinweise vorhanden |
+| Root Hygiene | in Review | Root ist auf sechs Batch Einstiegspunkte reduziert, PowerShell Logik liegt unter `scripts/`, echter Windows Test bleibt offen |
 | Launcher | erledigt | Startseite mit Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
 | Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp vorhanden |
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
@@ -48,6 +49,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.19
+
+- Root Batch Einstiegspunkte auf sechs sichtbare Dateien reduziert.
+- Sekundäre Batch Wrapper nach `scripts/install`, `scripts/maintenance` und `scripts/dev` verschoben.
+- Operative PowerShell Logik aus dem Root nach `scripts/` migriert.
+- Option A umgesetzt: neue Wrapper geben `-Root` beziehungsweise `-SourceRoot` explizit weiter.
+- `JARVIS_INSTALL_CONFIG.json` nach `scripts/install` verschoben.
+- README auf die neue Skriptstruktur aktualisiert.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.18
 
@@ -169,6 +180,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
+| Hoch | Root Hygiene Windows Test | offen | `INSTALL_JARVIS.bat`, `START_JARVIS.bat`, `REPAIR.bat` und `UPDATE_JARVIS.bat` mit neuer `scripts/` Struktur lokal testen |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
 | Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
 | Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
@@ -188,6 +200,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/installer-readiness.md` | Anleitung für den nicht destruktiven Installer Vorab Check |
 | `docs/backend-health-check.md` | Anleitung zum Backend Health Check beim Start |
 | `docs/diagcenter.md` | Anleitung zum zentralen DiagCenter Sammel Endpunkt |
+| `docs/tidy-root-migration-notes.md` | Notizen zur Root Hygiene Migration und zur Option A Entscheidung |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -195,6 +208,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
+| Root Skript Migration bricht Windows Start | mittel | PR bleibt Draft bis `INSTALL_JARVIS.bat`, `START_JARVIS.bat`, `REPAIR.bat` und `UPDATE_JARVIS.bat` lokal getestet wurden |
 | Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
@@ -203,16 +217,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem DiagCenter Frontend ist der nächste sinnvolle Schritt der Decision Assistant. Dort sollen Optionen, Aufwand, Risiko, Nutzen und Empfehlung als lokales Schema ergänzt werden.
+Vor dem nächsten Feature Schritt sollte Ticket 1 lokal auf Windows getestet werden. Danach ist der nächste sinnvolle Projekt Schritt der Decision Assistant.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Decision Assistant ergänzen
-2. Private Project Manager ergänzen
-3. Release ZIP Workflow testen
-4. Installer Endanwender Test durchführen
-5. Health und Energy Radar ergänzen
+1. Root Hygiene PR lokal auf Windows testen
+2. Root Hygiene PR reviewen und mergen
+3. Decision Assistant ergänzen
+4. Private Project Manager ergänzen
+5. Release ZIP Workflow testen
 ```
 
 ## Pflege Ablauf
