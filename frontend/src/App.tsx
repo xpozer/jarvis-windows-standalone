@@ -11,6 +11,7 @@ import "./chat-window.css";
 
 type Role = "operator" | "jarvis";
 type Level = "ok" | "warn" | "critical" | "unknown";
+type DashboardTheme = "jarvis" | "matrix" | "ultron";
 
 type Message = {
   role: Role;
@@ -99,7 +100,7 @@ const fallbackMetrics: SystemMetrics = {
 
 const navGroups = [
   { title: "HAUPT", items: [["H", "Start"], ["D", "Dialog"], ["L", "LifeOS"], ["W", "Wissensbasis"], ["S", "Datenstroeme"], ["A", "Aufgaben & Automationen"]] },
-  { title: "SYSTEM", items: [["R", "JARVIS Runtime"], ["D", "Diagnose"], ["N", "Agentennetz"], ["M", "Speicherbanken"], ["K", "Kernsysteme"], ["U", "Update Center"], ["S", "Sicherheitszentrale"]] },
+  { title: "SYSTEM", items: [["R", "JARVIS Runtime"], ["D", "Diagnose"], ["N", "Agentennetz"], ["M", "Speicherbanken"], ["K", "Kernsysteme"], ["U", "Optionen / Updates"], ["S", "Sicherheitszentrale"]] },
   { title: "WERKZEUGE", items: [["C", "Code-Werkzeuge"], ["A", "Datenanalyse"], ["F", "Dateimanager"], ["R", "Websuche"], ["API", "API-Konsole"]] },
 ];
 
@@ -133,6 +134,14 @@ function loadSoundVolume() {
     if (Number.isFinite(value)) return Math.min(100, Math.max(0, value));
   } catch {}
   return 22;
+}
+
+function loadDashboardTheme(): DashboardTheme {
+  try {
+    const value = localStorage.getItem("jarvis_dashboard_theme");
+    if (value === "matrix" || value === "ultron") return value;
+  } catch {}
+  return "jarvis";
 }
 
 function metricClass(level: Level) {
@@ -214,6 +223,7 @@ export function App() {
   const [uiZoom, setUiZoom] = useState(loadUiZoom);
   const [soundEnabled, setSoundEnabled] = useState(loadSoundEnabled);
   const [soundVolume, setSoundVolume] = useState(loadSoundVolume);
+  const [dashboardTheme, setDashboardTheme] = useState<DashboardTheme>(loadDashboardTheme);
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
@@ -257,6 +267,13 @@ export function App() {
       localStorage.setItem("jarvis_ui_zoom", String(uiZoom));
     } catch {}
   }, [uiZoom]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("jarvis_dashboard_theme", dashboardTheme);
+      document.documentElement.dataset.jarvisTheme = dashboardTheme;
+    } catch {}
+  }, [dashboardTheme]);
 
   useEffect(() => {
     jarvisSound.configure(soundEnabled, soundVolume / 100);
@@ -518,7 +535,7 @@ export function App() {
   }
 
   return (
-    <div className={`jarvis-screen ${thinking ? "is-thinking" : ""} ${orbState === "speaking" ? "is-speaking" : ""} ${isDialog ? "dialog-mode" : ""}`} style={{ "--ui-scale": uiScale } as CSSProperties}>
+    <div className={`jarvis-screen theme-${dashboardTheme} ${thinking ? "is-thinking" : ""} ${orbState === "speaking" ? "is-speaking" : ""} ${isDialog ? "dialog-mode" : ""}`} style={{ "--ui-scale": uiScale } as CSSProperties}>
       <DayStartCard onSend={sendMessage} />
       <header className="jarvis-topbar">
         <div className="jarvis-brand">
@@ -682,7 +699,7 @@ export function App() {
         </div>
       </section>
 
-      <DashboardModules activeNav={activeNav} onSend={sendMessage} />
+      <DashboardModules activeNav={activeNav} onSend={sendMessage} dashboardTheme={dashboardTheme} onThemeChange={setDashboardTheme} />
     </div>
   );
 }

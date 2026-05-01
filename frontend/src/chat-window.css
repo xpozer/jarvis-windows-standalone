@@ -8,6 +8,88 @@
   --ui-scale: 1;
 }
 
+.jarvis-screen.theme-matrix {
+  --cyan: #00ff66;
+  --cyan2: #b8ffd0;
+  --green: #00ff66;
+  --red: #ff476d;
+  --line: rgba(0, 255, 102, .18);
+  background:
+    radial-gradient(circle at 70% 24%, rgba(0, 255, 102, .17), transparent 36%),
+    linear-gradient(180deg, #010807, #020c0a 50%, #000302);
+}
+
+.jarvis-screen.theme-ultron {
+  --cyan: #ff355d;
+  --cyan2: #ffd1dc;
+  --green: #ff6a40;
+  --red: #ff355d;
+  --line: rgba(255, 53, 93, .2);
+  background:
+    radial-gradient(circle at 70% 24%, rgba(255, 53, 93, .19), transparent 38%),
+    linear-gradient(180deg, #0b0205, #10050a 52%, #050102);
+}
+
+.jarvis-screen.theme-matrix::before {
+  background:
+    linear-gradient(rgba(0, 255, 102, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 102, .04) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.jarvis-screen.theme-ultron::before {
+  background:
+    linear-gradient(rgba(255, 53, 93, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 53, 93, .04) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.jarvis-screen.theme-matrix .jarvis-mini-orb,
+.jarvis-screen.theme-matrix .jarvis-user-orb,
+.jarvis-screen.theme-matrix .jarvis-avatar.jarvis,
+.jarvis-screen.theme-matrix .jarvis-legacy-orb-wrap {
+  filter: hue-rotate(100deg) saturate(1.28);
+}
+
+.jarvis-screen.theme-ultron .jarvis-mini-orb,
+.jarvis-screen.theme-ultron .jarvis-user-orb,
+.jarvis-screen.theme-ultron .jarvis-avatar.jarvis,
+.jarvis-screen.theme-ultron .jarvis-legacy-orb-wrap {
+  filter: hue-rotate(150deg) saturate(1.32);
+}
+
+.jarvis-screen.theme-matrix .jarvis-nav-item.active,
+.jarvis-screen.theme-matrix .jarvis-system-status,
+.jarvis-screen.theme-matrix .jarvis-message-card,
+.jarvis-screen.theme-matrix .jarvis-input-panel,
+.jarvis-screen.theme-matrix .jarvis-card {
+  border-color: rgba(0, 255, 102, .2);
+  box-shadow: 0 0 28px rgba(0, 255, 102, .08);
+}
+
+.jarvis-screen.theme-ultron .jarvis-nav-item.active,
+.jarvis-screen.theme-ultron .jarvis-system-status,
+.jarvis-screen.theme-ultron .jarvis-message-card,
+.jarvis-screen.theme-ultron .jarvis-input-panel,
+.jarvis-screen.theme-ultron .jarvis-card {
+  border-color: rgba(255, 53, 93, .24);
+  box-shadow: 0 0 30px rgba(255, 53, 93, .1);
+}
+
+.jarvis-screen.theme-matrix .cyan,
+.jarvis-screen.theme-matrix .jarvis-brand-title,
+.jarvis-screen.theme-matrix .jarvis-card-title h2,
+.jarvis-screen.theme-matrix .jarvis-nav-item.active em {
+  color: #8dffae !important;
+}
+
+.jarvis-screen.theme-ultron .cyan,
+.jarvis-screen.theme-ultron .jarvis-brand-title,
+.jarvis-screen.theme-ultron .jarvis-card-title h2,
+.jarvis-screen.theme-ultron .jarvis-nav-item.active em {
+  color: #ff8ca2 !important;
+}
+
 .jarvis-metrics {
   grid-template-columns: repeat(4, minmax(78px, 1fr)) minmax(220px, 15vw) minmax(180px, 12vw);
 }
