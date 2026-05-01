@@ -6,6 +6,7 @@ param(
   [switch]$NoCleanBackup
 )
 
+$ErrorActionPreference = "Stop"
 $Root = (Resolve-Path $SourceRoot).Path
 . (Join-Path $PSScriptRoot "..\lib\Invoke-JarVISCore.ps1")
 

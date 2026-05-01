@@ -5,6 +5,7 @@ param(
   [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 )
 
+$ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "..\lib\Invoke-JarVISCore.ps1")
 
 $bound = @{}
