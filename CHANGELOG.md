@@ -4,6 +4,19 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.8] - 2026-05-01
+
+### Added
+
+- Learning Coach v1 in LifeOS ergaenzt.
+- `learning_radar.subjects` in der LifeOS Beispielkonfiguration vorbereitet.
+- Backend berechnet einen Lernfokus aus Sicherheit, Fehlerquote, offenen Karten und Wiederholungstermin.
+- LifeOS Panel zeigt Lernfokus, Empfehlung, Sicherheit, offene Karten und Fehlerquote.
+
+### Changed
+
+- LifeOS Briefing liefert nun `learning_focus` zusaetzlich zu Tageslage, Top 3 und Work Radar.
+
 ## [B6.6.7] - 2026-05-01
 
 ### Added

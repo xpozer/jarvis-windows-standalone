@@ -22,6 +22,7 @@ FALLBACK_CONFIG: dict[str, Any] = {
         "next_best_action": "LifeOS private Konfiguration pruefen und Tagesfokus festlegen.",
     },
     "work_radar": {"items": []},
+    "learning_radar": {"subjects": []},
     "life_modules": [],
     "timeline": [],
 }
@@ -159,6 +160,53 @@ def _top_tasks(config: dict[str, Any], items: list[dict[str, Any]]) -> list[dict
     return tasks[:3]
 
 
+def _learning_subjects(config: dict[str, Any]) -> list[dict[str, Any]]:
+    radar = config.get("learning_radar") if isinstance(config.get("learning_radar"), dict) else {}
+    raw_subjects = radar.get("subjects")
+    subjects = [item for item in raw_subjects if isinstance(item, dict)] if isinstance(raw_subjects, list) else []
+    normalized: list[dict[str, Any]] = []
+    for idx, item in enumerate(subjects):
+        confidence = int(item.get("confidence") or item.get("confidence_level") or 3)
+        confidence = max(1, min(5, confidence))
+        error_rate = float(item.get("error_rate") or 0)
+        open_cards = int(item.get("open_cards") or 0)
+        next_review = str(item.get("next_review") or "")
+        priority_score = (6 - confidence) * 12 + min(25, int(error_rate * 50)) + min(15, open_cards) + _date_weight(next_review) * 5
+        normalized.append({
+            "id": str(item.get("id") or f"learning_{idx + 1}"),
+            "subject": str(item.get("subject") or "Lernen"),
+            "topic": str(item.get("topic") or item.get("title") or "Lernthema"),
+            "confidence": confidence,
+            "last_review": str(item.get("last_review") or ""),
+            "next_review": next_review,
+            "error_rate": error_rate,
+            "open_cards": open_cards,
+            "priority_score": priority_score,
+        })
+    normalized.sort(key=lambda item: int(item.get("priority_score") or 0), reverse=True)
+    return normalized
+
+
+def _learning_focus(config: dict[str, Any]) -> dict[str, Any]:
+    subjects = _learning_subjects(config)
+    if not subjects:
+        return {
+            "ok": False,
+            "topic": "",
+            "subject": "",
+            "recommendation": "Noch kein Lernfokus hinterlegt. Ergaenze learning_radar.subjects in config/lifeos.json.",
+            "subjects": [],
+        }
+    focus = dict(subjects[0])
+    focus["ok"] = True
+    focus["recommendation"] = (
+        f"Heute {focus['topic']} aus {focus['subject']} wiederholen. "
+        f"Starte mit {max(5, min(25, int(focus.get('open_cards') or 0) or 10))} Karten oder 25 Minuten Fokuszeit."
+    )
+    focus["subjects"] = subjects
+    return focus
+
+
 def _summary(daily: dict[str, Any], top_tasks: list[dict[str, Any]], work_items: list[dict[str, Any]]) -> str:
     energy = int(daily.get("energy_percent") or 0)
     loops = int(daily.get("open_loops") or 0)
@@ -189,6 +237,7 @@ def briefing() -> dict[str, Any]:
     daily = config.get("daily_briefing") if isinstance(config.get("daily_briefing"), dict) else {}
     items = _work_items(config)
     top_tasks = _top_tasks(config, items)
+    learning_focus = _learning_focus(config)
     summary = str(daily.get("summary") or "").strip() or _summary(daily, top_tasks, items)
     next_action = str(daily.get("next_best_action") or "").strip()
     if not next_action and top_tasks:
@@ -203,6 +252,7 @@ def briefing() -> dict[str, Any]:
         "top_tasks": top_tasks,
         "next_best_action": next_action,
         "work_radar": {"items": items, "count": len(items)},
+        "learning_focus": learning_focus,
         "life_modules": config.get("life_modules") if isinstance(config.get("life_modules"), list) else [],
         "timeline": config.get("timeline") if isinstance(config.get("timeline"), list) else [],
     }

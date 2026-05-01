@@ -60,12 +60,59 @@ def test_lifeos_status_falls_back_to_example(monkeypatch, tmp_path):
     assert status["config_exists"]["example"] is True
 
 
+def test_lifeos_learning_focus_prioritizes_weak_due_topics(monkeypatch, tmp_path):
+    from services import lifeos
+
+    private_file = tmp_path / "lifeos.json"
+    example_file = tmp_path / "lifeos.example.json"
+    private_file.write_text(json.dumps({
+        "daily_briefing": {"today_important": ["Arbeit klaeren"], "energy_percent": 70},
+        "learning_radar": {
+            "subjects": [
+                {
+                    "id": "aevo_methodik",
+                    "subject": "AEVO",
+                    "topic": "Unterweisungsmethoden",
+                    "confidence": 2,
+                    "last_review": "2026-04-20",
+                    "next_review": "2026-05-01",
+                    "error_rate": 0.38,
+                    "open_cards": 14,
+                },
+                {
+                    "id": "vde_basis",
+                    "subject": "Meister",
+                    "topic": "VDE Grundlagen",
+                    "confidence": 5,
+                    "last_review": "2026-04-30",
+                    "next_review": "2026-05-20",
+                    "error_rate": 0.04,
+                    "open_cards": 2,
+                },
+            ]
+        },
+    }), encoding="utf-8")
+
+    monkeypatch.setattr(lifeos, "LIFEOS_PRIVATE_FILE", private_file)
+    monkeypatch.setattr(lifeos, "LIFEOS_EXAMPLE_FILE", example_file)
+
+    result = lifeos.briefing()
+
+    focus = result["learning_focus"]
+    assert focus["topic"] == "Unterweisungsmethoden"
+    assert focus["subject"] == "AEVO"
+    assert focus["confidence"] == 2
+    assert focus["priority_score"] > 0
+    assert "Unterweisungsmethoden" in focus["recommendation"]
+
+
 def test_lifeos_routes_expose_briefing_and_installer_check(client):
     briefing = client.get("/api/lifeos/briefing")
     installer = client.get("/api/lifeos/installer-check")
 
     assert briefing.status_code == 200
     assert "top_tasks" in briefing.json()
+    assert "learning_focus" in briefing.json()
     assert installer.status_code == 200
     assert installer.json()["checks"]["private_config_ignored"]["ok"] is True
 

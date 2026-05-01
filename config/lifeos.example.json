@@ -69,6 +69,40 @@
       "note": "Normenrecherche für Angebote und Prüftexte verfügbar."
     }
   },
+  "learning_radar": {
+    "subjects": [
+      {
+        "id": "aevo_methodik",
+        "subject": "AEVO",
+        "topic": "Unterweisungsmethoden",
+        "confidence": 2,
+        "last_review": "2026-04-20",
+        "next_review": "2026-05-01",
+        "error_rate": 0.32,
+        "open_cards": 14
+      },
+      {
+        "id": "meister_vde_pruefung",
+        "subject": "Meister",
+        "topic": "DIN VDE 0100-600 Pruefablauf",
+        "confidence": 3,
+        "last_review": "2026-04-26",
+        "next_review": "2026-05-03",
+        "error_rate": 0.18,
+        "open_cards": 9
+      },
+      {
+        "id": "wirtschaft_kalkulation",
+        "subject": "Meister",
+        "topic": "Kosten und Angebotskalkulation",
+        "confidence": 4,
+        "last_review": "2026-04-29",
+        "next_review": "2026-05-08",
+        "error_rate": 0.1,
+        "open_cards": 5
+      }
+    ]
+  },
   "life_modules": [
     {
       "name": "Work",

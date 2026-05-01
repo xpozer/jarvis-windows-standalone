@@ -35,6 +35,16 @@ type LifeOSBriefing = {
   top_tasks?: LifeTask[];
   next_best_action?: string;
   work_radar?: { items?: WorkItem[]; count?: number };
+  learning_focus?: {
+    ok?: boolean;
+    subject?: string;
+    topic?: string;
+    confidence?: number;
+    next_review?: string;
+    error_rate?: number;
+    open_cards?: number;
+    recommendation?: string;
+  };
   life_modules?: Array<{ name?: string; description?: string }>;
   timeline?: Array<{ time?: string; title?: string; tag?: string }>;
 };
@@ -161,6 +171,19 @@ export function LifeOSPanel({ onSend }: Props) {
             {Object.entries(installer?.checks || {}).map(([key, check]) => (
               <span key={key} className={check.ok ? "ok" : "warn"}>{key.replace(/_/g, " ")}</span>
             ))}
+          </div>
+        </article>
+
+        <article className="lifeos-card lifeos-learning-card">
+          <div className="lifeos-card-title"><h2>Lernfokus</h2><span>{briefing?.learning_focus?.subject || "Coach"}</span></div>
+          <div className="lifeos-learning-focus">
+            <b>{briefing?.learning_focus?.topic || "Kein Lernthema gesetzt"}</b>
+            <p>{briefing?.learning_focus?.recommendation || "Ergaenze learning_radar.subjects in deiner lokalen LifeOS Config."}</p>
+            <div>
+              <span>Sicherheit <strong>{briefing?.learning_focus?.confidence ?? "N/A"}/5</strong></span>
+              <span>Karten <strong>{briefing?.learning_focus?.open_cards ?? 0}</strong></span>
+              <span>Fehlerquote <strong>{Math.round((briefing?.learning_focus?.error_rate || 0) * 100)}%</strong></span>
+            </div>
           </div>
         </article>
       </div>
