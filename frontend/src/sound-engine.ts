@@ -20,6 +20,9 @@ class JarvisSoundEngine {
   private mode = "idle";
   private unlocked = false;
   private unlockListenerActive = false;
+  private readonly unlockOnGesture = () => {
+    void this.unlock();
+  };
   private thinkingOsc: OscillatorNode | null = null;
   private thinkingGain: GainNode | null = null;
 
@@ -125,18 +128,15 @@ class JarvisSoundEngine {
   private armUserGestureUnlock() {
     if (this.unlockListenerActive || typeof window === "undefined") return;
     this.unlockListenerActive = true;
-    const unlockOnGesture = () => {
-      void this.unlock();
-    };
-    window.addEventListener("pointerdown", unlockOnGesture, { passive: true });
-    window.addEventListener("keydown", unlockOnGesture);
+    window.addEventListener("pointerdown", this.unlockOnGesture, { passive: true });
+    window.addEventListener("keydown", this.unlockOnGesture);
   }
 
   private disarmUserGestureUnlock() {
     if (!this.unlockListenerActive || typeof window === "undefined") return;
     this.unlockListenerActive = false;
-    window.removeEventListener("pointerdown", () => void this.unlock());
-    window.removeEventListener("keydown", () => void this.unlock());
+    window.removeEventListener("pointerdown", this.unlockOnGesture);
+    window.removeEventListener("keydown", this.unlockOnGesture);
   }
 
   private beep(frequency: number, duration: number, gainValue: number, type: OscillatorKind = "sine", delay = 0) {
