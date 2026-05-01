@@ -34,15 +34,27 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
-| LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
-| LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
-| Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
-| Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
-| Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
+| LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
+| LifeOS Daily Command Center | in Arbeit | Eigenes JARVIS Sidebar Panel, Status API, Briefing API und Regeneration sind vorhanden. Top 3 Aufgaben und UI Feinschliff bleiben offen |
+| LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
+| Work Radar 2.0 | in Arbeit | Strukturierte Vorgänge mit Status, Risiko, Frist, Score und nächstem Schritt sind vorbereitet. UI Sortierung und echte Quellen fehlen noch |
+| Backend Integration | in Arbeit | LifeOS API für Status, Briefing, Regeneration und Installer Check ist vorhanden. Echte Runtime Daten und weitere Module fehlen noch |
+| Installer | in Arbeit | FIRST_SETUP bereitet private LifeOS Konfiguration vor. Robustheitstests sind ergänzt, echter Endanwender Test bleibt offen |
+| Tests und CI | in Arbeit | Tests für LifeOS Briefing, Work Radar und Installer Robustheit sind ergänzt. CI und Dependabot müssen weiter beobachtet werden |
 
 ## Erledigte Updates
+
+### B6.6.7
+
+- LifeOS Daily Command Center als eigenes JARVIS Sidebar Panel integriert.
+- Backend API für LifeOS Status, Briefing, Regeneration und Installer Check ergänzt.
+- Work Radar 2.0 Struktur mit sortierbaren Vorgängen, Risiko, Status, Frist und nächstem Schritt vorbereitet.
+- Tests für LifeOS Briefing, Work Radar und Installer Robustheit ergänzt.
+- `config/lifeos.example.json` um `daily_briefing.summary` und strukturierte `work_radar.items` erweitert.
+- `FIRST_SETUP.ps1` bereitet die private lokale LifeOS Konfiguration vor, ohne bestehende private Daten zu überschreiben.
+- Changelog war bereits aktualisiert. PROJECT_STATUS wird mit diesem Update auf denselben Stand gebracht.
 
 ### B6.6.6
 
@@ -108,20 +120,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Daily Command Center | offen | Top 3 Aufgaben, Tagesfokus und klaren nächsten Schritt aus lokalen Daten ableiten |
-| Hoch | Work Radar 2.0 | offen | strukturierte Vorgänge für SAP, FSM, LNW, Mail, Angebote und Rückfragen ergänzen |
-| Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
+| Hoch | Daily Command Center UI Feinschliff | offen | Top 3 Aufgaben, Tagesfokus und klaren nächsten Schritt im Sidebar Panel sauber sichtbar machen |
+| Hoch | Work Radar 2.0 UI Sortierung | offen | Vorgänge nach Risiko, Frist und Status sortieren und kritische Punkte hervorheben |
+| Hoch | Installer Endanwender Test | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy auf frischem Windows testen |
+| Hoch | PR 30 prüfen | offen | PR 30 ist durch B6.6.7 teilweise überholt. Inhalt prüfen, relevante Teile übernehmen oder PR schließen |
+| Mittel | Backend Runtime Daten | offen | LifeOS API mit echten lokalen Runtime Daten statt nur Beispiel oder Statusdaten versorgen |
 | Mittel | Learning Coach | offen | Lernstände, Wiederholungen und Schwachstellen lokal abbilden |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
 | Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
 | Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
 | Mittel | Finance und Contract Radar | offen | Verträge, Rechnungen, Abos, Fristen und Nachweise lokal strukturieren |
 | Mittel | Memory und Knowledge Layer | offen | Regeln, Notizen, Dokumente, Entscheidungen und Quellen lokal verwalten |
-| Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
 | Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
 | Niedrig | Voice und Push to Talk | offen | Mikrofon default off, lokale TTS und bewusste Aktivierung planen |
 | Niedrig | Automation Layer | offen | lokale Automationen mit RiskLevel, Freigabe und Audit Log vorbereiten |
-| Niedrig | UI Feinschliff LifeOS | offen | Layout, Texte und Live Werte nach erstem lokalen Test nachschärfen |
 | Niedrig | Release ZIP | offen | GitHub Release Workflow mit echtem Tag testen |
 
 ## Roadmap Dokumente
@@ -138,24 +150,25 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
-| Browser blockiert lokale JSON Datei | mittel | LifeOS über lokalen Server starten oder später Backend API nutzen |
+| PR 30 basiert auf älterem Stand | hoch | nicht blind mergen, sondern gegen B6.6.7 prüfen |
+| Browser blockiert lokale JSON Datei | mittel | LifeOS über lokalen Server starten oder Backend API nutzen |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Installer Fehler bei Endanwendern | hoch | Installer weiterhin als eigener Schwerpunkt behandeln |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
-| Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
+| Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur einen klaren Roadmap Punkt umsetzen |
 
 ## Nächster sinnvoller Schritt
 
-Nach der persönlichen LifeOS Vorlage ist der nächste sinnvolle Schritt das Daily Command Center. Dafür soll LifeOS aus lokalen Daten Top 3 Aufgaben, Tagesfokus und einen klaren nächsten Schritt ableiten.
+Nach B6.6.7 ist der nächste sinnvolle Schritt nicht mehr das Grundmodell, sondern der Abgleich von PR 30 und danach der UI Feinschliff für das Daily Command Center.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Daily Command Center um Top 3 Aufgaben erweitern
-2. Work Radar 2.0 Schema ergänzen
-3. Installer Robustheit erneut prüfen
-4. Backend Health Check sauber anbinden
-5. DiagCenter konkretisieren
+1. PR 30 prüfen und entweder relevante Teile übernehmen oder schließen
+2. Daily Command Center UI Feinschliff für Top 3 Aufgaben und Tagesfokus umsetzen
+3. Work Radar 2.0 UI Sortierung ergänzen
+4. Installer Endanwender Test auf frischem Windows durchführen
+5. Backend Runtime Daten konkret anbinden
 ```
 
 ## Pflege Ablauf
