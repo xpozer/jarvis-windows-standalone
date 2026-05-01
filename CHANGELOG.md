@@ -4,6 +4,23 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.0] - 2026-05-01
+
+### Added
+
+- LifeOS Command Center Prototyp unter `frontend/public/jarvis-lifeos-command-center.html`.
+- Launcher Eintrag für LifeOS neben Global Overview und ULTRON Grid.
+- Dokumentation für das LifeOS Global Upgrade unter `docs/lifeos-global-upgrade.md`.
+- Erste visuelle Struktur für Daily Briefing, Work Radar, Life Modules und Next Best Action.
+
+### Changed
+
+- Launcher Layout auf drei auswählbare Module erweitert.
+
+### Security
+
+- LifeOS Zielbild bleibt Local First und ohne externe Telemetrie dokumentiert.
+
 ## [B6.5.1] - 2026-04-29
 
 ### Added
