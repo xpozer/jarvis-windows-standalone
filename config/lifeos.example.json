@@ -1,12 +1,36 @@
 {
-  "version": "B6.6.1",
+  "version": "B6.7.0",
   "mode": "local-first",
   "daily_briefing": {
     "day_mode": "FOCUSED",
+    "day_focus": "Offene Arbeitsthemen mit Außenwirkung zuerst schließen",
     "priority_count": 3,
     "focus_minutes": 92,
     "open_loops": 7,
     "energy_percent": 81,
+    "top_tasks": [
+      {
+        "title": "Offene Rückfragen prüfen",
+        "area": "work",
+        "impact": "high",
+        "effort": "medium",
+        "next_step": "Rückfragen mit Kunden oder Kollegen sortieren und beantworten"
+      },
+      {
+        "title": "LNW und FSM Buchungen kontrollieren",
+        "area": "work",
+        "impact": "high",
+        "effort": "medium",
+        "next_step": "Fehlende Nachweise und Buchungsabweichungen prüfen"
+      },
+      {
+        "title": "Lernblock oder Projektblock reservieren",
+        "area": "learn",
+        "impact": "medium",
+        "effort": "low",
+        "next_step": "Fokusfenster am Nachmittag blocken"
+      }
+    ],
     "today_important": [
       "Offene Rückfragen aus Arbeit und Abrechnung prüfen",
       "LNW und FSM Buchungen auf fehlende Nachweise kontrollieren",
