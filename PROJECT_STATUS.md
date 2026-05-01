@@ -35,11 +35,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
 | LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
+| LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.4
+
+- `config/lifeos.json` wird als private lokale LifeOS Datei vorbereitet.
+- `.gitignore` schließt `config/lifeos.json` aus.
+- LifeOS lädt zuerst `config/lifeos.json`, danach `config/lifeos.example.json`, danach interne Fallback Daten.
+- Datenstatus unterscheidet private, Beispiel und Fallback Daten.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.3
 
@@ -84,7 +93,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
-| Hoch | LifeOS echte lokale Datei | offen | nicht versionierte `config/lifeos.json` für persönliche lokale Daten vorbereiten |
+| Hoch | LifeOS persönliche Vorlage | offen | Anleitung oder Kopierskript für `config/lifeos.json` aus `config/lifeos.example.json` ergänzen |
 | Mittel | Backend Health Check | offen | lokalen `/health` Check sauber mit Frontend und Installer verbinden |
 | Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config und Logs konkretisieren |
 | Mittel | Work Radar | offen | Struktur für SAP, FSM, Mail, LNW und offene Rückfragen weiter konkretisieren |
@@ -99,19 +108,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Browser blockiert lokale JSON Datei | mittel | LifeOS über lokalen Server starten oder später Backend API nutzen |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Installer Fehler bei Endanwendern | hoch | Installer weiterhin als eigener Schwerpunkt behandeln |
-| Private Daten im Repo | hoch | echte lokale Dateien wie `config/lifeos.json` nicht committen |
+| Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Daily Briefing Generator ist der nächste sinnvolle Schritt die lokale persönliche Datei `config/lifeos.json`. Diese Datei soll echte private Werte enthalten können, darf aber nicht ins Repository committed werden.
+Nach der privaten LifeOS Konfiguration ist der nächste sinnvolle Schritt eine einfache Anleitung oder ein kleines Skript, das aus `config/lifeos.example.json` eine lokale `config/lifeos.json` erstellt.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. config/lifeos.json als lokale, ignorierte Datei vorbereiten
-2. LifeOS bevorzugt config/lifeos.json laden lassen und danach auf lifeos.example.json fallen lassen
-3. Installer Robustheit erneut prüfen
-4. Backend Health Check sauber anbinden
+1. Anleitung oder Skript für config/lifeos.json ergänzen
+2. Installer Robustheit erneut prüfen
+3. Backend Health Check sauber anbinden
+4. DiagCenter konkretisieren
 5. Erst danach größere Dependency Updates angehen
 ```
 
