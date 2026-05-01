@@ -4,6 +4,22 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.7.0-screen-1.1] - 2026-05-01
+
+### Added
+
+- Autonome Assistant Roadmap unter `docs/autonomous-assistant-roadmap.md` ergänzt.
+- Screen Perception Modulstruktur unter `backend/perception/screen/` ergänzt.
+- Datenmodelle für `ActiveWindowInfo`, `ScreenshotFrame`, `VisionResult`, `ScreenContext` und `PrivacyDecision` ergänzt.
+- Erste Scaffolds für Screenshot Capture, Window Tracking, Vision Analyse, OCR Fallback, Privacy Policy und Context Builder ergänzt.
+- README für Screen Perception ergänzt.
+
+### Security
+
+- Screen Perception ist in der Privacy Policy standardmäßig deaktiviert.
+- Erste Blocklist für Passwort Manager, Banking Begriffe und private Fenstertitel ergänzt.
+- Keine Cloud Calls und keine automatische dauerhafte Beobachtung in Aufgabe 1.1.
+
 ## [B6.6.18] - 2026-05-01
 
 ### Added
