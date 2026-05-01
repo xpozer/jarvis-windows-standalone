@@ -1,6 +1,7 @@
 .dialog-mode .jarvis-main {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) clamp(220px, 18vw, 360px);
   width: min(58.2vw, calc(100vw - 720px));
+  gap: 1.2vw;
 }
 
 .jarvis-screen {
@@ -123,15 +124,13 @@
 
 .dialog-mode .jarvis-core-stage {
   display: block;
-  position: absolute;
-  right: -3.2vw;
-  top: 5.2vh;
-  width: clamp(280px, 21vw, 430px);
-  height: clamp(280px, 21vw, 430px);
-  z-index: 1;
-  opacity: .42;
+  position: relative;
+  width: 100%;
+  height: 68.8vh;
+  z-index: 2;
+  opacity: .72;
   pointer-events: none;
-  filter: saturate(.9);
+  filter: saturate(1);
 }
 
 .dialog-mode .jarvis-core-stage::before {
@@ -145,17 +144,17 @@
 
 .dialog-mode .jarvis-core-stage .jarvis-legacy-orb-wrap {
   left: 50%;
-  top: 50%;
-  width: 100%;
+  top: 36%;
+  width: clamp(220px, 18vw, 360px);
   min-width: 0;
   max-width: none;
-  opacity: .9;
-  filter: drop-shadow(0 0 34px rgba(5,216,255,.28));
+  opacity: .96;
+  filter: drop-shadow(0 0 42px rgba(5,216,255,.36));
 }
 
 .dialog-mode .jarvis-core-stage .jarvis-core-label {
-  top: 82%;
-  opacity: .72;
+  top: 62%;
+  opacity: .88;
 }
 
 .dialog-mode .jarvis-core-stage .jarvis-core-label h2 {
@@ -169,8 +168,8 @@
 
 .dialog-mode.is-thinking .jarvis-core-stage,
 .dialog-mode.is-speaking .jarvis-core-stage {
-  opacity: .66;
-  filter: saturate(1.15);
+  opacity: .92;
+  filter: saturate(1.18);
 }
 
 .dialog-mode.is-speaking .jarvis-core-stage .jarvis-legacy-orb-wrap {
@@ -443,13 +442,16 @@
 
 @media (max-width: 1600px) {
   .dialog-mode .jarvis-main {
+    grid-template-columns: minmax(0, 1fr) 240px;
     width: calc(100vw - 620px);
   }
 
   .dialog-mode .jarvis-core-stage {
-    right: -24px;
-    width: 280px;
-    height: 280px;
-    opacity: .34;
+    width: 240px;
+    opacity: .72;
+  }
+
+  .dialog-mode .jarvis-core-stage .jarvis-legacy-orb-wrap {
+    width: 240px;
   }
 }
