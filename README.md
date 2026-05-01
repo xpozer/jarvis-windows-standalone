@@ -13,6 +13,56 @@ Version: B6.5.1
 Plattform: Windows 10 und Windows 11
 Betriebsart: Local first, keine externe Telemetrie
 
+## Quick Install
+
+Für Endnutzer bleiben nur sechs Batch Einstiegspunkte sichtbar im Root:
+
+```text
+INSTALL_JARVIS.bat
+START_JARVIS.bat
+UPDATE_JARVIS.bat
+UNINSTALL_JARVIS.bat
+DIAGNOSE.bat
+REPAIR.bat
+```
+
+Installation per Doppelklick oder Terminal:
+
+```bat
+INSTALL_JARVIS.bat
+```
+
+Falls Windows Skripte blockiert, starte die Batch Datei über ein Terminal mit normalen Benutzerrechten. Die Batch Wrapper starten PowerShell intern mit `-ExecutionPolicy Bypass`.
+
+## Skriptstruktur
+
+Der Root bleibt bewusst schlank. Operative PowerShell Logik liegt unter `scripts/`.
+
+```text
+scripts/install/
+  INSTALL_JARVIS.ps1
+  FIRST_SETUP.ps1
+  PRODUCT_INSTALLER.ps1
+  REPAIR.ps1
+  JARVIS_INSTALL_CONFIG.json
+
+scripts/maintenance/
+  CHECK_GITHUB_UPDATE.ps1
+  SELF_CHECK.ps1
+  check-installer-readiness.ps1
+  setup-lifeos-config.ps1
+
+scripts/dev/
+  START_JARVIS.ps1
+  START_DEV_FRONTEND.bat
+  START_FRONTEND_CMD.bat
+
+scripts/lib/
+  Invoke-JarVISCore.ps1
+```
+
+Die Root Batch Dateien übergeben den Projekt Root explizit an die PowerShell Wrapper. Dadurch funktionieren die verschobenen Skripte weiterhin aus einem Windows Checkout und aus einer installierten Kopie.
+
 ## Dashboard Vorschau
 
 Das GitHub Pages Dashboard liegt unter:
@@ -20,8 +70,6 @@ Das GitHub Pages Dashboard liegt unter:
 ```text
 docs/index.html
 ```
-
-Screenshot Platzhalter:
 
 ![JARVIS Dashboard](docs/assets/dashboard-placeholder.svg)
 
@@ -36,14 +84,6 @@ Screenshot Platzhalter:
 | B5 | Dashboard und UI | 13 UI Pages, Live Telemetrie, GitHub Pages Bootscreen, Dashboard unter docs/index.html |
 | B6 | Installer und QA | Windows Installer, Maintenance Skripte, Tests, ZIP Builds je lauffähigem Block |
 
-## Quick Install
-
-```bat
-INSTALL_JARVIS.bat
-```
-
-Falls Windows Skripte blockiert, starte die Batch Datei über ein Terminal mit normalen Benutzerrechten. Der Installer soll PowerShell intern mit passender Execution Policy starten.
-
 ## Systemanforderungen
 
 | Komponente | Empfehlung |
@@ -56,9 +96,7 @@ Falls Windows Skripte blockiert, starte die Batch Datei über ein Terminal mit n
 | Netzwerk | Für Installation und Updates erforderlich, Betrieb lokal möglich |
 | Audio | Optional für Voice Modul und Piper TTS |
 
-## Voraussetzungen
-
-Installiere vor der lokalen Entwicklung:
+## Voraussetzungen für Entwicklung
 
 ```powershell
 python --version
@@ -76,6 +114,15 @@ python -m pip install --upgrade pip
 pip install -e .[dev]
 ```
 
+Frontend prüfen:
+
+```powershell
+cd frontend
+npm install
+npm run typecheck
+npm run build
+```
+
 ## Installation
 
 Klonen:
@@ -85,65 +132,131 @@ git clone https://github.com/xpozer/jarvis-windows-standalone.git
 cd jarvis-windows-standalone
 ```
 
-Installer starten, sobald die Installer Dateien im Root vorhanden sind:
+Installer starten:
 
 ```bat
 INSTALL_JARVIS.bat
 ```
 
-Frontend Abhängigkeiten installieren und Build prüfen:
+Der Root Wrapper ruft intern auf:
 
 ```powershell
-cd frontend
-npm install
-npm run typecheck
-npm run build
+scripts\install\INSTALL_JARVIS.ps1
 ```
 
-## Erste Schritte
+## Start
 
-Backend CLI prüfen:
+JARVIS starten:
 
-```powershell
-jarvis version
-jarvis status
+```bat
+START_JARVIS.bat
 ```
 
-Backend API lokal starten:
+Der Root Wrapper ruft intern auf:
 
 ```powershell
-jarvis-api
-```
-
-Health Check im Browser oder per PowerShell:
-
-```powershell
-Invoke-RestMethod http://127.0.0.1:8000/health
-```
-
-DiagCenter Smoke Check:
-
-```powershell
-jarvis-diagnose smoke
+scripts\dev\START_JARVIS.ps1
 ```
 
 Frontend im Entwicklungsmodus starten:
+
+```bat
+scripts\dev\START_DEV_FRONTEND.bat
+```
+
+Oder manuell:
 
 ```powershell
 cd frontend
 npm run dev
 ```
 
-Dashboard lokal öffnen:
+## Diagnose
 
-```text
-docs/index.html
+Schnelle Diagnose per Root Einstiegspunkt:
+
+```bat
+DIAGNOSE.bat
 ```
 
-GitHub Pages Dashboard:
+Self Check:
+
+```powershell
+scripts\maintenance\SELF_CHECK.ps1
+```
+
+Installer Readiness Check:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\maintenance\check-installer-readiness.ps1
+```
+
+Backend Health Check im Browser oder per PowerShell:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health
+```
+
+DiagCenter:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/diagnostic/center
+```
+
+## Update
+
+Update per Root Einstiegspunkt:
+
+```bat
+UPDATE_JARVIS.bat
+```
+
+Privates GitHub Release prüfen:
+
+```powershell
+scripts\maintenance\CHECK_GITHUB_UPDATE.ps1
+```
+
+Update anwenden:
+
+```powershell
+scripts\maintenance\CHECK_GITHUB_UPDATE.ps1 -Apply
+```
+
+## Reparatur
+
+```bat
+REPAIR.bat
+```
+
+Der Root Wrapper ruft intern auf:
+
+```powershell
+scripts\install\REPAIR.ps1
+```
+
+## Deinstallation
+
+```bat
+UNINSTALL_JARVIS.bat
+```
+
+Der Root Wrapper ruft intern auf:
+
+```powershell
+scripts\install\PRODUCT_INSTALLER.ps1 -Mode Uninstall -KeepData
+```
+
+Die Deinstallation entfernt Programmdateien. Lokale Daten werden mit `-KeepData` geschützt.
+
+Schützenswerte lokale Daten:
 
 ```text
-https://xpozer.github.io/jarvis-windows-standalone/
+config/
+logs/
+audit/
+knowledge_index/
+data/
 ```
 
 ## Konfiguration
@@ -173,76 +286,9 @@ Wichtige Prinzipien:
 | Security | Windows Allowlist für erlaubte lokale Aktionen |
 | Knowledge | Lokaler Index mit Chunks und Sources |
 
-## Diagnose
-
-DiagCenter 2.0 soll prüfen:
-
-| Prüfung | Ziel |
-|---|---|
-| Python Runtime | Richtige Version und virtuelle Umgebung |
-| Node Runtime | Frontend Buildfähigkeit |
-| PowerShell | Skriptfähigkeit und Execution Policy |
-| Ports | Backend und Frontend Erreichbarkeit |
-| Dateien | Vorhandensein der Konfigurationsdateien |
-| Logs | Lesbarkeit und Fehleranalyse |
-| Knowledge Index | Status der lokalen Wissensdaten |
-| Voice | Piper TTS und Mikrofonstatus |
-
-Aktueller Smoke Check:
-
-```powershell
-jarvis-diagnose smoke
-```
-
-Geplanter Skript Pfad:
-
-```powershell
-scripts\maintenance\diagnose.ps1
-```
-
-## Update
-
-Empfohlener Ablauf nach Einführung der Maintenance Skripte:
-
-```powershell
-git pull
-scripts\maintenance\update.ps1
-```
-
-Der Update Prozess soll prüfen:
-
-| Schritt | Zweck |
-|---|---|
-| Backup | Lokale Konfiguration sichern |
-| Dependencies | Python und Node Pakete aktualisieren |
-| Frontend | Bundle neu bauen |
-| Tests | Schnelltest ausführen |
-| Diagnose | Systemstatus prüfen |
-
-## Deinstallation
-
-Geplanter Ablauf:
-
-```powershell
-scripts\maintenance\uninstall.ps1
-```
-
-Die Deinstallation soll Programmdateien entfernen, aber lokale Daten nur nach Rückfrage löschen.
-
-Schützenswerte lokale Daten:
-
-```text
-config/
-logs/
-audit/
-knowledge_index/
-```
-
 ## Voice Modul und Datenschutz
 
 Das Voice Modul nutzt Piper TTS für lokale Sprachausgabe. Das Mikrofon bleibt standardmäßig ausgeschaltet.
-
-Gründe:
 
 | Entscheidung | Zweck |
 |---|---|
@@ -259,7 +305,7 @@ flowchart TD
     UI --> API[FastAPI Backend]
     API --> AgentSystem[AgentSystem]
     API --> WorkAgent[WorkAgent Module]
-    API --> DiagCenter[DiagCenter 2.0]
+    API --> DiagCenter[DiagCenter]
     API --> Voice[Voice Modul]
 
     AgentSystem --> AgentRegistry[AgentRegistry]
@@ -275,16 +321,13 @@ flowchart TD
     WorkAgent --> Kosten[Kosten und Kalkulation]
 
     API --> Knowledge[Knowledge Index]
-    Knowledge --> Chunks[Chunks]
-    Knowledge --> Sources[Sources]
-
-    DiagCenter --> Security[Security und Windows Allowlist]
     DiagCenter --> Logs[Lokale Logs]
-
     Voice --> Piper[Piper TTS]
     Voice --> Mic[Mikrofon standardmäßig aus]
 
-    Installer[PowerShell und Batch Installer] --> API
+    RootBatch[Root Batch Einstiegspunkte] --> ScriptWrappers[scripts PowerShell Wrapper]
+    ScriptWrappers --> Installer[Installer und Startlogik]
+    Installer --> API
     Installer --> UI
 ```
 
@@ -316,16 +359,6 @@ npm run typecheck
 npm run build
 ```
 
-## Entwicklung
-
-Empfohlener Ablauf:
-
-```powershell
-git checkout main
-git pull
-git checkout -b feature/mein-thema
-```
-
 Vor einem Pull Request:
 
 ```powershell
@@ -345,8 +378,6 @@ Bitte lies zuerst:
 ```text
 CONTRIBUTING.md
 ```
-
-Dort stehen Branch Strategie, Commit Konventionen, lokales Testen und Pull Request Hinweise.
 
 ## Sicherheit
 
