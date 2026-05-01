@@ -39,6 +39,39 @@ Ring Buffer nach Speicherlimit, Standard 100 MB
 Performance Konfiguration in config/screen-perception.example.json
 ```
 
+## Aufgabe 1.4
+
+Diese Aufgabe finalisiert das Kontext Datenmodell.
+
+Pflichtfelder aus der Roadmap:
+
+```text
+timestamp
+application
+window_title
+extracted_text
+ui_elements
+user_intent_guess
+```
+
+Zusätzlich vorbereitet für die nächsten Blöcke:
+
+```text
+source
+process_name
+pid
+structured_ui_elements
+activity_type
+confidence
+screenshot_hash
+screenshot_changed
+privacy_status
+duration_hint_seconds
+should_store_episode
+episode_reason
+metadata
+```
+
 ## Module
 
 | Datei | Zweck |
@@ -76,10 +109,23 @@ max_buffer_mb
 
 Standard ist maximal 100 Frames und maximal 100 MB.
 
+## Kontext Modell
+
+`ScreenContext` ist das zentrale Datenmodell für spätere Trigger, Memory und AuditLog.
+
+Der Context Builder setzt noch keine Aktion um. Er liefert nur Hinweise, ob ein Kontext später als Episode interessant sein könnte.
+
+```text
+should_store_episode
+episode_reason
+```
+
+Die eigentliche Speicherung kommt erst in Aufgabe 1.5.
+
 ## Lokale Verarbeitung
 
 Die aktuelle Struktur nutzt lokale Dateien und lokale Modelle als Zielbild. Cloud Calls sind nicht vorgesehen. Falls später Cloud Vision ergänzt wird, muss das explizit Opt In sein und mit AuditLog dokumentiert werden.
 
 ## Nächste Aufgabe
 
-Aufgabe 1.4 finalisiert das Kontext Datenmodell für timestamp, application, window_title, extracted_text, ui_elements und user_intent_guess.
+Aufgabe 1.5 ergänzt die Integration mit Memory. Wichtige Kontext Snapshots werden dafür vorbereitet, aber weiterhin nicht ungefragt dauerhaft beobachtet.
