@@ -41,11 +41,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
 | Backend Health Check | erledigt | Startskript prüft Port 8000 und `/health`, bevor JARVIS als bereit gilt |
+| DiagCenter | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
 | Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
-| Backend Integration | in Arbeit | Backend Health ist angebunden, weitere Diagnose Integration folgt |
+| Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.17
+
+- DiagCenter Sammel Endpunkt `GET /diagnostic/center` ergänzt.
+- DiagCenter bündelt Backend Health, Self Check, Dependencies, Ports, Logs, System Status, UseJARVIS Runtime und Awareness Runtime.
+- Dokumentation `docs/diagcenter.md` ergänzt.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.16
 
@@ -153,7 +161,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
-| Mittel | DiagCenter | offen | Diagnose Modul für Python, Node, Ports, Config, Backend Health und Logs konkretisieren |
+| Mittel | DiagCenter Frontend | offen | DiagCenter im Frontend sichtbar machen und Kernchecks lesbar darstellen |
 | Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
 | Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
 | Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
@@ -172,6 +180,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
 | `docs/installer-readiness.md` | Anleitung für den nicht destruktiven Installer Vorab Check |
 | `docs/backend-health-check.md` | Anleitung zum Backend Health Check beim Start |
+| `docs/diagcenter.md` | Anleitung zum zentralen DiagCenter Sammel Endpunkt |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -187,12 +196,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Backend Health Check ist der nächste sinnvolle Schritt das DiagCenter. Dort sollen Python, Node, Ports, Config, Backend Health und Logs in einem klaren Diagnose Modul zusammenlaufen.
+Nach dem DiagCenter Backend Endpunkt ist der nächste sinnvolle Schritt das DiagCenter Frontend. Dort sollen die Kernchecks aus `/diagnostic/center` sichtbar und verständlich dargestellt werden.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. DiagCenter konkretisieren
+1. DiagCenter im Frontend sichtbar machen
 2. Decision Assistant ergänzen
 3. Private Project Manager ergänzen
 4. Release ZIP Workflow testen
