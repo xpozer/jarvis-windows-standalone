@@ -4,6 +4,7 @@ from .config import ScreenPerformanceConfig, ScreenPerceptionConfig, ScreenPriva
 from .context_builder import ScreenContextBuilder
 from .hotkeys import ScreenHotkeyConfig, ScreenHotkeyRegistry
 from .indicator import ScreenActivityIndicator
+from .memory_bridge import ScreenEpisodeCandidate, ScreenMemoryBridge
 from .models import (
     ActiveWindowInfo,
     ActivityType,
@@ -36,8 +37,10 @@ __all__ = [
     "ScreenCapturer",
     "ScreenContext",
     "ScreenContextBuilder",
+    "ScreenEpisodeCandidate",
     "ScreenHotkeyConfig",
     "ScreenHotkeyRegistry",
+    "ScreenMemoryBridge",
     "ScreenPerformanceConfig",
     "ScreenPerceptionConfig",
     "ScreenPrivacyConfig",
