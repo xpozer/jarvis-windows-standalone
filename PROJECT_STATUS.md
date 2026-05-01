@@ -37,11 +37,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
+| LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.6
+
+- Setup Skript `scripts/maintenance/setup-lifeos-config.ps1` ergänzt.
+- Dokumentation `docs/lifeos-private-config.md` ergänzt.
+- Skript kopiert `config/lifeos.example.json` nach `config/lifeos.json`.
+- Bestehende private Konfiguration wird nur mit `-Force` überschrieben.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.5
 
@@ -99,7 +108,6 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | LifeOS persönliche Vorlage | offen | Anleitung oder Kopierskript für `config/lifeos.json` aus `config/lifeos.example.json` ergänzen |
 | Hoch | Daily Command Center | offen | Top 3 Aufgaben, Tagesfokus und klaren nächsten Schritt aus lokalen Daten ableiten |
 | Hoch | Work Radar 2.0 | offen | strukturierte Vorgänge für SAP, FSM, LNW, Mail, Angebote und Rückfragen ergänzen |
 | Hoch | Installer Prüfung | offen | Start, First Setup, Python Erkennung und PowerShell ExecutionPolicy erneut testen |
@@ -122,6 +130,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 |---|---|
 | `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
+| `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -137,16 +146,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach der Roadmap ist der nächste sinnvolle Schritt die LifeOS persönliche Vorlage. Damit kann lokal aus `config/lifeos.example.json` eine echte private `config/lifeos.json` erzeugt werden, ohne persönliche Daten ins Repository zu schreiben.
+Nach der persönlichen LifeOS Vorlage ist der nächste sinnvolle Schritt das Daily Command Center. Dafür soll LifeOS aus lokalen Daten Top 3 Aufgaben, Tagesfokus und einen klaren nächsten Schritt ableiten.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Anleitung oder Skript für config/lifeos.json ergänzen
-2. Daily Command Center um Top 3 Aufgaben erweitern
-3. Work Radar 2.0 Schema ergänzen
-4. Installer Robustheit erneut prüfen
-5. Backend Health Check sauber anbinden
+1. Daily Command Center um Top 3 Aufgaben erweitern
+2. Work Radar 2.0 Schema ergänzen
+3. Installer Robustheit erneut prüfen
+4. Backend Health Check sauber anbinden
+5. DiagCenter konkretisieren
 ```
 
 ## Pflege Ablauf
