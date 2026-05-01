@@ -37,6 +37,8 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
+| Autonome Assistant Roadmap | in Arbeit | Neue fünf Block Roadmap liegt unter `docs/autonomous-assistant-roadmap.md` |
+| Screen Perception 1.1 | erledigt | Modulstruktur für Bildschirm Beobachtung ist auf `feature/screen` angelegt |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
@@ -48,6 +50,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.0 Screen 1.1
+
+- Autonome Assistant Roadmap unter `docs/autonomous-assistant-roadmap.md` ergänzt.
+- Screen Perception Modulstruktur unter `backend/perception/screen/` angelegt.
+- Scaffolds für Capturer, Window Tracker, Vision Analyse, OCR Fallback, Context Builder und Privacy Policy ergänzt.
+- Datenmodelle für Screen Kontext ergänzt.
+- Screen Perception README ergänzt.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.18
 
@@ -168,12 +179,17 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
+| Hoch | Screen Perception 1.2 | offen | Privacy First Konfiguration mit Aktivierung, Pause Status und sichtbarem Aktivitätsindikator ergänzen |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
-| Mittel | Decision Assistant | offen | Optionen, Aufwand, Risiko, Nutzen und Empfehlung als Schema ergänzen |
-| Mittel | Private Project Manager | offen | private Projekte mit Status, Blocker und nächstem Schritt führen |
-| Mittel | Health und Energy Radar | offen | Energie, Belastung, Pausen und Fokusfenster in die Planung aufnehmen |
-| Mittel | Finance und Contract Radar | offen | Verträge, Rechnungen, Abos, Fristen und Nachweise lokal strukturieren |
-| Mittel | Memory und Knowledge Layer | offen | Regeln, Notizen, Dokumente, Entscheidungen und Quellen lokal verwalten |
+| Mittel | Episodic Memory | offen | Nach Abschluss Block 1 beginnen |
+| Mittel | Mail Triage | offen | Nach Abschluss Block 2 beginnen |
+| Mittel | Multi Agent System | offen | Nach Abschluss Block 3 beginnen |
+| Mittel | Daily Planning und Weekly Review | offen | Nach Abschluss Block 4 beginnen |
+| Mittel | Decision Assistant | offen | Nach aktueller autonomen Roadmap später einordnen |
+| Mittel | Private Project Manager | offen | Nach aktueller autonomen Roadmap später einordnen |
+| Mittel | Health und Energy Radar | offen | Nach aktueller autonomen Roadmap später einordnen |
+| Mittel | Finance und Contract Radar | offen | Nach aktueller autonomen Roadmap später einordnen |
+| Mittel | Memory und Knowledge Layer | offen | Nach aktueller autonomen Roadmap später einordnen |
 | Niedrig | Voice und Push to Talk | offen | Mikrofon default off, lokale TTS und bewusste Aktivierung planen |
 | Niedrig | Automation Layer | offen | lokale Automationen mit RiskLevel, Freigabe und Audit Log vorbereiten |
 | Niedrig | Release ZIP | offen | GitHub Release Workflow mit echtem Tag testen |
@@ -182,6 +198,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Datei | Zweck |
 |---|---|
+| `docs/autonomous-assistant-roadmap.md` | Neue fünf Block Roadmap für autonomen Personal Assistenten |
 | `docs/lifeos-roadmap.md` | Ausgearbeitete LifeOS Upgrade Roadmap mit Modulen, Nutzen, Umsetzung und Akzeptanzkriterien |
 | `docs/lifeos-global-upgrade.md` | Grundkonzept des LifeOS Global Upgrade |
 | `docs/lifeos-private-config.md` | Anleitung für die private lokale LifeOS Konfiguration |
@@ -195,24 +212,25 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
+| Screen Perception erfasst sensible Daten | hoch | Default Off, Blocklist, Pause Funktion und AuditLog zwingend vor Aktivierung ausbauen |
+| Vision Modell belastet System | mittel | Diff Detection, Caching und Intervallsteuerung vor Dauerbetrieb einbauen |
 | Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
-| Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
 
 ## Nächster sinnvoller Schritt
 
-Nach dem DiagCenter Frontend ist der nächste sinnvolle Schritt der Decision Assistant. Dort sollen Optionen, Aufwand, Risiko, Nutzen und Empfehlung als lokales Schema ergänzt werden.
+Nach Aufgabe 1.1 ist der nächste sinnvolle Schritt Screen Perception 1.2. Dabei wird die Privacy First Konfiguration konkretisiert, bevor irgendeine dauerhafte Beobachtung aktiviert wird.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Decision Assistant ergänzen
-2. Private Project Manager ergänzen
-3. Release ZIP Workflow testen
-4. Installer Endanwender Test durchführen
-5. Health und Energy Radar ergänzen
+1. Screen Perception 1.2 Privacy First Konfiguration
+2. Screen Perception 1.3 Performance
+3. Screen Perception 1.4 Kontext Datenmodell finalisieren
+4. Screen Perception 1.5 Memory Integration
+5. Screen Perception 1.6 Proaktive Trigger
 ```
 
 ## Pflege Ablauf
