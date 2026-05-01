@@ -16,6 +16,7 @@ Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstan
 - Sidebar Punkt `Update Center` in `Optionen / Updates` umbenannt.
 - Update Center Header auf Optionen und Updates erweitert.
 - `START_JARVIS.ps1` baut das Frontend nun automatisch neu, wenn Quellcode neuer ist als der vorhandene Production Build.
+- Der Frontend Build wird zusaetzlich per Git Commit Marker geprueft, damit alte Bundles nach `git pull` sicher ersetzt werden.
 
 ## [B6.6.20] - 2026-05-01
 

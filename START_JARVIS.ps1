@@ -6,6 +6,7 @@ param(
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Backend = Join-Path $Root "backend"
 $Frontend = Join-Path $Root "frontend"
+$FrontendBuildMarker = Join-Path $Frontend "dist\.jarvis-build-commit"
 $script:Logs = Join-Path $Root "logs"
 New-Item -ItemType Directory -Force -Path $script:Logs | Out-Null
 $script:LogFile = Join-Path $script:Logs "start.log"
@@ -323,6 +324,24 @@ function Ensure-FrontendBuildFresh {
   if($DevFrontend){ return }
   if(-not (Test-Path $DistIndex)){ return }
 
+  $currentCommit = ""
+  try {
+    $currentCommit = (& git -C $Root rev-parse HEAD 2>$null).Trim()
+  } catch {}
+
+  $builtCommit = ""
+  if(Test-Path $FrontendBuildMarker){
+    try { $builtCommit = (Get-Content $FrontendBuildMarker -Raw -ErrorAction Stop).Trim() } catch {}
+  }
+
+  if($currentCommit -and $builtCommit -ne $currentCommit){
+    Jv-Warn "Frontend Build passt nicht zum aktuellen Git Stand. Baue Frontend neu."
+    $npm = Get-NpmCmd
+    Invoke-Checked "Frontend neu bauen" $npm @("run", "build") "frontend-build.log" $Frontend
+    Set-Content -Path $FrontendBuildMarker -Value $currentCommit -Encoding UTF8
+    return
+  }
+
   $latestSource = Get-LatestFrontendSourceTime
   if($latestSource -eq [datetime]::MinValue){ return }
 
@@ -332,6 +351,7 @@ function Ensure-FrontendBuildFresh {
   Jv-Warn "Frontend Quellen sind neuer als der Production Build. Baue Frontend neu."
   $npm = Get-NpmCmd
   Invoke-Checked "Frontend neu bauen" $npm @("run", "build") "frontend-build.log" $Frontend
+  if($currentCommit){ Set-Content -Path $FrontendBuildMarker -Value $currentCommit -Encoding UTF8 }
 }
 
 
