@@ -4,6 +4,26 @@ Diese Datei zeigt den aktuellen Stand des Projekts auf einen Blick. Sie ergänzt
 
 Der Changelog dokumentiert, was versioniert geändert wurde. Diese Datei zeigt zusätzlich, was noch offen ist und was als Nächstes sinnvoll ist.
 
+## Verbindliche Pflege Regel
+
+Bei jedem größeren Schritt im Projekt müssen zwei Dateien geprüft und bei Bedarf aktualisiert werden:
+
+```text
+CHANGELOG.md
+PROJECT_STATUS.md
+```
+
+Diese Regel gilt für neue Features, Fixes, UI Änderungen, Installer Änderungen, Dokumentation, Release Vorbereitungen und größere Dependency Updates.
+
+Kurzregel:
+
+```text
+Changelog = was wurde versioniert geändert
+PROJECT_STATUS = was ist erledigt, was ist offen, was kommt als Nächstes
+```
+
+Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS.md` nicht geprüft wurde.
+
 ## Aktueller Stand
 
 | Bereich | Status | Hinweis |
@@ -26,6 +46,7 @@ Der Changelog dokumentiert, was versioniert geändert wurde. Diese Datei zeigt z
 - LifeOS Datenstruktur für Daily Briefing, Work Radar, Life Modules, Timeline und Security ergänzt.
 - Dokumentation um lokale LifeOS Daten erweitert.
 - Hinweis ergänzt, dass echte lokale Daten nicht ins Repository gehören.
+- Verbindliche Pflege Regel für `CHANGELOG.md` und `PROJECT_STATUS.md` ergänzt.
 
 ### B6.6.0
 
@@ -80,13 +101,14 @@ Empfohlene Reihenfolge:
 5. Erst danach größere Dependency Updates angehen
 ```
 
-## Pflege Regel
+## Pflege Ablauf
 
-Diese Datei sollte bei jedem größeren Projektstand aktualisiert werden.
-
-Kurzregel:
+Vor jedem Commit oder Pull Request prüfen:
 
 ```text
-Changelog = was wurde versioniert geändert
-PROJECT_STATUS = was ist erledigt, was ist offen, was kommt als Nächstes
+1. Wurde etwas Nutzer sichtbares geändert?
+2. Wurde ein technischer Meilenstein erreicht?
+3. Hat sich ein offener Punkt erledigt?
+4. Ist ein neues Risiko oder Todo entstanden?
+5. Müssen CHANGELOG.md und PROJECT_STATUS.md angepasst werden?
 ```
