@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.12] - 2026-05-01
+
+### Added
+
+- Sound Layer v1 mit lokaler Web Audio Engine ohne externe Audio Dateien.
+- Sound Toggle und Lautstaerke Regler im HUD ergaenzt.
+- Dezente JARVIS Sounds fuer Agent Routing, Memory, Provider Kontakt, Antwortstart, Abschluss, Listening und Fehlerpulse.
+
+### Changed
+
+- Sound ist standardmaessig aus und wird erst nach bewusster Nutzeraktion aktiviert.
+
 ## [B6.6.11] - 2026-05-01
 
 ### Added

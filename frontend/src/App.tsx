@@ -4,6 +4,7 @@ import { Orb, type OrbEventSignal, type OrbState } from "./components/Orb";
 import { DashboardModules } from "./components/DashboardModules";
 import { DayStartCard } from "./components/DayStartCard";
 import { TodayScheduleCard } from "./components/TodayScheduleCard";
+import { jarvisSound } from "./sound-engine";
 import "./jarvis-dashboard.css";
 import "./orb-legacy.css";
 import "./chat-window.css";
@@ -119,6 +120,21 @@ function loadUiZoom() {
   return 100;
 }
 
+function loadSoundEnabled() {
+  try {
+    return localStorage.getItem("jarvis_sound_enabled") === "true";
+  } catch {}
+  return false;
+}
+
+function loadSoundVolume() {
+  try {
+    const value = Number(localStorage.getItem("jarvis_sound_volume") || "22");
+    if (Number.isFinite(value)) return Math.min(100, Math.max(0, value));
+  } catch {}
+  return 22;
+}
+
 function metricClass(level: Level) {
   return `metric-level ${level}`;
 }
@@ -196,6 +212,8 @@ export function App() {
   const [metrics, setMetrics] = useState<SystemMetrics>(fallbackMetrics);
   const [lastAgent, setLastAgent] = useState("general");
   const [uiZoom, setUiZoom] = useState(loadUiZoom);
+  const [soundEnabled, setSoundEnabled] = useState(loadSoundEnabled);
+  const [soundVolume, setSoundVolume] = useState(loadSoundVolume);
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
@@ -239,6 +257,18 @@ export function App() {
       localStorage.setItem("jarvis_ui_zoom", String(uiZoom));
     } catch {}
   }, [uiZoom]);
+
+  useEffect(() => {
+    jarvisSound.configure(soundEnabled, soundVolume / 100);
+    try {
+      localStorage.setItem("jarvis_sound_enabled", String(soundEnabled));
+      localStorage.setItem("jarvis_sound_volume", String(soundVolume));
+    } catch {}
+  }, [soundEnabled, soundVolume]);
+
+  useEffect(() => {
+    jarvisSound.setMode(orbState);
+  }, [orbState]);
 
   function readChatResponse(data: ChatApiResponse) {
     if (typeof data.response === "string" && data.response.trim()) return data.response;
@@ -336,6 +366,8 @@ export function App() {
     setInput("");
     setThinking(true);
     setInteractionState("thinking");
+    jarvisSound.play("agent_route");
+    let errorSoundPlayed = false;
     try {
       const response = await fetch("/api/chat/stream", {
         method: "POST",
@@ -398,6 +430,7 @@ export function App() {
         if (item.event === "orb") {
           const label = item.data.label || "Orb Signal";
           setOrbStatus(label);
+          jarvisSound.play(item.data.kind || "ui_toggle");
           setOrbSignal({
             kind: item.data.kind || "pulse",
             label,
@@ -422,10 +455,15 @@ export function App() {
         }
         if (item.event === "done") {
           setOrbStatus("BEREIT");
+          jarvisSound.play("done");
           finishStream(item.data);
           return;
         }
         if (item.event === "error") {
+          if (!errorSoundPlayed) {
+            jarvisSound.play("error_pulse");
+            errorSoundPlayed = true;
+          }
           throw new Error(item.data.detail || "Chat Stream fehlgeschlagen.");
         }
       }
@@ -448,6 +486,7 @@ export function App() {
     } catch (error) {
       setInteractionState("idle");
       setOrbStatus("FEHLER");
+      if (!errorSoundPlayed) jarvisSound.play("error_pulse");
       setMessages((prev) => prev.map((message) => (
         message.streamId === streamId
           ? {
@@ -466,6 +505,16 @@ export function App() {
 
   function quickAction(label: string) {
     sendMessage(label);
+  }
+
+  async function toggleSound() {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    if (next) {
+      await jarvisSound.unlock();
+      jarvisSound.configure(true, soundVolume / 100);
+      jarvisSound.play("ui_toggle");
+    }
   }
 
   return (
@@ -498,6 +547,20 @@ export function App() {
             />
             <b>{uiZoom}%</b>
             <button type="button" onClick={() => setUiZoom(100)} title="Zoom zuruecksetzen">100</button>
+          </nav>
+          <nav className="jarvis-sound-control" aria-label="JARVIS Sound">
+            <span>SOUND</span>
+            <button type="button" className={soundEnabled ? "active" : ""} onClick={() => void toggleSound()} title="Sound an oder aus">{soundEnabled ? "AN" : "AUS"}</button>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={soundVolume}
+              onChange={(event) => setSoundVolume(Number(event.target.value))}
+              aria-label="Sound Lautstaerke"
+            />
+            <b>{soundVolume}%</b>
           </nav>
         </div>
       </header>

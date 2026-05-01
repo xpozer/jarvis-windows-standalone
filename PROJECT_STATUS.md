@@ -38,11 +38,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
+| JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer mit Toggle und Lautstaerke im HUD vorhanden |
 | Installer | offen | Installer muss weiter auf echte Endanwender Robustheit geprüft werden |
 | Backend Integration | offen | LifeOS liest noch keine echten Daten aus Backend oder lokaler Runtime |
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.6.12
+
+- Sound Layer v1 mit lokaler Web Audio Engine ohne externe Audio Dateien ergaenzt.
+- Sound Toggle und Lautstaerke Regler im HUD eingebaut.
+- Chat und Orb Events triggern dezente Sounds fuer Agent Routing, Memory, Provider Kontakt, Antwortstart, Abschluss, Listening und Fehlerpulse.
+- Sound ist standardmaessig aus und wird erst nach bewusster Nutzeraktion aktiviert.
 
 ### B6.6.11
 
