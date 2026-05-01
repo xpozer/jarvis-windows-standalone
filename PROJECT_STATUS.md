@@ -39,7 +39,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | Autonome Assistant Roadmap | in Arbeit | Neue fünf Block Roadmap liegt unter `docs/autonomous-assistant-roadmap.md` |
-| Screen Perception | in Arbeit | Aufgaben 1.1 bis 1.4 wurden auf aktuellem `main` als `feature/screen-rebased` neu aufgebaut |
+| Screen Perception | in Arbeit | Aufgaben 1.1 bis 1.5 wurden auf aktuellem `main` als `feature/screen-rebased` aufgebaut |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Voice / Push to Talk | erledigt | Chat Mikrofon nutzt Browser Speech Recognition bewusst per gedruecktem Button, keine Daueraufnahme |
@@ -53,6 +53,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
 
 ## Erledigte Updates
+
+### B6.7.1 Screen Memory Bridge
+
+- `ScreenMemoryBridge` ergänzt.
+- `ScreenEpisodeCandidate` ergänzt.
+- Screen Contexts werden nur als Episode Kandidaten vorbereitet, nicht gespeichert.
+- Kandidaten entstehen nur bei erlaubtem Privacy Status, nicht blockiertem Kontext, geändertem Screenshot, gesetztem `should_store_episode` und ausreichender Relevanz.
+- Export der Memory Bridge Typen im Screen Perception Paket ergänzt.
+- Screen Perception README um Memory Übergabe und Eligibility Regeln erweitert.
+- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.7.0 Screen Rebased
 
@@ -104,42 +114,36 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - DiagCenter Frontend Seite `frontend/public/jarvis-diagcenter.html` ergänzt.
 - Launcher um `DIAGCENTER` Einstieg erweitert.
 - DiagCenter Frontend zeigt Checks, Sections und Raw JSON aus `/diagnostic/center`.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.17
 
 - DiagCenter Sammel Endpunkt `GET /diagnostic/center` ergänzt.
 - DiagCenter bündelt Backend Health, Self Check, Dependencies, Ports, Logs, System Status, UseJARVIS Runtime und Awareness Runtime.
 - Dokumentation `docs/diagcenter.md` ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.16
 
 - Backend Health Check im Startskript ergänzt.
 - `START_JARVIS.ps1` prüft nach Port 8000 zusätzlich `http://127.0.0.1:8000/health`.
 - Dokumentation `docs/backend-health-check.md` ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.15
 
 - Installer Readiness Check unter `scripts/maintenance/check-installer-readiness.ps1` ergänzt.
 - Dokumentation `docs/installer-readiness.md` ergänzt.
 - Vorprüfung für PowerShell, wichtige Root Dateien, Python, Node.js, npm, winget, Ollama, Ports und LifeOS Config ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.14
 
 - Sound Re Unlock im Frontend ergänzt.
 - Sound Engine setzt bei aktivem Sound und gesperrtem AudioContext automatisch Listener für den nächsten Nutzerklick oder Tastendruck.
 - Listener nutzen eine stabile Referenz und können korrekt entfernt werden.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.13
 
 - Sound Engine prüft jetzt, ob der AudioContext wirklich freigeschaltet ist, bevor Events abgespielt werden.
-- Reload Problem entschärft, bei dem Sound im HUD als aktiviert gespeichert war, der Browser AudioContext aber noch gesperrt blieb.
+- Reload Problem entschärft, bei dem Sound zwar im HUD als aktiviert gespeichert war, der Browser AudioContext aber noch gesperrt blieb.
 - WebKit Fallback für `webkitAudioContext` ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.12
 
@@ -161,7 +165,6 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - Dokumentation `docs/lifeos-private-config.md` ergänzt.
 - Skript kopiert `config/lifeos.example.json` nach `config/lifeos.json`.
 - Bestehende private Konfiguration wird nur mit `-Force` überschrieben.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.5
 
@@ -175,21 +178,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - `.gitignore` schließt `config/lifeos.json` aus.
 - LifeOS lädt zuerst `config/lifeos.json`, danach `config/lifeos.example.json`, danach interne Fallback Daten.
 - Datenstatus unterscheidet private, Beispiel und Fallback Daten.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.3
 
 - LifeOS Daily Briefing Generator ergänzt.
 - LifeOS erzeugt eine verständliche Tageslage aus JSON Daten oder Fallback Daten.
 - Die generierte Tageslage bewertet Prioritäten, offene Schleifen, Energie, Fokuszeit und Work Radar.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.2
 
 - LifeOS Command Center lädt lokale Werte aus `config/lifeos.example.json`, wenn die Seite über einen lokalen Server läuft.
 - Interner Fallback ergänzt, falls der Browser lokales Datei Laden blockiert.
 - Daily Briefing, Work Radar, Timeline, Life Modules und Next Best Action werden dynamisch gerendert.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
 
 ### B6.6.1
 
@@ -218,7 +218,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Screen Perception 1.5 | offen | Memory Übergabe vorbereiten, ohne automatisch dauerhaft zu speichern |
+| Hoch | Screen Perception 1.6 | offen | Proaktive Trigger vorbereiten, nur für erlaubte und nicht blockierte Kontexte |
 | Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
 | Mittel | Decision Assistant | vorbereitet | echte private Entscheidungen lokal in `config/lifeos.json` eintragen |
 | Mittel | Private Project Manager | vorbereitet | echte private Projekte lokal in `config/lifeos.json` eintragen |
@@ -257,16 +257,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach dem Rebase ist der nächste sinnvolle Schritt Screen Perception 1.5. Dabei wird die Übergabe an Memory vorbereitet, ohne schon dauerhaft zu speichern.
+Nach Aufgabe 1.5 ist der nächste sinnvolle Schritt Screen Perception 1.6. Dabei werden proaktive Trigger vorbereitet, ohne automatisch Aktionen auszuführen.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Screen Perception 1.5 Memory Integration
-2. Screen Perception 1.6 Proaktive Trigger
-3. Screen Perception 1.7 User Kommandos
-4. Screen Perception 1.8 AuditLog
-5. Screen Perception 1.9 Tests
+1. Screen Perception 1.6 Proaktive Trigger
+2. Screen Perception 1.7 User Kommandos
+3. Screen Perception 1.8 AuditLog
+4. Screen Perception 1.9 Tests
+5. Danach PR fuer kompletten Block 1 vorbereiten
 ```
 
 ## Pflege Ablauf
