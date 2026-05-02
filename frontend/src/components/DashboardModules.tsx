@@ -5,6 +5,7 @@ import { RuntimeControlPanel } from "./RuntimeControlPanel";
 import { SecurityPanel } from "./SecurityPanel";
 import { UpdateCenterPanel } from "./UpdateCenterPanel";
 import { LifeOSPanel } from "./LifeOSPanel";
+import { ADDON_VISIBILITY_EVENT, findAddonByNav, loadVisibleAddonIds } from "../features/dashboard/addonVisibility";
 import { agentToolsModules, moduleMap } from "../features/dashboard/dashboardConfig";
 import type { EndpointCard, ResultState } from "../features/dashboard/dashboardConfig";
 import "./dashboard-modules.css";
@@ -38,14 +39,29 @@ export function DashboardModules({ activeNav, onSend, dashboardTheme = "jarvis",
   const module = moduleMap[activeNav];
   const [results, setResults] = useState<ResultState>({});
   const [query, setQuery] = useState("");
+  const [visibleAddonIds, setVisibleAddonIds] = useState(loadVisibleAddonIds);
 
+  const addon = findAddonByNav(activeNav);
+  const addonHidden = Boolean(addon) && !visibleAddonIds.includes(addon.id);
   const visible = Boolean(module) && activeNav !== "Dialog";
 
   useEffect(() => {
-    if (!visible || !module || activeNav === "Aufgaben & Automationen" || activeNav === "JARVIS Runtime") return;
+    function handleVisibilityChange() {
+      setVisibleAddonIds(loadVisibleAddonIds());
+    }
+    window.addEventListener(ADDON_VISIBILITY_EVENT, handleVisibilityChange);
+    window.addEventListener("storage", handleVisibilityChange);
+    return () => {
+      window.removeEventListener(ADDON_VISIBILITY_EVENT, handleVisibilityChange);
+      window.removeEventListener("storage", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!visible || !module || addonHidden || activeNav === "Aufgaben & Automationen" || activeNav === "JARVIS Runtime") return;
     setResults({});
     module.endpoints.slice(0, 2).forEach((endpoint) => void runEndpoint(endpoint));
-  }, [activeNav]);
+  }, [activeNav, addonHidden]);
 
   async function runEndpoint(card: EndpointCard) {
     setResults((prev) => ({ ...prev, [card.title]: { status: "loading" } }));
@@ -80,12 +96,32 @@ export function DashboardModules({ activeNav, onSend, dashboardTheme = "jarvis",
     return ok?.data;
   }, [results]);
 
-  if (activeNav === "JARVIS Runtime") {
-    return <RuntimeControlPanel onSend={onSend} />;
-  }
-
   if (activeNav === "Optionen / Updates" || activeNav === "Update Center") {
     return <UpdateCenterPanel onSend={onSend} dashboardTheme={dashboardTheme} onThemeChange={onThemeChange || (() => {})} />;
+  }
+
+  if (addonHidden && addon) {
+    return (
+      <section className="jv-module-shell addon-hidden-shell">
+        <div className="jv-module-header">
+          <div>
+            <small>ADDON AUSGEBLENDET</small>
+            <h1>{addon.label}</h1>
+            <p>Dieses Modul ist unter Optionen ausgeblendet, damit die Oberflaeche ruhiger bleibt. Die Funktion ist nicht geloescht.</p>
+          </div>
+          <button onClick={() => onSend("Oeffne Optionen und zeige mir die Addon Sichtbarkeit.")}>OPTIONEN OEFFNEN</button>
+        </div>
+        <div className="addon-hidden-card">
+          <span>INAKTIV</span>
+          <b>{addon.description}</b>
+          <em>Aktiviere das Addon unter Optionen / Updates, wenn du es wieder im Dashboard sehen willst.</em>
+        </div>
+      </section>
+    );
+  }
+
+  if (activeNav === "JARVIS Runtime") {
+    return <RuntimeControlPanel onSend={onSend} />;
   }
 
   if (activeNav === "LifeOS") {
