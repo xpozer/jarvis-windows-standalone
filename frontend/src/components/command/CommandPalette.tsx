@@ -34,8 +34,7 @@ export function CommandPalette({ open, items, onOpenChange }: CommandPaletteProp
     if (!open) return;
     setQuery("");
     setActiveIndex(0);
-    const id = window.setTimeout(() => inputRef.current?.focus(), 0);
-    return () => window.clearTimeout(id);
+    inputRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
