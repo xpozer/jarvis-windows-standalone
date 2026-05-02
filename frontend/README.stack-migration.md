@@ -141,6 +141,17 @@ Der Workflow Eintrag fuer a11y:checklist wurde vom Connector blockiert.
 Der lokale Script Einstieg ist vorhanden und kann spaeter manuell in CI nachgezogen werden.
 ```
 
+## Aufgabe 5.9 Stand
+
+Erledigt:
+
+```text
+frontend/MIGRATION-STRATEGY.md             Phasenplan 1 bis 4 mit Freigaben und Fallback Plan
+frontend/migration-checklist.json          maschinenlesbare Freigabe Checkliste
+frontend/scripts/check-migration-gate.mjs  Gate gegen versehentliches Ersetzen von docs/index.html
+frontend/package.json                      migration:gate Script
+```
+
 Lokaler Preview Start:
 
 ```text
@@ -153,6 +164,7 @@ Stack Preview Build:
 cd frontend
 npm run build:stack-preview
 npm run budget:stack-preview
+npm run migration:gate
 ```
 
 Storybook Start:
@@ -168,6 +180,7 @@ npm run storybook
 cd frontend
 npm install
 npm run a11y:checklist
+npm run migration:gate
 npm run typecheck
 npm run test
 npm run build
@@ -178,4 +191,4 @@ npm run build-storybook
 
 ## Naechster Schritt
 
-Aufgabe 5.9 dokumentiert die Migrationsstrategie fuer Phase 1 bis 4 und definiert die Freigabe, wann der alte HTML Stand abgeloest werden darf.
+Aufgabe 5.10 schliesst Block 5 mit Testplan, PR Vorbereitung und einer ehrlichen Liste offener lokaler Pruefungen ab.
