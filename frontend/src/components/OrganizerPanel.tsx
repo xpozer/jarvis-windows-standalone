@@ -26,6 +26,18 @@ type Reminder = {
   created_at?: string;
 };
 
+type AuditEntry = {
+  id?: string;
+  task?: string;
+  source?: string;
+  status?: string;
+  result?: string;
+  requires_confirmation?: boolean;
+  risk?: "low" | "medium" | "high";
+  target?: string;
+  created_at?: string;
+};
+
 type Props = {
   onSend: (message: string) => void;
 };
@@ -61,6 +73,7 @@ export function OrganizerPanel({ onSend }: Props) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([]);
   const [noteText, setNoteText] = useState("");
   const [taskText, setTaskText] = useState("");
   const [taskDue, setTaskDue] = useState("");
@@ -70,19 +83,23 @@ export function OrganizerPanel({ onSend }: Props) {
 
   const openTasks = useMemo(() => tasks.filter((task) => !task.done), [tasks]);
   const doneTasks = useMemo(() => tasks.filter((task) => task.done), [tasks]);
+  const waitingAudit = useMemo(() => auditEntries.filter((entry) => entry.status === "waiting" || entry.requires_confirmation), [auditEntries]);
+  const highRiskAudit = useMemo(() => auditEntries.filter((entry) => entry.risk === "high"), [auditEntries]);
 
   async function loadAll() {
     setBusy(true);
     setError("");
     try {
-      const [notesData, tasksData, remindersData] = await Promise.all([
+      const [notesData, tasksData, remindersData, auditData] = await Promise.all([
         requestJson(`/notes?q=${encodeURIComponent(filter)}&limit=100`),
         requestJson(`/tasks?q=${encodeURIComponent(filter)}`),
         requestJson("/reminders"),
+        requestJson("/automation/audit?limit=12"),
       ]);
       setNotes(normalizeList<Note>(notesData, ["notes", "items", "results"]));
       setTasks(normalizeList<Task>(tasksData, ["tasks", "items", "results"]));
       setReminders(normalizeList<Reminder>(remindersData, ["reminders", "items", "results"]));
+      setAuditEntries(normalizeList<AuditEntry>(auditData, ["entries", "audit", "items", "results"]));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -177,9 +194,9 @@ export function OrganizerPanel({ onSend }: Props) {
     <section className="jv-organizer-shell">
       <div className="jv-organizer-header">
         <div>
-          <small>Organizer</small>
-          <h1>Tasks & Notes</h1>
-          <p>Aufgaben, Notizen und Erinnerungen als echte Bedienoberfläche statt JSON Ansicht.</p>
+          <small>Automation Cluster</small>
+          <h1>Aufgaben & Automationen</h1>
+          <p>Aufgaben, Notizen, Erinnerungen und Audit Log als zusammenhängendes Cluster.</p>
         </div>
         <div className="jv-organizer-actions">
           <input value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === "Enter" && loadAll()} placeholder="Suchen..." />
@@ -242,15 +259,27 @@ export function OrganizerPanel({ onSend }: Props) {
         </section>
 
         <section className="jv-organizer-card jv-summary-card">
-          <div className="jv-organizer-title"><h2>Übersicht</h2><span>Live</span></div>
-          <div className="jv-organizer-stats">
+          <div className="jv-organizer-title"><h2>Audit Log</h2><span>{auditEntries.length} Einträge</span></div>
+          <div className="jv-organizer-stats compact-stats">
             <div><b>{openTasks.length}</b><span>offen</span></div>
-            <div><b>{doneTasks.length}</b><span>erledigt</span></div>
-            <div><b>{notes.length}</b><span>Notizen</span></div>
-            <div><b>{reminders.length}</b><span>Reminder</span></div>
+            <div><b>{waitingAudit.length}</b><span>warten</span></div>
+            <div><b>{highRiskAudit.length}</b><span>high risk</span></div>
+            <div><b>{auditEntries.length}</b><span>audit</span></div>
           </div>
-          <button className="jv-wide-btn" onClick={() => onSend("Plane meine offenen Aufgaben sinnvoll für heute")}>TAGESPLAN ERSTELLEN</button>
-          <button className="jv-wide-btn" onClick={() => onSend("Fasse meine aktuellen Aufgaben und Notizen zusammen")}>ZUSAMMENFASSEN</button>
+          <div className="jv-audit-list">
+            {auditEntries.length === 0 && <div className="jv-empty">Noch keine Audit Einträge.</div>}
+            {auditEntries.map((entry, index) => (
+              <article className={`jv-audit-entry risk-${entry.risk || "low"}`} key={entry.id || index}>
+                <div className="jv-audit-entry-head">
+                  <b>{entry.task || "Automation"}</b>
+                  <span>{entry.status || "unknown"}</span>
+                </div>
+                <p>{entry.result || "Kein Ergebnis hinterlegt."}</p>
+                <small>{entry.source || "manual"} · {entry.target || "kein Ziel"} · {formatDate(entry.created_at)}</small>
+              </article>
+            ))}
+          </div>
+          <button className="jv-wide-btn" onClick={() => onSend("Fasse die letzten Automation Audit Log Einträge zusammen")}>AUDIT ZUSAMMENFASSEN</button>
         </section>
       </div>
     </section>

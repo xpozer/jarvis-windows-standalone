@@ -24,3 +24,11 @@ def api_audit_stats():
 @router.post("/audit/log")
 async def api_audit_log_write(req: Request):
     return await audit_service.api_audit_log_write(req=req)
+
+@router.get("/automation/audit")
+def api_automation_audit(limit: int = 50):
+    return audit_service.api_automation_audit(limit=limit)
+
+@router.post("/automation/audit")
+async def api_automation_audit_write(req: Request):
+    return await audit_service.api_automation_audit_write(req=req)

@@ -2,8 +2,10 @@
 Tests fuer classify_agent() Keyword-Router
 Prueft ob bekannte Eingaben den richtigen Agenten bekommen.
 """
+
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 from main import classify_agent

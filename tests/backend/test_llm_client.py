@@ -2,8 +2,6 @@ import io
 import json
 import urllib.error
 
-import pytest
-
 
 class FakeResponse:
     def __init__(self, payload=None, lines=None):
@@ -134,7 +132,9 @@ def test_openai_compatible_stream_returns_text_chunks(monkeypatch):
         b"data: [DONE]\n\n",
     ]
 
-    monkeypatch.setattr(llm_client.request, "urlopen", lambda req, timeout: FakeResponse(lines=lines))
+    monkeypatch.setattr(
+        llm_client.request, "urlopen", lambda req, timeout: FakeResponse(lines=lines)
+    )
     monkeypatch.setattr(llm_client, "JARVIS_PROVIDER", "ollama")
     monkeypatch.setattr(llm_client, "JARVIS_FALLBACK", [])
 

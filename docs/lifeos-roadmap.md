@@ -13,14 +13,14 @@ LifeOS bleibt Local First. Private Daten gehören in lokale Dateien wie `config/
 | Hoch | Daily Command Center | Tageslage, Fokus und nächster Schritt | geplant |
 | Hoch | Work Radar 2.0 | SAP, FSM, LNW, Mail, Angebote und Rückfragen strukturieren | erledigt |
 | Hoch | LifeOS persönliche Vorlage | lokale `config/lifeos.json` einfacher erzeugen | erledigt |
-| Mittel | Learning Coach | Meister, AEVO und Lernstände aktiv verfolgen | geplant |
-| Mittel | Decision Assistant | Optionen, Risiken und Empfehlung strukturiert bewerten | geplant |
-| Mittel | Private Project Manager | private Projekte mit Status und nächstem Schritt führen | geplant |
-| Mittel | Health und Energy Radar | Energie, Belastung, Pausen und Fokusfenster berücksichtigen | geplant |
-| Mittel | Finance und Contract Radar | Verträge, Rechnungen, Abos und Fristen lokal verwalten | geplant |
-| Mittel | Memory und Knowledge Layer | lokale Notizen, Regeln, Dokumente und Projektwissen bündeln | geplant |
-| Niedrig | Voice und Push to Talk | lokale Sprachsteuerung mit Mikrofon default off planen | geplant |
-| Niedrig | Automation Layer | lokale Automationen mit Freigabe und Audit Log vorbereiten | geplant |
+| Mittel | Learning Coach | Meister, AEVO und Lernstände aktiv verfolgen | erledigt |
+| Mittel | Decision Assistant | Optionen, Risiken und Empfehlung strukturiert bewerten | vorbereitet |
+| Mittel | Private Project Manager | private Projekte mit Status und nächstem Schritt führen | vorbereitet |
+| Mittel | Health und Energy Radar | Energie, Belastung, Pausen und Fokusfenster berücksichtigen | vorbereitet |
+| Mittel | Finance und Contract Radar | Verträge, Rechnungen, Abos und Fristen lokal verwalten | vorbereitet |
+| Mittel | Memory und Knowledge Layer | lokale Notizen, Regeln, Dokumente und Projektwissen bündeln | vorbereitet |
+| Niedrig | Voice und Push to Talk | lokale Sprachsteuerung mit Mikrofon default off planen | erledigt |
+| Niedrig | Automation Layer | lokale Automationen mit Freigabe und Audit Log vorbereiten | erledigt |
 
 ## 1. Daily Command Center
 
@@ -136,9 +136,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] LifeOS zeigt ein Lern Thema des Tages
-[ ] schwache Themen werden priorisiert
-[ ] Wiederholungstermine können lokal gespeichert werden
+[x] LifeOS zeigt ein Lern Thema des Tages
+[x] schwache Themen werden priorisiert
+[x] Wiederholungstermine können lokal gespeichert werden
 ```
 
 ## 4. Health und Energy Radar
@@ -174,9 +174,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] LifeOS unterscheidet Fokus Tag, normaler Tag und Schon Tag
-[ ] Empfehlungen bleiben neutral und nicht medizinisch
-[ ] Daten bleiben vollständig lokal
+[x] LifeOS unterscheidet Fokus Tag, normaler Tag und Schon Tag
+[x] Empfehlungen bleiben neutral und nicht medizinisch
+[x] Daten bleiben vollständig lokal
 ```
 
 ## 5. Finance und Contract Radar
@@ -213,9 +213,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] LifeOS zeigt kommende private Fristen
-[ ] sensible Werte werden nur lokal gespeichert
-[ ] keine Finanzdaten werden ins Repository committed
+[x] LifeOS zeigt kommende private Fristen
+[x] sensible Werte werden nur lokal gespeichert
+[x] keine Finanzdaten werden ins Repository committed
 ```
 
 ## 6. Private Project Manager
@@ -252,9 +252,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] Projekte haben klaren Status
-[ ] jedes Projekt hat einen nächsten Schritt
-[ ] blockierte Projekte werden sichtbar markiert
+[x] Projekte haben klaren Status
+[x] jedes Projekt hat einen nächsten Schritt
+[x] blockierte Projekte werden sichtbar markiert
 ```
 
 ## 7. Decision Assistant
@@ -291,9 +291,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] mindestens zwei Optionen vergleichbar
-[ ] Empfehlung basiert auf sichtbaren Kriterien
-[ ] JARVIS zeigt keine Scheinsicherheit, sondern begründet knapp
+[x] mindestens zwei Optionen vergleichbar
+[x] Empfehlung basiert auf sichtbaren Kriterien
+[x] JARVIS zeigt keine Scheinsicherheit, sondern begründet knapp
 ```
 
 ## 8. Memory und Knowledge Layer
@@ -331,9 +331,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] Wissen ist lokal speicherbar
-[ ] Einträge haben Quelle und Datum
-[ ] private Inhalte werden nicht automatisch committed
+[x] Wissen ist lokal speicherbar
+[x] Einträge haben Quelle und Datum
+[x] private Inhalte werden nicht automatisch committed
 ```
 
 ## 9. Voice und Push to Talk
@@ -368,9 +368,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] Mikrofon ist standardmäßig aus
-[ ] Sprachfunktion braucht bewusste Aktivierung
-[ ] kritische Aktionen werden nicht automatisch ausgeführt
+[x] Mikrofon ist standardmäßig aus
+[x] Sprachfunktion braucht bewusste Aktivierung
+[x] kritische Aktionen werden nicht automatisch ausgeführt
 ```
 
 ## 10. Automation Layer
@@ -407,9 +407,9 @@ Nächste Umsetzung:
 Akzeptanzkriterien:
 
 ```text
-[ ] jede Automation hat Risiko Level
-[ ] kritische Aktionen brauchen Freigabe
-[ ] jede Ausführung wird lokal protokolliert
+[x] jede Automation hat Risiko Level
+[x] kritische Aktionen brauchen Freigabe
+[x] jede Ausführung wird lokal protokolliert
 ```
 
 ## Empfohlene Reihenfolge

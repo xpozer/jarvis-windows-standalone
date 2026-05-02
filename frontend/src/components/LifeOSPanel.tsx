@@ -60,6 +60,29 @@ type LifeOSBriefing = {
     open_cards?: number;
     recommendation?: string;
   };
+  decision_layer?: {
+    count?: number;
+    next?: { title?: string; recommendation?: string; reason?: string; urgency?: string };
+  };
+  projects?: {
+    count?: number;
+    blocked_count?: number;
+    next?: { name?: string; status?: string; risk?: string; next_step?: string; blocker?: string };
+  };
+  energy_profile?: {
+    energy_percent?: number;
+    load?: string;
+    mode?: string;
+    recommendation?: string;
+    next_break?: string;
+    focus_windows?: Array<{ from?: string; to?: string; label?: string }>;
+  };
+  finance_radar?: {
+    count?: number;
+    next?: { title?: string; category?: string; due?: string; due_state?: string; next_step?: string; proof_required?: boolean };
+  };
+  memory_layer?: { count?: number; recommendation?: string; recent?: Array<{ title?: string; type?: string; source?: string }> };
+  automation_layer?: { count?: number; requires_confirmation?: number };
   life_modules?: Array<{ name?: string; description?: string }>;
   timeline?: Array<{ time?: string; title?: string; tag?: string }>;
 };
@@ -121,6 +144,10 @@ export function LifeOSPanel({ onSend }: Props) {
   const daily = briefing?.daily_briefing || {};
   const workRadar = briefing?.work_radar || {};
   const workItems = useMemo(() => workRadar.items || [], [workRadar.items]);
+  const decision = briefing?.decision_layer?.next;
+  const project = briefing?.projects?.next;
+  const energy = briefing?.energy_profile;
+  const finance = briefing?.finance_radar?.next;
 
   async function loadLifeOS(regenerate = false) {
     setLoading(true);
@@ -241,6 +268,48 @@ export function LifeOSPanel({ onSend }: Props) {
               <span>Fehlerquote <strong>{Math.round((briefing?.learning_focus?.error_rate || 0) * 100)}%</strong></span>
             </div>
           </div>
+        </article>
+
+        <article className="lifeos-card lifeos-roadmap-card">
+          <div className="lifeos-card-title"><h2>Decision</h2><span>{briefing?.decision_layer?.count || 0} offen</span></div>
+          <b>{decision?.title || "Keine Entscheidung offen"}</b>
+          <p>{decision?.recommendation || "decision_layer.decisions lokal ergaenzen."}</p>
+          <small>{decision?.reason || "Empfehlung bleibt begruendet und ohne Scheinsicherheit."}</small>
+        </article>
+
+        <article className="lifeos-card lifeos-roadmap-card">
+          <div className="lifeos-card-title"><h2>Projekte</h2><span>{briefing?.projects?.blocked_count || 0} blockiert</span></div>
+          <b>{project?.name || "Kein Projekt gesetzt"}</b>
+          <p>{project?.next_step || "projects lokal ergaenzen."}</p>
+          <small>{project?.blocker ? `Blocker: ${project.blocker}` : `Status: ${project?.status || "N/A"}`}</small>
+        </article>
+
+        <article className="lifeos-card lifeos-roadmap-card">
+          <div className="lifeos-card-title"><h2>Energie</h2><span>{energy?.mode || "Profil"}</span></div>
+          <b>{energy?.energy_percent ?? daily.energy_percent ?? "N/A"}% / {energy?.load || "medium"}</b>
+          <p>{energy?.recommendation || "energy_profile lokal ergaenzen."}</p>
+          <small>{energy?.next_break ? `Naechste Pause: ${energy.next_break}` : "Keine Pause gesetzt"}</small>
+        </article>
+
+        <article className="lifeos-card lifeos-roadmap-card">
+          <div className="lifeos-card-title"><h2>Finanzen</h2><span>{briefing?.finance_radar?.count || 0} Punkte</span></div>
+          <b>{finance?.title || "Keine Frist gesetzt"}</b>
+          <p>{finance?.next_step || "finance_radar.items lokal ergaenzen."}</p>
+          <small>{finance?.due ? `${finance.category || "Frist"}: ${finance.due}` : "Nur lokale Daten verwenden"}</small>
+        </article>
+
+        <article className="lifeos-card lifeos-roadmap-card">
+          <div className="lifeos-card-title"><h2>Memory</h2><span>{briefing?.memory_layer?.count || 0} Eintraege</span></div>
+          <b>Lokales Wissen</b>
+          <p>{briefing?.memory_layer?.recommendation || "memory_layer.entries lokal ergaenzen."}</p>
+          <small>{briefing?.memory_layer?.recent?.[0]?.title || "Noch keine Regel gesetzt"}</small>
+        </article>
+
+        <article className="lifeos-card lifeos-roadmap-card">
+          <div className="lifeos-card-title"><h2>Automation</h2><span>{briefing?.automation_layer?.requires_confirmation || 0} Freigaben</span></div>
+          <b>{briefing?.automation_layer?.count || 0} lokale Automationen</b>
+          <p>RiskLevel und Freigabe bleiben sichtbar, bevor Aktionen ausgefuehrt werden.</p>
+          <small>Keine blinden Windows Aktionen.</small>
         </article>
       </div>
     </section>

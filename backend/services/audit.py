@@ -18,3 +18,9 @@ def api_audit_stats():
 
 async def api_audit_log_write(req: Request):
     return await core.api_audit_log_write(req=req)
+
+def api_automation_audit(limit: int = 50):
+    return core.api_automation_audit(limit=limit)
+
+async def api_automation_audit_write(req: Request):
+    return await core.api_automation_audit_write(req=req)

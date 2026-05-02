@@ -25,10 +25,11 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     title: "Startuebersicht",
     subtitle: "Zentrale Uebersicht. Hier bleiben nur die wichtigsten Statuspunkte sichtbar.",
     endpoints: [
+      { title: "Health", description: "Prueft die lokale FastAPI Basis.", endpoint: "/health" },
       { title: "Chat Zustand", description: "Prueft Provider, Modell und Runtime.", endpoint: "/api/chat/health" },
       { title: "Runtime Status", description: "Lokaler JARVIS Runtime Kern mit Gedächtnis, Aktionen und Abläufen.", endpoint: "/api/runtime/status" },
       { title: "Systemwerte", description: "Live Werte fuer CPU, RAM, Temperatur und Netzwerk.", endpoint: "/system/metrics" },
-      { title: "Selbstpruefung", description: "Backend Selbsttest und wichtige Runtime Informationen.", endpoint: "/self-check" },
+      { title: "Automation Audit", description: "Letzte lokale Automation Audit Eintraege.", endpoint: "/automation/audit?limit=5" },
     ],
     prompts: ["Fasse mir den aktuellen Systemstatus kurz zusammen", "Welche Module sind gerade einsatzbereit?"],
   },
@@ -59,19 +60,21 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     prompts: ["Analysiere die aktuellen Systemdaten", "Gibt es Auffaelligkeiten in den Live Daten?"],
   },
   "Aufgaben & Automationen": {
-    folder: "Organisation",
+    folder: "Automation Cluster",
     title: "Aufgaben & Automationen",
-    subtitle: "Notizen, Aufgaben, Erinnerungen, Automationen und Ordnerueberwachung.",
+    subtitle: "Notizen, Aufgaben, Erinnerungen, Automationen und Audit Log in einem Cluster.",
     endpoints: [
       { title: "Notizen", description: "Lokale Notizen abrufen.", endpoint: "/notes" },
       { title: "Aufgaben", description: "Aufgaben abrufen.", endpoint: "/tasks" },
+      { title: "Automation Audit", description: "Letzte Audit Log Eintraege fuer ausgefuehrte oder vorbereitete Automationen.", endpoint: "/automation/audit?limit=12" },
+      { title: "Runtime Aktionen", description: "Runtime Aktionen mit Risiko und Status.", endpoint: "/api/runtime/actions?limit=20" },
       { title: "Runtime Ziele", description: "OKR Ziele aus der lokalen Runtime.", endpoint: "/api/runtime/goals" },
       { title: "Runtime Abläufe", description: "Gespeicherte Runtime Abläufe.", endpoint: "/api/runtime/workflows" },
       { title: "Erinnerungen", description: "Erinnerungen abrufen.", endpoint: "/reminders" },
       { title: "Automationen", description: "Automationen und geplante Ablaeufe anzeigen.", endpoint: "/automation/list" },
       { title: "Ordnerueberwachung", description: "Ueberwachte Ordner anzeigen.", endpoint: "/folder-watch/list" },
     ],
-    prompts: ["Erstelle mir eine Aufgabe", "Zeig mir meine offenen Aufgaben", "Welche Erinnerungen sind faellig?"],
+    prompts: ["Erstelle mir eine Aufgabe", "Zeig mir meine offenen Aufgaben", "Fasse die letzten Automation Audit Log Einträge zusammen"],
   },
   "JARVIS Runtime": {
     folder: "Runtime",
@@ -80,6 +83,7 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     endpoints: [
       { title: "Runtime Status", description: "Gesamtzustand der lokalen Runtime.", endpoint: "/api/runtime/status" },
       { title: "Aktionen", description: "Runtime Aktionen mit Risiko und Status.", endpoint: "/api/runtime/actions?limit=20" },
+      { title: "Automation Audit", description: "Lokaler Audit Log fuer Automationen.", endpoint: "/automation/audit?limit=10" },
       { title: "Gedächtnis Fakten", description: "Persistente Runtime Fakten.", endpoint: "/api/runtime/memory/facts?limit=20" },
       { title: "Abläufe", description: "Gespeicherte Runtime Abläufe.", endpoint: "/api/runtime/workflows" },
     ],
@@ -90,8 +94,10 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     title: "Diagnose",
     subtitle: "Selbsttest, Ports, Logs, Abhaengigkeiten und Reparaturplan.",
     endpoints: [
+      { title: "Health", description: "FastAPI Health Check.", endpoint: "/health" },
       { title: "Selbstpruefung", description: "Gesamter Backend Selbsttest.", endpoint: "/self-check" },
       { title: "Runtime Status", description: "Status der lokalen JARVIS Runtime.", endpoint: "/api/runtime/status" },
+      { title: "Automation Audit", description: "Prueft, ob der neue Audit Log erreichbar ist.", endpoint: "/automation/audit?limit=5" },
       { title: "Abhaengigkeiten", description: "Prueft Python Pakete, Node und wichtige Abhaengigkeiten.", endpoint: "/diagnostic/dependencies" },
       { title: "Ports", description: "Prueft relevante Ports wie 8000 und 11434.", endpoint: "/diagnostic/ports" },
       { title: "Logs", description: "Verfuegbare Backend Logs anzeigen.", endpoint: "/diagnostic/logs/list" },
@@ -130,6 +136,7 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     title: "Kernsysteme",
     subtitle: "Backend, Runtime, Agenten, Werkzeuge und Systemmetriken.",
     endpoints: [
+      { title: "Health", description: "FastAPI Health Check.", endpoint: "/health" },
       { title: "Runtime Status", description: "Lokaler Runtime Kern.", endpoint: "/api/runtime/status" },
       { title: "Selbstpruefung", description: "Kernpruefung des Systems.", endpoint: "/self-check" },
       { title: "Werkzeugverzeichnis", description: "Registrierte Werkzeuge.", endpoint: "/tools/registry" },
@@ -143,6 +150,7 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     title: "Sicherheitszentrale",
     subtitle: "Status, Freigabezentrale, Audit, offene Aktionen und sichere Werkzeugausfuehrung.",
     endpoints: [
+      { title: "Automation Audit", description: "Audit Log fuer Automationen und Sicherheitspruefung.", endpoint: "/automation/audit?limit=20" },
       { title: "Runtime Aktionen", description: "Alle Runtime Action Requests mit Risiko und Status.", endpoint: "/api/runtime/actions?limit=20" },
       { title: "Offene Aktionen", description: "Aktionen, die auf Bestaetigung warten.", endpoint: "/actions/pending" },
       { title: "Berechtigungen", description: "Berechtigungen inklusive Freigabestatus.", endpoint: "/security/permissions" },
@@ -202,6 +210,8 @@ export const moduleMap: Record<string, DashboardModuleConfig> = {
     title: "API-Konsole",
     subtitle: "Direkter Ueberblick ueber Backend Routen, Werkzeuge und Systemchecks.",
     endpoints: [
+      { title: "Health", description: "FastAPI Health Check.", endpoint: "/health" },
+      { title: "Automation Audit", description: "OpenAPI sichtbarer Audit Log Endpunkt.", endpoint: "/automation/audit?limit=5" },
       { title: "Runtime Status", description: "Lokale Runtime API Uebersicht.", endpoint: "/api/runtime/status" },
       { title: "Ablauf Knoten", description: "Ablaufknoten Verzeichnis.", endpoint: "/api/runtime/workflows/nodes" },
       { title: "OpenAPI", description: "FastAPI OpenAPI Spezifikation.", endpoint: "/openapi.json" },

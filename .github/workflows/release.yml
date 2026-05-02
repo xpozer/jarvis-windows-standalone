@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build-release:
     name: Build release package
@@ -28,7 +31,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install Python tooling only when Python files exist
         shell: pwsh
@@ -69,31 +72,7 @@ jobs:
       - name: Create installer zip
         shell: pwsh
         run: |
-          $TagName = "${{ github.ref_name }}"
-          $ReleaseDir = "release"
-          $ZipName = "jarvis-windows-standalone-$TagName.zip"
-          New-Item -ItemType Directory -Force -Path $ReleaseDir | Out-Null
-
-          $Exclude = @(
-            ".git",
-            ".github",
-            "node_modules",
-            ".venv",
-            "venv",
-            "env",
-            "logs",
-            "audit",
-            "knowledge_index",
-            "local_data",
-            "runtime",
-            "cache",
-            "release",
-            "artifacts"
-          )
-
-          $Items = Get-ChildItem -Force | Where-Object { $Exclude -notcontains $_.Name }
-          Compress-Archive -Path $Items.FullName -DestinationPath "$ReleaseDir\$ZipName" -Force
-          Get-FileHash -Algorithm SHA256 "$ReleaseDir\$ZipName" | Format-List | Out-File "$ReleaseDir\$ZipName.sha256.txt"
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts\maintenance\build-release-zip.ps1 -TagName "${{ github.ref_name }}" -ReleaseDir "release" -SkipFrontendBuild
 
       - name: Generate changelog excerpt
         shell: pwsh
@@ -112,3 +91,4 @@ jobs:
           files: |
             release/*.zip
             release/*.sha256.txt
+            release/release-manifest-*.json

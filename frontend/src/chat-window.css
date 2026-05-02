@@ -8,6 +8,227 @@
   --ui-scale: 1;
 }
 
+.jarvis-screen.theme-matrix {
+  --cyan: #00ff41;
+  --cyan2: #baffc9;
+  --green: #00ff41;
+  --red: #ffde59;
+  --line: rgba(0, 255, 65, .2);
+  color: #d9ffe4;
+  background:
+    radial-gradient(circle at 62% 30%, rgba(0, 255, 65, .12), transparent 28%),
+    radial-gradient(circle at 78% 64%, rgba(18, 112, 34, .16), transparent 42%),
+    linear-gradient(180deg, #000805, #00140b 48%, #000201);
+}
+
+.jarvis-screen.theme-ultron {
+  --cyan: #ff1d2d;
+  --cyan2: #f1f3f4;
+  --green: #f7c859;
+  --red: #ff1d2d;
+  --line: rgba(255, 29, 45, .25);
+  color: #f4f6f7;
+  background:
+    radial-gradient(circle at 68% 34%, rgba(255, 29, 45, .24), transparent 32%),
+    radial-gradient(circle at 82% 68%, rgba(178, 184, 190, .1), transparent 34%),
+    linear-gradient(135deg, #030304 0%, #0a0a0d 34%, #1a0205 62%, #050506 100%);
+}
+
+.jarvis-screen.theme-matrix::before {
+  background:
+    linear-gradient(rgba(0, 255, 65, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, .032) 1px, transparent 1px),
+    radial-gradient(circle at 64% 46%, transparent 0 25vh, rgba(0, 255, 65, .18) calc(25vh + 2px), transparent calc(25vh + 5px)),
+    radial-gradient(circle at 64% 46%, transparent 0 38vh, rgba(0, 255, 65, .07) calc(38vh + 2px), transparent calc(38vh + 5px));
+  background-size: 42px 42px, 42px 42px, 100% 100%, 100% 100%;
+  opacity: .95;
+}
+
+.jarvis-screen.theme-ultron::before {
+  background:
+    linear-gradient(115deg, transparent 0 18%, rgba(179, 185, 190, .08) 18.3% 18.8%, transparent 19.1% 42%, rgba(255, 29, 45, .11) 42.3% 42.8%, transparent 43.1%),
+    linear-gradient(rgba(255, 29, 45, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(178, 184, 190, .035) 1px, transparent 1px),
+    radial-gradient(circle at 64% 46%, transparent 0 25vh, rgba(255, 29, 45, .22) calc(25vh + 2px), transparent calc(25vh + 5px));
+  background-size: 100% 100%, 52px 52px, 52px 52px, 100% 100%;
+  opacity: .95;
+}
+
+.jarvis-screen.theme-matrix::after {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(186, 255, 201, .78) 8%, rgba(0, 255, 65, .44) 18%, transparent 44%) 4% -40%/18px 280px repeat-y,
+    linear-gradient(180deg, transparent 0%, rgba(0, 255, 65, .62) 10%, rgba(0, 95, 25, .32) 26%, transparent 55%) 12% -15%/22px 340px repeat-y,
+    linear-gradient(180deg, transparent 0%, rgba(186, 255, 201, .7) 7%, rgba(0, 255, 65, .5) 20%, transparent 58%) 28% -30%/16px 260px repeat-y,
+    linear-gradient(180deg, transparent 0%, rgba(0, 255, 65, .58) 10%, transparent 62%) 48% -10%/20px 320px repeat-y,
+    linear-gradient(180deg, transparent 0%, rgba(186, 255, 201, .7) 6%, rgba(0, 255, 65, .45) 22%, transparent 60%) 74% -26%/18px 300px repeat-y,
+    linear-gradient(180deg, transparent 0%, rgba(0, 255, 65, .54) 12%, transparent 64%) 88% -8%/24px 360px repeat-y,
+    linear-gradient(90deg, transparent, rgba(0, 255, 65, .18), transparent) 0 46%/100% 1px no-repeat;
+  opacity: .5;
+  animation: matrixRain 11s linear infinite;
+}
+
+.jarvis-screen.theme-ultron::after {
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 29, 45, .45), rgba(242, 244, 245, .18), transparent) 0 45%/100% 2px no-repeat,
+    linear-gradient(0deg, transparent, rgba(255, 29, 45, .32), transparent) 64% 0/2px 100% no-repeat,
+    linear-gradient(135deg, transparent 0 23%, rgba(242, 244, 245, .12) 23.4% 23.9%, transparent 24.2% 49%, rgba(255, 29, 45, .2) 49.4% 50.2%, transparent 50.6%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 18px);
+  opacity: .72;
+  animation: ultronScan 5.5s ease-in-out infinite;
+}
+
+.jarvis-screen.theme-matrix .jarvis-mini-orb,
+.jarvis-screen.theme-matrix .jarvis-user-orb,
+.jarvis-screen.theme-matrix .jarvis-avatar.jarvis,
+.jarvis-screen.theme-matrix .jarvis-legacy-orb-wrap {
+  filter: hue-rotate(96deg) saturate(1.7) brightness(1.08);
+}
+
+.jarvis-screen.theme-ultron .jarvis-mini-orb,
+.jarvis-screen.theme-ultron .jarvis-user-orb,
+.jarvis-screen.theme-ultron .jarvis-avatar.jarvis,
+.jarvis-screen.theme-ultron .jarvis-legacy-orb-wrap {
+  filter: hue-rotate(145deg) saturate(1.9) contrast(1.18) brightness(.9);
+}
+
+.jarvis-screen.theme-matrix .jarvis-topbar,
+.jarvis-screen.theme-matrix .jarvis-sidebar {
+  background: linear-gradient(180deg, rgba(0, 15, 8, .97), rgba(0, 7, 3, .92));
+  border-color: rgba(0, 255, 65, .22);
+}
+
+.jarvis-screen.theme-ultron .jarvis-topbar,
+.jarvis-screen.theme-ultron .jarvis-sidebar {
+  background:
+    linear-gradient(135deg, rgba(19, 20, 23, .98), rgba(4, 4, 6, .94)),
+    linear-gradient(90deg, rgba(255, 29, 45, .16), transparent);
+  border-color: rgba(255, 29, 45, .3);
+}
+
+.jarvis-screen.theme-matrix .jarvis-nav-item.active,
+.jarvis-screen.theme-matrix .jarvis-system-status,
+.jarvis-screen.theme-matrix .jarvis-message-card,
+.jarvis-screen.theme-matrix .jarvis-input-panel,
+.jarvis-screen.theme-matrix .jarvis-card {
+  border-color: rgba(0, 255, 65, .28);
+  background: linear-gradient(180deg, rgba(0, 22, 11, .9), rgba(0, 8, 4, .78));
+  box-shadow: 0 0 30px rgba(0, 255, 65, .1), inset 0 0 0 1px rgba(186, 255, 201, .025);
+}
+
+.jarvis-screen.theme-ultron .jarvis-nav-item.active,
+.jarvis-screen.theme-ultron .jarvis-system-status,
+.jarvis-screen.theme-ultron .jarvis-message-card,
+.jarvis-screen.theme-ultron .jarvis-input-panel,
+.jarvis-screen.theme-ultron .jarvis-card {
+  border-color: rgba(255, 29, 45, .38);
+  background:
+    linear-gradient(145deg, rgba(19, 20, 23, .94), rgba(5, 5, 8, .84)),
+    linear-gradient(90deg, rgba(255, 29, 45, .14), transparent);
+  box-shadow: 0 0 34px rgba(255, 29, 45, .13), inset 0 1px 0 rgba(245, 247, 248, .08);
+}
+
+.jarvis-screen.theme-matrix .jarvis-nav-item.active {
+  background: linear-gradient(90deg, rgba(0, 255, 65, .28), rgba(0, 63, 18, .64));
+  box-shadow: inset 3px 0 0 #baffc9, 0 0 32px rgba(0, 255, 65, .22);
+}
+
+.jarvis-screen.theme-ultron .jarvis-nav-item.active {
+  background:
+    linear-gradient(90deg, rgba(255, 29, 45, .8), rgba(36, 37, 41, .72)),
+    linear-gradient(135deg, transparent 0 48%, rgba(242, 244, 245, .18) 49% 51%, transparent 52%);
+  box-shadow: inset 3px 0 0 #f2f4f5, 0 0 36px rgba(255, 29, 45, .28);
+}
+
+.jarvis-screen.theme-matrix .jarvis-message-card:hover,
+.jarvis-screen.theme-matrix .jarvis-card:hover {
+  border-color: rgba(186, 255, 201, .55);
+  box-shadow: 0 22px 62px rgba(0, 0, 0, .48), 0 0 44px rgba(0, 255, 65, .22);
+}
+
+.jarvis-screen.theme-ultron .jarvis-message-card:hover,
+.jarvis-screen.theme-ultron .jarvis-card:hover {
+  border-color: rgba(242, 244, 245, .38);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .56), 0 0 48px rgba(255, 29, 45, .28);
+}
+
+.jarvis-screen.theme-matrix .cyan,
+.jarvis-screen.theme-matrix .jarvis-brand-title,
+.jarvis-screen.theme-matrix .jarvis-card-title h2,
+.jarvis-screen.theme-matrix .jarvis-nav-item.active em {
+  color: #baffc9 !important;
+  text-shadow: 0 0 18px rgba(0, 255, 65, .6);
+}
+
+.jarvis-screen.theme-ultron .cyan,
+.jarvis-screen.theme-ultron .jarvis-brand-title,
+.jarvis-screen.theme-ultron .jarvis-card-title h2,
+.jarvis-screen.theme-ultron .jarvis-nav-item.active em {
+  color: #f2f4f5 !important;
+  text-shadow: 0 0 18px rgba(255, 29, 45, .72), 0 0 4px rgba(255, 255, 255, .35);
+}
+
+.jarvis-screen.theme-matrix .jarvis-brand-sub,
+.jarvis-screen.theme-matrix .jarvis-sidebar h3,
+.jarvis-screen.theme-matrix .jarvis-message-meta,
+.jarvis-screen.theme-matrix .jarvis-metrics span {
+  color: rgba(127, 255, 161, .68);
+}
+
+.jarvis-screen.theme-ultron .jarvis-brand-sub,
+.jarvis-screen.theme-ultron .jarvis-sidebar h3,
+.jarvis-screen.theme-ultron .jarvis-message-meta,
+.jarvis-screen.theme-ultron .jarvis-metrics span {
+  color: rgba(210, 215, 220, .68);
+}
+
+.jarvis-screen.theme-matrix .jarvis-input-row input {
+  border-color: rgba(0, 255, 65, .28);
+  background: rgba(0, 13, 6, .86);
+  color: #e6ffec;
+}
+
+.jarvis-screen.theme-ultron .jarvis-input-row input {
+  border-color: rgba(242, 244, 245, .16);
+  background: linear-gradient(180deg, rgba(16, 17, 20, .92), rgba(5, 5, 7, .86));
+  color: #f4f6f7;
+}
+
+.jarvis-screen.theme-ultron .send-btn {
+  background: linear-gradient(180deg, #f2f4f5, #8d949c 46%, #ff1d2d);
+  border-color: rgba(242, 244, 245, .42);
+  color: #060607;
+}
+
+.jarvis-screen.theme-matrix .send-btn {
+  background: linear-gradient(180deg, #baffc9, #00ff41 46%, #006b1b);
+  border-color: rgba(186, 255, 201, .44);
+  color: #001607;
+}
+
+@keyframes matrixRain {
+  to {
+    background-position:
+      4% 240%,
+      12% 215%,
+      28% 230%,
+      48% 210%,
+      74% 226%,
+      88% 208%,
+      0 46%;
+  }
+}
+
+@keyframes ultronScan {
+  0%, 100% {
+    filter: brightness(.86) contrast(1.05);
+    opacity: .58;
+  }
+  50% {
+    filter: brightness(1.2) contrast(1.2);
+    opacity: .86;
+  }
+}
+
 .jarvis-metrics {
   grid-template-columns: repeat(4, minmax(78px, 1fr)) minmax(220px, 15vw) minmax(180px, 12vw);
 }
@@ -62,6 +283,73 @@
   border-color: rgba(69, 232, 155, .42);
   color: #baffdb;
   box-shadow: 0 0 18px rgba(69, 232, 155, .18);
+}
+
+.voice-btn {
+  font-size: 12px !important;
+  font-weight: 800;
+  letter-spacing: .8px;
+}
+
+.voice-btn.active {
+  border-color: rgba(69, 232, 155, .72);
+  background: radial-gradient(circle, rgba(69, 232, 155, .34), rgba(5, 18, 32, .92));
+  box-shadow: 0 0 34px rgba(69, 232, 155, .34), inset 0 0 18px rgba(69, 232, 155, .12);
+  color: #dffff0;
+}
+
+.voice-btn:disabled {
+  opacity: .46;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.jarvis-voice-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 20px;
+  margin: 6px 0 -4px 72px;
+  color: rgba(155, 201, 218, .82);
+  font-size: calc(11px * var(--ui-scale));
+  letter-spacing: .8px;
+  overflow: hidden;
+}
+
+.jarvis-voice-status span {
+  border: 1px solid rgba(126, 231, 255, .16);
+  border-radius: 999px;
+  background: rgba(5, 18, 32, .68);
+  color: #7ee7ff;
+  padding: 3px 8px;
+  font-size: calc(10px * var(--ui-scale));
+  font-weight: 800;
+}
+
+.jarvis-voice-status b {
+  color: rgba(219, 246, 255, .88);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.jarvis-voice-status em {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(126, 231, 255, .78);
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-voice-status.active span {
+  border-color: rgba(69, 232, 155, .48);
+  color: #baffdb;
+  box-shadow: 0 0 18px rgba(69, 232, 155, .18);
+}
+
+.jarvis-voice-status.unsupported span {
+  border-color: rgba(255, 212, 90, .32);
+  color: #ffe6a2;
 }
 
 .jarvis-sidebar h3 {
@@ -493,4 +781,77 @@
     left: 58%;
     width: 300px;
   }
+}
+
+.jarvis-sidebar {
+  overflow-y: auto;
+  padding-bottom: 1.2vh;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(5, 216, 255, .38) rgba(5, 18, 32, .4);
+}
+
+.jarvis-user-card {
+  position: sticky;
+  left: auto;
+  right: auto;
+  bottom: 0;
+  width: 100%;
+  min-height: 74px;
+  height: auto;
+  margin-top: 1.2vh;
+  padding: 12px 4px 4px;
+  background: linear-gradient(180deg, rgba(5, 18, 32, .08), rgba(5, 18, 32, .96) 30%, rgba(2, 8, 16, .98));
+  z-index: 3;
+}
+
+.jarvis-user-card > div:nth-child(2) {
+  min-width: 0;
+}
+
+.jarvis-user-card strong,
+.jarvis-user-card p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-file {
+  min-height: 58px;
+  height: auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.jarvis-file > div {
+  min-width: 0;
+}
+
+.jarvis-file b,
+.jarvis-file small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-file button {
+  min-width: 32px;
+}
+
+.jarvis-input-panel {
+  height: auto;
+  min-height: 9.6vh;
+}
+
+.jarvis-chip-row {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.jarvis-chip-row button {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

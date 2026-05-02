@@ -12,6 +12,8 @@ import "./dashboard-modules.css";
 type Props = {
   activeNav: string;
   onSend: (message: string) => void;
+  dashboardTheme?: "jarvis" | "matrix" | "ultron";
+  onThemeChange?: (theme: "jarvis" | "matrix" | "ultron") => void;
 };
 
 function pretty(value: unknown) {
@@ -32,7 +34,7 @@ function countHint(data: unknown) {
   return "Antwort erhalten";
 }
 
-export function DashboardModules({ activeNav, onSend }: Props) {
+export function DashboardModules({ activeNav, onSend, dashboardTheme = "jarvis", onThemeChange }: Props) {
   const module = moduleMap[activeNav];
   const [results, setResults] = useState<ResultState>({});
   const [query, setQuery] = useState("");
@@ -82,8 +84,8 @@ export function DashboardModules({ activeNav, onSend }: Props) {
     return <RuntimeControlPanel onSend={onSend} />;
   }
 
-  if (activeNav === "Update Center") {
-    return <UpdateCenterPanel onSend={onSend} />;
+  if (activeNav === "Optionen / Updates" || activeNav === "Update Center") {
+    return <UpdateCenterPanel onSend={onSend} dashboardTheme={dashboardTheme} onThemeChange={onThemeChange || (() => {})} />;
   }
 
   if (activeNav === "LifeOS") {

@@ -1,16 +1,21 @@
 """
 Block 1 Tests — Audit Log, Agent Registry, Tool Registry
 """
+
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 
 class TestAuditLog:
     def test_log_action(self, tmp_path, monkeypatch):
         import audit_log
+
         monkeypatch.setattr(audit_log, "AUDIT_FILE", tmp_path / "audit_log.json")
-        entry = audit_log.log_action("test_action", agent="sap", tool="sap_text_generate", risk_level="low")
+        entry = audit_log.log_action(
+            "test_action", agent="sap", tool="sap_text_generate", risk_level="low"
+        )
         assert entry["action"] == "test_action"
         assert entry["agent"] == "sap"
         assert entry["risk_level"] == "low"
@@ -18,6 +23,7 @@ class TestAuditLog:
 
     def test_get_entries_leer(self, tmp_path, monkeypatch):
         import audit_log
+
         monkeypatch.setattr(audit_log, "AUDIT_FILE", tmp_path / "audit_log.json")
         entries = audit_log.get_entries()
         assert isinstance(entries, list)
@@ -25,6 +31,7 @@ class TestAuditLog:
 
     def test_filter_by_agent(self, tmp_path, monkeypatch):
         import audit_log
+
         monkeypatch.setattr(audit_log, "AUDIT_FILE", tmp_path / "audit_log.json")
         audit_log.log_action("a1", agent="sap")
         audit_log.log_action("a2", agent="vde")
@@ -35,6 +42,7 @@ class TestAuditLog:
 
     def test_filter_has_error(self, tmp_path, monkeypatch):
         import audit_log
+
         monkeypatch.setattr(audit_log, "AUDIT_FILE", tmp_path / "audit_log.json")
         audit_log.log_action("ok_action", agent="core", error=None)
         audit_log.log_action("bad_action", agent="core", error="Etwas ist schiefgelaufen")
@@ -44,6 +52,7 @@ class TestAuditLog:
 
     def test_stats(self, tmp_path, monkeypatch):
         import audit_log
+
         monkeypatch.setattr(audit_log, "AUDIT_FILE", tmp_path / "audit_log.json")
         audit_log.log_action("a1", agent="sap", risk_level="low")
         audit_log.log_action("a2", agent="sap", risk_level="high", error="err")
@@ -54,6 +63,7 @@ class TestAuditLog:
 
     def test_corrupt_file_gibt_leer(self, tmp_path, monkeypatch):
         import audit_log
+
         f = tmp_path / "audit_log.json"
         f.write_text("{kaputt}", encoding="utf-8")
         monkeypatch.setattr(audit_log, "AUDIT_FILE", f)
@@ -64,6 +74,7 @@ class TestAuditLog:
 class TestAgentRegistry:
     def _patch(self, monkeypatch, tmp_path):
         import agent_registry
+
         monkeypatch.setattr(agent_registry, "REGISTRY_FILE", tmp_path / "agents.json")
         return agent_registry
 
@@ -111,6 +122,7 @@ class TestAgentRegistry:
 class TestToolRegistry:
     def _patch(self, monkeypatch, tmp_path):
         import tool_registry
+
         monkeypatch.setattr(tool_registry, "TOOLS_FILE", tmp_path / "tools.json")
         return tool_registry
 

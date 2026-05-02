@@ -5,9 +5,17 @@ def test_chat_persists_session_and_returns_metadata(client, monkeypatch, tmp_pat
     from routes import local_chat
 
     monkeypatch.setattr(local_chat, "CHAT_SESSIONS_FILE", tmp_path / "chat_sessions.json")
-    monkeypatch.setattr(local_chat, "call_llm", lambda messages, model, temperature, stream=False: "Hallo, ich bin bereit.")
-    monkeypatch.setattr(local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: [])
-    monkeypatch.setattr(local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": [])
+    monkeypatch.setattr(
+        local_chat,
+        "call_llm",
+        lambda messages, model, temperature, stream=False: "Hallo, ich bin bereit.",
+    )
+    monkeypatch.setattr(
+        local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: []
+    )
+    monkeypatch.setattr(
+        local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": []
+    )
     monkeypatch.setattr(local_chat.usejarvis_runtime, "audit", lambda *args, **kwargs: None)
 
     response = client.post("/api/chat", json={"message": "test", "history": []})
@@ -35,9 +43,15 @@ def test_chat_session_can_be_renamed_and_deleted(client, monkeypatch, tmp_path):
     from routes import local_chat
 
     monkeypatch.setattr(local_chat, "CHAT_SESSIONS_FILE", tmp_path / "chat_sessions.json")
-    monkeypatch.setattr(local_chat, "call_llm", lambda messages, model, temperature, stream=False: "Antwort")
-    monkeypatch.setattr(local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: [])
-    monkeypatch.setattr(local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": [])
+    monkeypatch.setattr(
+        local_chat, "call_llm", lambda messages, model, temperature, stream=False: "Antwort"
+    )
+    monkeypatch.setattr(
+        local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: []
+    )
+    monkeypatch.setattr(
+        local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": []
+    )
     monkeypatch.setattr(local_chat.usejarvis_runtime, "audit", lambda *args, **kwargs: None)
 
     session_id = client.post("/api/chat", json={"message": "alter titel"}).json()["session_id"]
@@ -56,9 +70,17 @@ def test_chat_stream_emits_deltas_and_persists_session(client, monkeypatch, tmp_
     from routes import local_chat
 
     monkeypatch.setattr(local_chat, "CHAT_SESSIONS_FILE", tmp_path / "chat_sessions.json")
-    monkeypatch.setattr(local_chat, "call_llm", lambda messages, model, temperature, stream=False: iter(["Hallo", " Welt"]))
-    monkeypatch.setattr(local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: [])
-    monkeypatch.setattr(local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": [])
+    monkeypatch.setattr(
+        local_chat,
+        "call_llm",
+        lambda messages, model, temperature, stream=False: iter(["Hallo", " Welt"]),
+    )
+    monkeypatch.setattr(
+        local_chat.usejarvis_runtime, "memory_context", lambda user_text, limit=6: []
+    )
+    monkeypatch.setattr(
+        local_chat.usejarvis_runtime, "extract_facts_from_text", lambda text, source_ref="": []
+    )
     monkeypatch.setattr(local_chat.usejarvis_runtime, "audit", lambda *args, **kwargs: None)
 
     with client.stream("POST", "/api/chat/stream", json={"message": "stream test"}) as response:

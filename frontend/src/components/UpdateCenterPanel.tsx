@@ -35,9 +35,19 @@ type UpdateCenterStatus = {
   logs?: string[];
 };
 
+type DashboardTheme = "jarvis" | "matrix" | "ultron";
+
 type Props = {
   onSend: (message: string) => void;
+  dashboardTheme: DashboardTheme;
+  onThemeChange: (theme: DashboardTheme) => void;
 };
+
+const themeOptions: Array<{ id: DashboardTheme; label: string; description: string; accent: string }> = [
+  { id: "jarvis", label: "JARVIS", description: "Klassisches blaues HUD mit Orb-Fokus.", accent: "Cyan" },
+  { id: "matrix", label: "MATRIX", description: "Gruener Datenstrom fuer Analyse-Modus.", accent: "Gruen" },
+  { id: "ultron", label: "ULTRON", description: "Roter Kontrollmodus mit Warn-Kontrast.", accent: "Rot" },
+];
 
 function statusLabel(status: UpdateStatus) {
   if (status === "ok") return "AKTUELL";
@@ -53,7 +63,7 @@ function formatValue(value: unknown) {
   try { return JSON.stringify(value); } catch { return String(value); }
 }
 
-export function UpdateCenterPanel({ onSend }: Props) {
+export function UpdateCenterPanel({ onSend, dashboardTheme, onThemeChange }: Props) {
   const [status, setStatus] = useState<UpdateCenterStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState("jarvis_core");
@@ -90,9 +100,9 @@ export function UpdateCenterPanel({ onSend }: Props) {
     <section className="update-center-shell">
       <div className="update-center-header">
         <div>
-          <small>KERN / WARTUNG</small>
-          <h1>Update Center</h1>
-          <p>{status?.policy || "JARVIS prueft Updates automatisch. Installiert wird erst nach klarer Bestaetigung."}</p>
+          <small>SYSTEM / OPTIONEN</small>
+          <h1>Optionen / Updates</h1>
+          <p>{status?.policy || "JARVIS prueft Updates automatisch. Installiert wird erst nach klarer Bestaetigung."} Theme-Wechsel wirken sofort auf diese Oberflaeche.</p>
         </div>
         <div className="update-center-actions">
           <button onClick={() => void loadStatus(true)} disabled={loading}>{loading ? "PRUEFT..." : "JETZT PRUEFEN"}</button>
@@ -108,6 +118,30 @@ export function UpdateCenterPanel({ onSend }: Props) {
       </div>
 
       {error && <div className="update-center-error">{error}</div>}
+
+      <div className="update-theme-panel">
+        <div className="update-theme-title">
+          <div>
+            <small>OBERFLAECHE</small>
+            <h2>Theme wechseln</h2>
+          </div>
+          <strong>{dashboardTheme.toUpperCase()}</strong>
+        </div>
+        <div className="update-theme-list">
+          {themeOptions.map((theme) => (
+            <button
+              type="button"
+              key={theme.id}
+              className={`update-theme-option ${theme.id} ${dashboardTheme === theme.id ? "active" : ""}`}
+              onClick={() => onThemeChange(theme.id)}
+            >
+              <span>{theme.accent}</span>
+              <b>{theme.label}</b>
+              <em>{theme.description}</em>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="update-center-grid">
         <div className="update-component-list">
