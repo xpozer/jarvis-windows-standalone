@@ -8,6 +8,13 @@ export type AddonVisibilityItem = {
   defaultVisible: boolean;
 };
 
+export type AddonVisibilityPreset = {
+  id: "minimal" | "standard" | "all";
+  label: string;
+  description: string;
+  addonIds: string[];
+};
+
 export const ADDON_VISIBILITY_STORAGE_KEY = "jarvis_visible_addons";
 export const ADDON_VISIBILITY_EVENT = "jarvis:addon-visibility-changed";
 
@@ -29,8 +36,30 @@ export const addonVisibilityItems: AddonVisibilityItem[] = [
   { id: "api", nav: "API-Konsole", label: "API Konsole", group: "tools", description: "API Endpunkte und technische Pruefung.", defaultVisible: true }
 ];
 
+export const addonVisibilityPresets: AddonVisibilityPreset[] = [
+  {
+    id: "minimal",
+    label: "Minimal",
+    description: "Nur Alltag, Dialog und direkte Assistenz. Gut fuer ruhige Arbeitsphasen.",
+    addonIds: ["lifeos", "knowledge", "automation", "diagnostics"]
+  },
+  {
+    id: "standard",
+    label: "Standard",
+    description: "Ausgewogene Ansicht fuer normale Nutzung ohne Werkzeug Ueberladung.",
+    addonIds: ["lifeos", "knowledge", "streams", "automation", "runtime", "diagnostics", "agents", "memory", "security", "web"]
+  },
+  {
+    id: "all",
+    label: "Alles sichtbar",
+    description: "Alle Addons anzeigen, wenn du bewusst tief im System arbeitest.",
+    addonIds: addonVisibilityItems.map((item) => item.id)
+  }
+];
+
 export function defaultVisibleAddonIds() {
-  return addonVisibilityItems.filter((item) => item.defaultVisible).map((item) => item.id);
+  const standard = addonVisibilityPresets.find((preset) => preset.id === "standard");
+  return standard ? standard.addonIds : addonVisibilityItems.filter((item) => item.defaultVisible).map((item) => item.id);
 }
 
 export function loadVisibleAddonIds() {
@@ -52,6 +81,11 @@ export function saveVisibleAddonIds(ids: string[]) {
   localStorage.setItem(ADDON_VISIBILITY_STORAGE_KEY, JSON.stringify(clean));
   window.dispatchEvent(new CustomEvent(ADDON_VISIBILITY_EVENT, { detail: clean }));
   return clean;
+}
+
+export function applyAddonVisibilityPreset(presetId: AddonVisibilityPreset["id"]) {
+  const preset = addonVisibilityPresets.find((item) => item.id === presetId);
+  return saveVisibleAddonIds(preset?.addonIds || defaultVisibleAddonIds());
 }
 
 export function findAddonByNav(nav: string) {
