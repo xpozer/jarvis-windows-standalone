@@ -1,6 +1,7 @@
 // frontend/src/routes/StackRouterApp.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { CommandPalette, type CommandPaletteItem } from "@/components/command/CommandPalette";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { HotkeyBadge } from "@/components/dashboard/HotkeyBadge";
 import { Panel } from "@/components/dashboard/Panel";
@@ -11,6 +12,8 @@ import { StackPagePlaceholder } from "./StackPagePlaceholder";
 
 export function StackRouterApp() {
   const [activePageId, setActivePageId] = useState(dashboardPages[0].id);
+  const commandPaletteOpen = useDashboardStore((state) => state.commandPaletteOpen);
+  const setCommandPaletteOpen = useDashboardStore((state) => state.setCommandPaletteOpen);
   const setActivePage = useDashboardStore((state) => state.setActivePage);
   const activePage = useMemo(() => dashboardPages.find((page) => page.id === activePageId) ?? dashboardPages[0], [activePageId]);
 
@@ -20,18 +23,35 @@ export function StackRouterApp() {
     window.history.replaceState(null, "", `?stackPreview=1&page=${page.id}`);
   }
 
+  const commandItems = useMemo<CommandPaletteItem[]>(() => buildCommandItems(selectPage), []);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [setCommandPaletteOpen]);
+
   return (
-    <DashboardShell
-      header={<StackHeader activePage={activePage} />}
-      leftRail={<StackNavigation activePage={activePage} onSelectPage={selectPage} />}
-      main={<StackPagePlaceholder page={activePage} />}
-      rightRail={<StackRouteDetails page={activePage} />}
-      assistantRail={<StackAssistantRail page={activePage} />}
-    />
+    <>
+      <DashboardShell
+        header={<StackHeader activePage={activePage} onOpenCommand={() => setCommandPaletteOpen(true)} />}
+        leftRail={<StackNavigation activePage={activePage} onSelectPage={selectPage} />}
+        main={<StackPagePlaceholder page={activePage} />}
+        rightRail={<StackRouteDetails page={activePage} />}
+        assistantRail={<StackAssistantRail page={activePage} />}
+      />
+      <CommandPalette open={commandPaletteOpen} items={commandItems} onOpenChange={setCommandPaletteOpen} />
+    </>
   );
 }
 
-function StackHeader({ activePage }: { activePage: DashboardPage }) {
+function StackHeader({ activePage, onOpenCommand }: { activePage: DashboardPage; onOpenCommand: () => void }) {
   return (
     <header className="flex h-[72px] items-center justify-between gap-4 px-5">
       <div>
@@ -40,7 +60,9 @@ function StackHeader({ activePage }: { activePage: DashboardPage }) {
       </div>
       <div className="flex items-center gap-4">
         <StatusDot status="ok" label="preview only" />
-        <HotkeyBadge label="Command" keys={["Ctrl", "K"]} />
+        <button type="button" onClick={onOpenCommand} className="rounded-md border border-border px-2 py-1 hover:border-primary" aria-label="Command Palette oeffnen">
+          <HotkeyBadge label="Command" keys={["Ctrl", "K"]} />
+        </button>
       </div>
     </header>
   );
@@ -113,4 +135,29 @@ function StackAssistantRail({ page }: { page: DashboardPage }) {
       </div>
     </Panel>
   );
+}
+
+function buildCommandItems(selectPage: (page: DashboardPage) => void): CommandPaletteItem[] {
+  const pageItems: CommandPaletteItem[] = dashboardPages.map((page) => ({
+    id: `page-${page.id}`,
+    title: page.title,
+    subtitle: page.description,
+    group: "Pages",
+    hint: page.path,
+    keywords: [page.id, page.group, page.path],
+    onSelect: () => selectPage(page),
+  }));
+
+  const quickActions: CommandPaletteItem[] = [
+    { id: "action-reminder", title: "Neuer Reminder", subtitle: "Reminder im lokalen System vorbereiten", group: "Quick Actions", hint: "soon", keywords: ["reminder", "erinnerung", "quick capture"] },
+    { id: "action-banf", title: "BANF vorbereiten", subtitle: "Beschaffungsidee als BANF Draft ablegen", group: "Quick Actions", hint: "soon", keywords: ["banf", "material", "sap"] },
+    { id: "action-mail", title: "Mail Entwurf", subtitle: "Mail Vorlage fuer Rueckfrage oder Erinnerung", group: "Quick Actions", hint: "soon", keywords: ["mail", "outlook", "draft"] },
+  ];
+
+  const settings: CommandPaletteItem[] = [
+    { id: "setting-wireframe", title: "Wireframe Theme", subtitle: "Schematic Mode vorbereiten", group: "Settings", hint: "theme", keywords: ["theme", "wireframe", "schematic"] },
+    { id: "setting-reduced-motion", title: "Reduced Motion pruefen", subtitle: "Animationsarme Darstellung respektieren", group: "Settings", hint: "a11y", keywords: ["motion", "accessibility", "bewegung"] },
+  ];
+
+  return [...pageItems, ...quickActions, ...settings];
 }
