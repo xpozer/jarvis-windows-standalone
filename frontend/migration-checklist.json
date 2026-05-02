@@ -1,0 +1,31 @@
+{
+  "phase1_stack_skeleton": {
+    "typecheck": false,
+    "tests": false,
+    "stack_preview_build": false,
+    "performance_budget": false,
+    "accessibility_checklist": false,
+    "manual_preview_review": false
+  },
+  "phase2_real_data_sidebar": {
+    "real_dashboard_metrics": false,
+    "websocket_stream": false,
+    "ai_sidebar_context": false,
+    "risk_confirmation_flow": false,
+    "offline_stale_states": false,
+    "reduced_motion_verified": false
+  },
+  "phase3_all_pages": {
+    "all_13_pages_have_contracts": true,
+    "all_13_pages_have_real_data_or_offline_state": false,
+    "keyboard_navigation_verified": false,
+    "empty_states_verified": false,
+    "error_states_verified": false
+  },
+  "phase4_replace_legacy_html": {
+    "docs_index_replacement_approved": false,
+    "fallback_commit_documented": false,
+    "ci_green": false,
+    "manual_signoff": false
+  }
+}
