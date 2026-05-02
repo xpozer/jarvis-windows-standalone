@@ -1,9 +1,3 @@
-"""
-JARVIS SAPAgent
-Zustaendig fuer: SAP PM Texte, Transaktionshilfe,
-Auftragsbeschreibungen, Leistungsnachweise, VDE-Norm-Vorschlaege.
-"""
-
 from .base_agent import BaseAgent, AgentContext, AgentResult
 from persistent_memory import AgentMemory
 
@@ -32,12 +26,11 @@ class SAPAgent(BaseAgent):
     description = "SAP PM Texte, Transaktionen, Leistungsnachweise, VDE-Normen"
 
     def run(self, ctx: AgentContext) -> AgentResult:
-        self.mem = AgentMemory("sap")
+        mem = AgentMemory("sap")
         tool_log = ["SAP-Kontext geladen"]
-        # Persistente Daten in Kontext laden
-        mem_summary = self.mem.get_summary()
+        mem_summary = mem.get_summary()
         if mem_summary:
-            tool_log.append(f"Memory: {len(self.mem.get_all())} Eintraege")
+            tool_log.append(f"Memory: {len(mem.get_all())} Eintraege")
         skill_ctx = self.get_skill_context(ctx)
         sys_content = SYSTEM + skill_ctx
         if mem_summary:
@@ -51,6 +44,8 @@ class SAPAgent(BaseAgent):
         return AgentResult(agent=self.name, content=content, tool_log=tool_log)
 
     def run_stream(self, ctx):
+        mem = AgentMemory("sap")
+        mem_summary = mem.get_summary()
         skill_ctx = self.get_skill_context(ctx)
         sys_content = SYSTEM + skill_ctx
         if mem_summary:

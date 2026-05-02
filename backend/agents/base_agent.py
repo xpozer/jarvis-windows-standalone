@@ -1,8 +1,3 @@
-"""
-JARVIS BaseAgent
-Gemeinsame Basis fuer alle Sub-Agenten.
-"""
-
 import json
 from typing import Generator
 from dataclasses import dataclass, field
@@ -49,7 +44,8 @@ class BaseAgent:
         if text.startswith("```"):
             parts = text.split("```")
             text = parts[1] if len(parts) > 1 else text
-            if text.startswith("json"): text = text[4:].lstrip("\n")
+            if text.startswith("json"):
+                text = text[4:].lstrip("\n")
         try:
             return json.loads(text.strip())
         except Exception:

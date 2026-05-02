@@ -23,10 +23,8 @@ SKILL.md Format:
   Du kannst Kabelquerschnitte nach VDE 0298-4 berechnen...
 """
 
-import os
 import re
 import yaml
-import json
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -155,8 +153,9 @@ class SkillManager:
         return "\n".join(lines)
 
     def execute_script(self, skill_name: str, script_name: str,
-                       args: list[str] = []) -> dict:
+                       args: list[str] | None = None) -> dict:
         """Fuehrt ein Skript aus einem Skill aus."""
+        args = args or []
         skill = self.skills.get(skill_name)
         if not skill:
             return {"error": f"Skill '{skill_name}' nicht gefunden"}

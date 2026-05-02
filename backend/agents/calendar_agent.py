@@ -1,9 +1,3 @@
-"""
-JARVIS CalendarAgent
-Zustaendig fuer: Terminplanung, KW-Berechnung,
-Wartungsintervalle, Prüffristen, Schichtplanung.
-"""
-
 import datetime
 from .base_agent import BaseAgent, AgentContext, AgentResult
 from persistent_memory import AgentMemory
@@ -41,8 +35,8 @@ class CalendarAgent(BaseAgent):
 
     def run(self, ctx: AgentContext) -> AgentResult:
         cal_ctx = get_calendar_context()
-        self.mem = AgentMemory("calendar")
-        mem_summary = self.mem.get_summary()
+        mem = AgentMemory("calendar")
+        mem_summary = mem.get_summary()
         tool_log = [f"Kalender-Kontext: {cal_ctx.splitlines()[0]}"]
         sys_extra = f"\n\nAktuell:\n{cal_ctx}"
         if mem_summary:
@@ -57,6 +51,8 @@ class CalendarAgent(BaseAgent):
 
     def run_stream(self, ctx):
         cal_ctx = get_calendar_context()
+        mem = AgentMemory("calendar")
+        mem_summary = mem.get_summary()
         sys_extra = f"\n\nAktuell:\n{cal_ctx}"
         if mem_summary:
             sys_extra += f"\n\nGespeicherter Kontext:\n{mem_summary}"
