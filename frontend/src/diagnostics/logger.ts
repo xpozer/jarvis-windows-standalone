@@ -9,6 +9,20 @@ export interface JarvisLogEntry {
 
 const LOG_KEY = "jarvis_frontend_logs";
 const MAX_LOGS = 250;
+const MOJIBAKE_REPLACEMENTS: Array<[string, string]> = [
+  ["GesprÃ¤ch", "Gespraech"],
+  ["gelÃ¶scht", "geloescht"],
+  ["GedÃ¤chtnis", "Gedaechtnis"],
+  ["geprÃ¼ft", "geprueft"],
+  ["Ã¶", "oe"],
+  ["Ã¤", "ae"],
+  ["Ã¼", "ue"],
+  ["ÃŸ", "ss"],
+  ["Ô£ô", "OK"],
+  ["Ôöé", "|"],
+  ["Ã¢â€žÂ¢", ""],
+  ["Ã¢", ""],
+];
 
 function normaliseMessage(value: unknown): string {
   if (value instanceof Error) {
@@ -39,6 +53,41 @@ function writeStoredLogs(logs: JarvisLogEntry[]) {
   } catch {
     // ignore storage failures
   }
+}
+
+function cleanMojibakeText(value: string) {
+  let clean = value;
+  for (const [from, to] of MOJIBAKE_REPLACEMENTS) clean = clean.split(from).join(to);
+  return clean.replace(/A¢\s*/g, "").replace(/Â\s*/g, "");
+}
+
+function cleanMojibakeNode(root: ParentNode) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes: Text[] = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+  for (const node of nodes) {
+    const next = cleanMojibakeText(node.nodeValue ?? "");
+    if (next !== node.nodeValue) node.nodeValue = next;
+  }
+}
+
+function installMojibakeCleanup() {
+  if (typeof document === "undefined" || typeof MutationObserver === "undefined") return;
+  cleanMojibakeNode(document.body);
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of Array.from(mutation.addedNodes)) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node as Text;
+          const next = cleanMojibakeText(text.nodeValue ?? "");
+          if (next !== text.nodeValue) text.nodeValue = next;
+        } else if (node instanceof Element) {
+          cleanMojibakeNode(node);
+        }
+      }
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 export function addJarvisLog(level: JarvisLogLevel, area: string, value: unknown) {
@@ -107,4 +156,10 @@ if (typeof window !== "undefined") {
       return existingUnhandled.call(window, event);
     }
   };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", installMojibakeCleanup, { once: true });
+  } else {
+    installMojibakeCleanup();
+  }
 }
