@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { CommandPalette, type CommandPaletteItem } from "@/components/command/CommandPalette";
+import { buildCommandPaletteItems } from "@/components/command/commandSources";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { HotkeyBadge } from "@/components/dashboard/HotkeyBadge";
 import { Panel } from "@/components/dashboard/Panel";
@@ -23,7 +24,19 @@ export function StackRouterApp() {
     window.history.replaceState(null, "", `?stackPreview=1&page=${page.id}`);
   }
 
-  const commandItems = useMemo<CommandPaletteItem[]>(() => buildCommandItems(selectPage), []);
+  const commandItems = useMemo<CommandPaletteItem[]>(
+    () => buildCommandPaletteItems({
+      pages: dashboardPages.map((page) => ({
+        id: page.id,
+        title: page.title,
+        path: page.path,
+        group: page.group,
+        description: page.description,
+        onSelect: () => selectPage(page),
+      })),
+    }),
+    [],
+  );
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -135,29 +148,4 @@ function StackAssistantRail({ page }: { page: DashboardPage }) {
       </div>
     </Panel>
   );
-}
-
-function buildCommandItems(selectPage: (page: DashboardPage) => void): CommandPaletteItem[] {
-  const pageItems: CommandPaletteItem[] = dashboardPages.map((page) => ({
-    id: `page-${page.id}`,
-    title: page.title,
-    subtitle: page.description,
-    group: "Pages",
-    hint: page.path,
-    keywords: [page.id, page.group, page.path],
-    onSelect: () => selectPage(page),
-  }));
-
-  const quickActions: CommandPaletteItem[] = [
-    { id: "action-reminder", title: "Neuer Reminder", subtitle: "Reminder im lokalen System vorbereiten", group: "Quick Actions", hint: "soon", keywords: ["reminder", "erinnerung", "quick capture"] },
-    { id: "action-banf", title: "BANF vorbereiten", subtitle: "Beschaffungsidee als BANF Draft ablegen", group: "Quick Actions", hint: "soon", keywords: ["banf", "material", "sap"] },
-    { id: "action-mail", title: "Mail Entwurf", subtitle: "Mail Vorlage fuer Rueckfrage oder Erinnerung", group: "Quick Actions", hint: "soon", keywords: ["mail", "outlook", "draft"] },
-  ];
-
-  const settings: CommandPaletteItem[] = [
-    { id: "setting-wireframe", title: "Wireframe Theme", subtitle: "Schematic Mode vorbereiten", group: "Settings", hint: "theme", keywords: ["theme", "wireframe", "schematic"] },
-    { id: "setting-reduced-motion", title: "Reduced Motion pruefen", subtitle: "Animationsarme Darstellung respektieren", group: "Settings", hint: "a11y", keywords: ["motion", "accessibility", "bewegung"] },
-  ];
-
-  return [...pageItems, ...quickActions, ...settings];
 }
