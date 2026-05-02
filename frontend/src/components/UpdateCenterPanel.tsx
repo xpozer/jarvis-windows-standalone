@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { addonVisibilityItems, defaultVisibleAddonIds, loadVisibleAddonIds, saveVisibleAddonIds } from "../features/dashboard/addonVisibility";
+import { addonVisibilityItems, addonVisibilityPresets, applyAddonVisibilityPreset, defaultVisibleAddonIds, loadVisibleAddonIds, saveVisibleAddonIds } from "../features/dashboard/addonVisibility";
+import type { AddonVisibilityPreset } from "../features/dashboard/addonVisibility";
 import "./update-center-panel.css";
 
 type UpdateStatus = "ok" | "warn" | "error" | "unknown";
@@ -87,6 +88,10 @@ export function UpdateCenterPanel({ onSend, dashboardTheme, onThemeChange }: Pro
     setVisibleAddonIds(saveVisibleAddonIds(defaultVisibleAddonIds()));
   }
 
+  function applyPreset(id: AddonVisibilityPreset["id"]) {
+    setVisibleAddonIds(applyAddonVisibilityPreset(id));
+  }
+
   async function loadStatus(refresh = false) {
     setLoading(true);
     setError("");
@@ -143,6 +148,14 @@ export function UpdateCenterPanel({ onSend, dashboardTheme, onThemeChange }: Pro
           <strong>{hiddenAddonCount ? `${hiddenAddonCount} AUS` : "ALLE AN"}</strong>
         </div>
         <p className="addon-visibility-copy">Blende Module aus, die du gerade nicht brauchst. Die Funktionen bleiben vorhanden und koennen jederzeit wieder aktiviert werden.</p>
+        <div className="addon-preset-list">
+          {addonVisibilityPresets.map((preset) => (
+            <button type="button" key={preset.id} onClick={() => applyPreset(preset.id)}>
+              <b>{preset.label}</b>
+              <span>{preset.description}</span>
+            </button>
+          ))}
+        </div>
         <div className="addon-visibility-grid">
           {addonVisibilityItems.map((addon) => {
             const enabled = visibleAddonSet.has(addon.id);
@@ -161,7 +174,7 @@ export function UpdateCenterPanel({ onSend, dashboardTheme, onThemeChange }: Pro
           })}
         </div>
         <div className="addon-visibility-actions">
-          <button type="button" onClick={resetAddons}>ALLE STANDARDMODULE EINBLENDEN</button>
+          <button type="button" onClick={resetAddons}>STANDARD WIEDERHERSTELLEN</button>
         </div>
       </div>
 
