@@ -41,6 +41,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
 | JARVIS Sound Layer | erledigt | Lokaler Web Audio Sound Layer vorhanden. Re Unlock nach Reload ist vorbereitet |
 | Voice / Push to Talk | erledigt | Chat Mikrofon nutzt Browser Speech Recognition bewusst per gedruecktem Button, keine Daueraufnahme |
+| Automation Audit Log | erledigt | Echtes Backend liefert `/automation/audit`; vorbereiten, bestaetigen, verwerfen und ausfuehren von Aktionen wird protokolliert |
 | Installer Readiness Check | erledigt | Nicht destruktiver Vorab Check für Installer Voraussetzungen vorhanden |
 | Backend Health Check | erledigt | Startskript prüft Port 8000 und `/health`, bevor JARVIS als bereit gilt |
 | DiagCenter Backend | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
@@ -214,7 +215,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Mittel | Finance und Contract Radar | vorbereitet | echte Vertrags- und Fristdaten nur lokal pflegen |
 | Mittel | Memory und Knowledge Layer | vorbereitet | lokale Regeln, Notizen und Quellen weiter ausbauen |
 | Niedrig | Voice und Push to Talk | erledigt | Browser Speech Recognition angebunden, TTS optional ueber Voice Settings |
-| Niedrig | Automation Layer | vorbereitet | Audit Log fuer echte Ausfuehrungen anbinden |
+| Niedrig | Automation Layer | erledigt | Audit Log fuer echte Ausfuehrungen ist im Backend angebunden |
 | Niedrig | Release ZIP | offen | GitHub Release Workflow mit echtem Tag testen |
 
 ## Roadmap Dokumente
@@ -242,16 +243,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach Voice und den vorbereiteten LifeOS Roadmap Modulen ist der nächste sinnvolle Schritt der Automation Layer mit echtem Audit Log.
+Nach Voice, den vorbereiteten LifeOS Roadmap Modulen und dem echten Automation Audit Log ist der nächste sinnvolle Schritt der Release ZIP und Installer Test.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Automation Audit Log anbinden
-2. Release ZIP Workflow testen
-3. Installer Endanwender Test durchführen
-4. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
-5. Voice UX mit echtem Mikrofon im Browser testen
+1. Release ZIP Workflow testen
+2. Installer Endanwender Test durchführen
+3. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
+4. Voice UX mit echtem Mikrofon im Browser testen
 ```
 
 ## Pflege Ablauf

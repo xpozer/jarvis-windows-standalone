@@ -4,6 +4,19 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.25] - 2026-05-02
+
+### Added
+
+- Das echte FastAPI Backend liefert jetzt `GET /automation/audit` und `POST /automation/audit`.
+- Vorbereitete, bestaetigte, verworfene und ausgefuehrte Legacy Actions schreiben Automation Audit Eintraege.
+- Die Sicherheitszentrale erhaelt wieder eine flache `actions` Liste mit Legacy Actions und UseJARVIS Authority Gate Eintraegen.
+
+### Fixed
+
+- Der sichtbare Automation Cluster griff auf `/automation/audit` zu, der bisher nur in der kleinen `jarvis/api` App vorhanden war.
+- Automation Audit Daten aus Legacy Audit Log und UseJARVIS Runtime Audit werden fuer das Frontend vereinheitlicht.
+
 ## [B6.6.24] - 2026-05-02
 
 ### Added

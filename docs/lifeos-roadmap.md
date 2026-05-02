@@ -20,7 +20,7 @@ LifeOS bleibt Local First. Private Daten gehören in lokale Dateien wie `config/
 | Mittel | Finance und Contract Radar | Verträge, Rechnungen, Abos und Fristen lokal verwalten | vorbereitet |
 | Mittel | Memory und Knowledge Layer | lokale Notizen, Regeln, Dokumente und Projektwissen bündeln | vorbereitet |
 | Niedrig | Voice und Push to Talk | lokale Sprachsteuerung mit Mikrofon default off planen | erledigt |
-| Niedrig | Automation Layer | lokale Automationen mit Freigabe und Audit Log vorbereiten | vorbereitet |
+| Niedrig | Automation Layer | lokale Automationen mit Freigabe und Audit Log vorbereiten | erledigt |
 
 ## 1. Daily Command Center
 
@@ -409,7 +409,7 @@ Akzeptanzkriterien:
 ```text
 [x] jede Automation hat Risiko Level
 [x] kritische Aktionen brauchen Freigabe
-[ ] jede Ausführung wird lokal protokolliert
+[x] jede Ausführung wird lokal protokolliert
 ```
 
 ## Empfohlene Reihenfolge

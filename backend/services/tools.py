@@ -33,11 +33,26 @@ async def api_tools_run(req: Request):
 def api_actions_pending():
     legacy = core.api_actions_pending()
     runtime_actions = [item for item in usejarvis_runtime.list_action_requests(limit=100) if item.get("status") == "pending_approval"]
+    legacy_actions = legacy.get("actions", []) if isinstance(legacy, dict) else []
+    mapped_runtime = [
+        {
+            "id": item.get("id"),
+            "type": item.get("action_type"),
+            "risk": item.get("risk"),
+            "status": item.get("status"),
+            "message": item.get("summary"),
+            "created_at": item.get("created_at"),
+            "payload": item.get("payload") if isinstance(item.get("payload"), dict) else {},
+            "runtime": "usejarvis",
+        }
+        for item in runtime_actions
+    ]
     return {
         "ok": True,
+        "actions": [*legacy_actions, *mapped_runtime],
         "legacy": legacy,
         "runtime_pending": runtime_actions,
-        "count": len(runtime_actions),
+        "count": len(legacy_actions) + len(runtime_actions),
         "authority_gating": "enabled",
     }
 

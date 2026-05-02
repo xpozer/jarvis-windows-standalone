@@ -185,6 +185,132 @@ def ensure_list_file(path: Path) -> list:
     return data if isinstance(data, list) else []
 
 
+def _safe_audit_log(action: str, **kwargs: Any) -> None:
+    try:
+        audit.log_action(action, **kwargs)
+    except Exception:
+        pass
+
+
+def _risk_for_audit(value: Any) -> str:
+    risk = str(value or "low").lower()
+    if risk in {"critical", "high"}:
+        return "high"
+    if risk in {"confirm", "approval", "medium"}:
+        return "medium"
+    return "low"
+
+
+def _automation_status_from_audit(entry: dict) -> str:
+    action = str(entry.get("action") or "").lower()
+    if entry.get("error"):
+        return "error"
+    if "cancel" in action or "reject" in action:
+        return "blocked"
+    if entry.get("requires_confirmation") and entry.get("confirmed") is not True:
+        return "waiting"
+    if "prepare" in action or "requested" in action:
+        return "waiting"
+    if "start" in action:
+        return "started"
+    return "ok"
+
+
+def _automation_entry_from_audit(entry: dict) -> dict:
+    details = entry.get("details") if isinstance(entry.get("details"), dict) else {}
+    task = str(details.get("summary") or entry.get("action") or "Automation")
+    target = str(details.get("target") or details.get("action_id") or entry.get("tool") or "")
+    result = str(entry.get("error") or entry.get("result") or details.get("result") or "")
+    return {
+        "id": entry.get("id"),
+        "task": task,
+        "source": entry.get("agent") or "automation",
+        "status": _automation_status_from_audit(entry),
+        "result": result,
+        "requires_confirmation": bool(entry.get("requires_confirmation")),
+        "risk": _risk_for_audit(entry.get("risk_level")),
+        "target": target,
+        "created_at": entry.get("ts"),
+    }
+
+
+def _runtime_automation_audit_entries(limit: int) -> list[dict]:
+    try:
+        from services.runtime.db import connect, init_runtime, row_to_dict
+
+        init_runtime()
+        with connect() as db:
+            rows = db.execute(
+                """
+                SELECT * FROM audit_events
+                WHERE actor IN ('authority', 'automation', 'actions')
+                   OR event_type LIKE 'action.%'
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (max(1, min(limit, 500)),),
+            ).fetchall()
+        out = []
+        for row in rows:
+            item = row_to_dict(row)
+            payload = item.get("payload") if isinstance(item.get("payload"), dict) else {}
+            event_type = str(item.get("event_type") or "")
+            status = "ok"
+            if "execution_failed" in event_type:
+                status = "error"
+            elif "rejected" in event_type:
+                status = "blocked"
+            elif "requested" in event_type and payload.get("status") == "pending_approval":
+                status = "waiting"
+            out.append({
+                "id": item.get("id"),
+                "task": item.get("summary") or event_type or "Automation",
+                "source": item.get("actor") or "automation",
+                "status": status,
+                "result": json.dumps(payload.get("result") or payload, ensure_ascii=False)[:500] if payload else "",
+                "requires_confirmation": status == "waiting" or payload.get("status") == "pending_approval",
+                "risk": _risk_for_audit(item.get("risk")),
+                "target": payload.get("action_id") or "",
+                "created_at": item.get("created_at"),
+            })
+        return out
+    except Exception:
+        return []
+
+
+def api_automation_audit(limit: int = 50) -> dict:
+    safe_limit = max(1, min(limit, 200))
+    raw_entries = audit.get_entries(limit=1000)
+    prefixes = ("action_", "tool_prepare:", "tool_run:", "tool_run_error:")
+    legacy_entries = [
+        _automation_entry_from_audit(entry)
+        for entry in raw_entries
+        if entry.get("agent") == "automation" or str(entry.get("action") or "").startswith(prefixes)
+    ]
+    entries = (legacy_entries + _runtime_automation_audit_entries(safe_limit))
+    entries.sort(key=lambda item: str(item.get("created_at") or ""), reverse=True)
+    entries = entries[:safe_limit]
+    return {"status": "ok", "count": len(entries), "entries": entries}
+
+
+async def api_automation_audit_write(req: Request) -> dict:
+    body = await req.json()
+    status = str(body.get("status") or "ok")
+    entry = audit.log_action(
+        action=str(body.get("task") or body.get("action") or "manual_automation"),
+        agent=str(body.get("source") or body.get("agent") or "automation"),
+        tool=str(body.get("target") or body.get("tool") or "") or None,
+        risk_level=_risk_for_audit(body.get("risk") or body.get("risk_level")),
+        requires_confirmation=bool(body.get("requires_confirmation")),
+        confirmed=body.get("confirmed"),
+        result=str(body.get("result") or "")[:500],
+        error=str(body.get("error") or "")[:500] if status == "error" or body.get("error") else None,
+        ui_page=body.get("ui_page"),
+        details={"target": body.get("target"), "status": status},
+    )
+    return {"status": "ok", "entry": _automation_entry_from_audit(entry)}
+
+
 def add_note(text: str, tags: Optional[list[str]] = None) -> dict:
     notes = ensure_list_file(NOTES_FILE)
     item = {"id": str(uuid.uuid4()), "text": text.strip(), "tags": tags or [], "created_at": now_iso(), "updated_at": now_iso()}
@@ -1341,6 +1467,16 @@ def create_pending_action(action_type: str, payload: dict, risk: str = "confirm"
     }
     actions.insert(0, item)
     write_json(ACTIONS_FILE, actions)
+    _safe_audit_log(
+        f"action_prepare:{action_type}",
+        agent="automation",
+        tool=str(payload.get("tool_id") or action_type),
+        risk_level=_risk_for_audit(risk),
+        requires_confirmation=True,
+        confirmed=False,
+        result=item["id"],
+        details={"action_id": item["id"], "payload": payload, "summary": item["message"]},
+    )
     return item
 
 def execute_pending_action(action_id: str) -> dict:
@@ -1351,6 +1487,16 @@ def execute_pending_action(action_id: str) -> dict:
                 return {"ok": False, "error": "Aktion ist nicht mehr offen.", "action": item}
             action_type = item.get("type")
             payload = item.get("payload") or {}
+            _safe_audit_log(
+                f"action_confirm:{action_type}",
+                agent="automation",
+                tool=str(payload.get("tool_id") or action_type),
+                risk_level=_risk_for_audit(item.get("risk")),
+                requires_confirmation=True,
+                confirmed=True,
+                result=action_id,
+                details={"action_id": action_id},
+            )
             try:
                 if action_type == "copy_file":
                     src = Path(str(payload.get("src", ""))).expanduser()
@@ -1363,6 +1509,15 @@ def execute_pending_action(action_id: str) -> dict:
                     shutil.copy2(src, dst)
                     item["status"] = "done"; item["executed_at"] = now_iso()
                     write_json(ACTIONS_FILE, actions)
+                    _safe_audit_log(
+                        "action_executed:copy_file",
+                        agent="automation",
+                        tool="copy_file",
+                        risk_level=_risk_for_audit(item.get("risk")),
+                        confirmed=True,
+                        result=f"Datei kopiert nach {dst}",
+                        details={"action_id": action_id, "target": str(dst)},
+                    )
                     return {"ok": True, "message": f"Datei kopiert nach {dst}", "action": item}
                 if action_type == "write_text_file":
                     dst = safe_relative_path(str(payload.get("path", "")))
@@ -1372,16 +1527,43 @@ def execute_pending_action(action_id: str) -> dict:
                     dst.write_text(str(payload.get("content", "")), encoding="utf-8")
                     item["status"] = "done"; item["executed_at"] = now_iso()
                     write_json(ACTIONS_FILE, actions)
+                    _safe_audit_log(
+                        "action_executed:write_text_file",
+                        agent="automation",
+                        tool="write_text_file",
+                        risk_level=_risk_for_audit(item.get("risk")),
+                        confirmed=True,
+                        result=f"Datei geschrieben: {dst}",
+                        details={"action_id": action_id, "target": str(dst)},
+                    )
                     return {"ok": True, "message": f"Datei geschrieben: {dst}", "action": item}
                 if action_type == "tool_run":
                     result = _run_registry_tool(str(payload.get("tool_id") or ""), payload.get("args") if isinstance(payload.get("args"), dict) else {}, confirmed=True)
                     item["status"] = "done"; item["executed_at"] = now_iso(); item["result"] = result
                     write_json(ACTIONS_FILE, actions)
+                    _safe_audit_log(
+                        f"action_executed:tool_run:{payload.get('tool_id')}",
+                        agent="automation",
+                        tool=str(payload.get("tool_id") or "tool_run"),
+                        risk_level=_risk_for_audit(item.get("risk")),
+                        confirmed=True,
+                        result=json.dumps(result, ensure_ascii=False)[:240],
+                        details={"action_id": action_id},
+                    )
                     return {"ok": True, "message": "Werkzeug ausgefuehrt.", "action": item, "result": result}
                 raise ValueError(f"Unbekannter Aktionstyp: {action_type}")
             except Exception as e:
                 item["status"] = "error"; item["error"] = str(e); item["executed_at"] = now_iso()
                 write_json(ACTIONS_FILE, actions)
+                _safe_audit_log(
+                    f"action_failed:{action_type}",
+                    agent="automation",
+                    tool=str(payload.get("tool_id") or action_type),
+                    risk_level=_risk_for_audit(item.get("risk")),
+                    confirmed=True,
+                    error=str(e),
+                    details={"action_id": action_id},
+                )
                 return {"ok": False, "error": str(e), "action": item}
     raise HTTPException(404, "Aktion nicht gefunden")
 
@@ -1394,6 +1576,17 @@ def cancel_pending_action(action_id: str) -> dict:
             item["status"] = "cancelled"
             item["cancelled_at"] = now_iso()
             write_json(ACTIONS_FILE, actions)
+            payload = item.get("payload") if isinstance(item.get("payload"), dict) else {}
+            _safe_audit_log(
+                f"action_cancel:{item.get('type')}",
+                agent="automation",
+                tool=str(payload.get("tool_id") or item.get("type") or "action"),
+                risk_level=_risk_for_audit(item.get("risk")),
+                requires_confirmation=True,
+                confirmed=False,
+                result=action_id,
+                details={"action_id": action_id},
+            )
             return {"ok": True, "message": "Aktion verworfen.", "action": item}
     raise HTTPException(404, "Aktion nicht gefunden")
 
