@@ -4,6 +4,24 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.26] - 2026-05-02
+
+### Added
+
+- Release ZIP Packager `scripts/maintenance/build-release-zip.ps1` ergaenzt.
+- Dokumentation `docs/release-zip-workflow.md` fuer lokalen Release Test und GitHub Tag Release ergaenzt.
+- Release Manifest mit Dateien, SHA256 und Paketmetadaten wird beim Build erzeugt.
+
+### Changed
+
+- GitHub Release Workflow nutzt jetzt denselben Release Packager wie der lokale Testlauf.
+- Release Upload haengt ZIP, SHA256 Datei und Manifest an.
+
+### Fixed
+
+- Release ZIP schliesst verschachtelte Entwicklungsordner wie `frontend/node_modules`, `.venv`, Laufzeitdaten und private Konfigurationen robust aus.
+- Lokaler Release Packager funktioniert auch mit Windows PowerShell 5 ohne `GetRelativePath`.
+
 ## [B6.6.25] - 2026-05-02
 
 ### Added
