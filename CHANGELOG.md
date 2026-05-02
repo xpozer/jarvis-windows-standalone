@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.27] - 2026-05-02
+
+### Changed
+
+- GitHub Actions Workflows bereiten JavaScript Actions auf Node 24 vor.
+- CI und Release Frontend Jobs nutzen jetzt Node.js 24.
+
+### Fixed
+
+- Die GitHub Release Warnung zur kommenden Node.js 20 Abschaltung wurde vorgezogen entschärft.
+- Projektstatus markiert den echten Release ZIP Workflow nach erfolgreichem Tag Release als erledigt.
+
 ## [B6.6.26] - 2026-05-02
 
 ### Added

@@ -48,11 +48,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | DiagCenter Frontend | erledigt | Lokale HUD Seite `frontend/public/jarvis-diagcenter.html` zeigt Checks, Sections und Raw JSON |
 | Dashboard Themes | erledigt | JARVIS, MATRIX und ULTRON sind als eigene Global Themes Seite und direkt unter Optionen / Updates im React Dashboard eingebunden |
 | Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
-| Release ZIP Packager | erledigt | Lokaler Release Packager erzeugt ZIP, SHA256 und Manifest ohne Entwicklungsordner oder private Daten |
+| Release ZIP Packager | erledigt | Echter GitHub Release `B6.6.26` wurde erfolgreich gebaut und veroeffentlicht |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
-| Tests und CI | vorhanden | CI ist angelegt, muss bei größeren Dependency Updates aufmerksam geprüft werden |
+| Tests und CI | vorhanden | CI und Release Workflows sind auf Node.js 24 vorbereitet |
 
 ## Erledigte Updates
+
+### B6.6.27
+
+- Echter GitHub Release `B6.6.26` wurde erfolgreich per Tag ausgeloest.
+- Release enthaelt ZIP, SHA256 Datei und Manifest.
+- GitHub Actions Workflows wurden auf Node.js 24 vorbereitet.
+- Release ZIP Todo ist damit erledigt; offen bleibt der Installer Endanwender Test.
 
 ### B6.6.26
 
@@ -225,7 +232,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Mittel | Memory und Knowledge Layer | vorbereitet | lokale Regeln, Notizen und Quellen weiter ausbauen |
 | Niedrig | Voice und Push to Talk | erledigt | Browser Speech Recognition angebunden, TTS optional ueber Voice Settings |
 | Niedrig | Automation Layer | erledigt | Audit Log fuer echte Ausfuehrungen ist im Backend angebunden |
-| Niedrig | Release ZIP | vorbereitet | Lokal getestet; naechster Schritt ist ein echter GitHub Release Tag |
+| Niedrig | Release ZIP | erledigt | GitHub Release `B6.6.26` wurde erfolgreich erzeugt; naechster Schritt ist Installer Endanwender Test |
 
 ## Roadmap Dokumente
 
@@ -252,12 +259,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach Voice, den vorbereiteten LifeOS Roadmap Modulen, dem echten Automation Audit Log und dem lokalen Release ZIP Test ist der naechste sinnvolle Schritt der echte GitHub Release Tag und danach der Installer Endanwender Test.
+Nach Voice, den vorbereiteten LifeOS Roadmap Modulen, dem echten Automation Audit Log und dem erfolgreichen Release ZIP ist der naechste sinnvolle Schritt der Installer Endanwender Test.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. echten GitHub Release Tag ausloesen
+1. Release ZIP aus GitHub Release herunterladen und in frischem Ordner testen
 2. Installer Endanwender Test durchführen
 3. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
 4. Voice UX mit echtem Mikrofon im Browser testen
