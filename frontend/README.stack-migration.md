@@ -15,6 +15,7 @@ TanStack Query
 Zustand
 Vitest plus Testing Library
 Storybook fuer isolierte Komponentenentwicklung
+TanStack Router vorbereitet
 ```
 
 ## Grundsatz
@@ -85,6 +86,19 @@ frontend/.storybook/preview.ts                          Storybook Token Preview
 frontend/src/components/dashboard/StackMigrationPreview.tsx zeigt die neuen Komponenten
 ```
 
+## Aufgabe 5.5 Stand
+
+Erledigt:
+
+```text
+frontend/package.json                         TanStack Router Dependency vorbereitet
+frontend/src/routes/pageRegistry.ts           13 Page Slots mit Gruppen und Pfaden
+frontend/src/routes/StackPagePlaceholder.tsx  generischer Page Slot mit Contract Anzeige
+frontend/src/routes/StackRouterApp.tsx        Stack Navigation und Page Slot Rendering
+frontend/src/routes/pageRegistry.test.ts      Tests fuer 13 Slots, eindeutige IDs und Pfade
+frontend/src/components/dashboard/StackMigrationPreview.tsx nutzt jetzt die Router App
+```
+
 Lokaler Preview Start:
 
 ```text
@@ -111,4 +125,4 @@ npm run build-storybook
 
 ## Naechster Schritt
 
-Aufgabe 5.5 bereitet Routing und 13 Page Slots vor, ohne die alte App zu ersetzen.
+Aufgabe 5.6 bereitet Build und Deployment so vor, dass der neue Stack parallel zu `docs/index.html` getestet werden kann.
