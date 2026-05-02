@@ -1,6 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "@fontsource/inter-tight/400.css";
+import "@fontsource/inter-tight/600.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/600.css";
+import "./styles/tokens.css";
 import "./diagnostics/logger";
+import { AppProviders } from "./api/providers";
 import { addJarvisLog } from "./diagnostics/logger";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { DiagnosticsOverlay } from "./components/DiagnosticsOverlay";
@@ -21,9 +27,9 @@ function FatalBootError({ error }: { error: unknown }) {
   return (
     <div style={{ minHeight: "100vh", background: "#02040a", color: "#e8f6ff", padding: 24, fontFamily: "Consolas, monospace" }}>
       <h1 style={{ color: "#7ee7ff" }}>JARVIS Frontend Fehler</h1>
-      <p>Die OberflÃ¤che konnte nicht sauber geladen werden. Der Fehler steht unten und wurde im Diagnose Log gespeichert.</p>
+      <p>Die Oberflaeche konnte nicht sauber geladen werden. Der Fehler steht unten und wurde im Diagnose Log gespeichert.</p>
       <pre style={{ whiteSpace: "pre-wrap", background: "rgba(255,0,80,.12)", border: "1px solid rgba(255,0,80,.35)", padding: 16, borderRadius: 12 }}>{err.name}: {err.message}{"\n"}{err.stack}</pre>
-      <button onClick={() => { localStorage.clear(); location.href = "/?safe=1"; }} style={{ background: "rgba(0,180,255,.18)", color: "#e8f6ff", border: "1px solid rgba(0,180,255,.45)", borderRadius: 10, padding: "10px 14px", cursor: "pointer" }}>Storage lÃ¶schen und Safe Mode</button>
+      <button onClick={() => { localStorage.clear(); location.href = "/?safe=1"; }} style={{ background: "rgba(0,180,255,.18)", color: "#e8f6ff", border: "1px solid rgba(0,180,255,.45)", borderRadius: 10, padding: "10px 14px", cursor: "pointer" }}>Storage loeschen und Safe Mode</button>
       <button onClick={() => { location.href = "/diagnose.html"; }} style={{ marginLeft: 8, background: "rgba(0,180,255,.18)", color: "#e8f6ff", border: "1px solid rgba(0,180,255,.45)", borderRadius: 10, padding: "10px 14px", cursor: "pointer" }}>Statische Diagnose</button>
     </div>
   );
@@ -31,7 +37,7 @@ function FatalBootError({ error }: { error: unknown }) {
 
 function runBootSequence(): Promise<void> {
   const params = new URLSearchParams(location.search);
-  if (params.has("noboot") || localStorage.getItem("jarvis_boot_disabled") === "1") return Promise.resolve();
+  if (params.has("noboot") || params.has("stackPreview") || localStorage.getItem("jarvis_boot_disabled") === "1") return Promise.resolve();
 
   return new Promise((resolve) => {
     let done = false;
@@ -81,20 +87,28 @@ async function boot() {
   try {
     const params = new URLSearchParams(location.search);
     const safe = params.has("safe") || localStorage.getItem("jarvis_safe_mode") === "1";
-    addJarvisLog("info", "boot", safe ? "Safe Mode" : "Normale App");
+    const stackPreview = params.has("stackPreview");
+    addJarvisLog("info", "boot", safe ? "Safe Mode" : stackPreview ? "Stack Preview" : "Normale App");
     if (safe) {
-      createRoot(root).render(<StrictMode><SafeMode /><DiagnosticsOverlay /></StrictMode>);
+      createRoot(root).render(<StrictMode><AppProviders><SafeMode /><DiagnosticsOverlay /></AppProviders></StrictMode>);
+      setTimeout(markMounted, 50);
+      return;
+    }
+    if (stackPreview) {
+      const mod = await import("./components/dashboard/StackMigrationPreview");
+      const StackMigrationPreview = mod.StackMigrationPreview;
+      createRoot(root).render(<StrictMode><AppProviders><StackMigrationPreview /><DiagnosticsOverlay /></AppProviders></StrictMode>);
       setTimeout(markMounted, 50);
       return;
     }
     await runBootSequence();
     const mod = await import("./App");
     const App = mod.App;
-    createRoot(root).render(<StrictMode><ErrorBoundary><App /></ErrorBoundary><DiagnosticsOverlay /></StrictMode>);
+    createRoot(root).render(<StrictMode><AppProviders><ErrorBoundary><App /></ErrorBoundary><DiagnosticsOverlay /></AppProviders></StrictMode>);
     setTimeout(markMounted, 50);
   } catch (error) {
     addJarvisLog("error", "boot", error);
-    createRoot(root).render(<StrictMode><FatalBootError error={error} /><DiagnosticsOverlay /></StrictMode>);
+    createRoot(root).render(<StrictMode><AppProviders><FatalBootError error={error} /><DiagnosticsOverlay /></AppProviders></StrictMode>);
     setTimeout(markMounted, 50);
   }
 }
