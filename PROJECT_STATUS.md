@@ -29,6 +29,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Bereich | Status | Hinweis |
 |---|---|---|
 | Repository Basis | erledigt | Projektstruktur, README, Changelog, Contribution Regeln und Security Hinweise vorhanden |
+| Root Hygiene | in Review | Root ist auf sechs Batch Einstiegspunkte reduziert, PowerShell Logik liegt unter `scripts/`, Windows Smoke Test laeuft ueber PR #40 |
 | Launcher | erledigt | Startseite mit Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
 | Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp vorhanden |
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
@@ -54,6 +55,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.32
+
+- Root Batch Einstiegspunkte auf sechs sichtbare Dateien reduziert.
+- Sekundaere Batch Wrapper nach `scripts/install`, `scripts/maintenance` und `scripts/dev` verschoben.
+- Operative PowerShell Logik aus dem Root nach `scripts/` migriert.
+- Neue Wrapper geben `-Root` beziehungsweise `-SourceRoot` explizit weiter.
+- `JARVIS_INSTALL_CONFIG.json` nach `scripts/install` verschoben.
+- README auf die neue Skriptstruktur aktualisiert.
+- PR #40 wurde mit aktuellem `main` synchronisiert.
 
 ### B6.6.31
 
@@ -100,6 +111,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/installer-readiness.md` | Anleitung für den nicht destruktiven Installer Vorab Check |
 | `docs/backend-health-check.md` | Anleitung zum Backend Health Check beim Start |
 | `docs/diagcenter.md` | Anleitung zum zentralen DiagCenter Sammel Endpunkt |
+| `docs/tidy-root-migration-notes.md` | Notizen zur Root Hygiene Migration und zur Wrapper Entscheidung |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -107,6 +119,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
+| Root Skript Migration bricht Windows Start | mittel | PR #40 bleibt pruefpflichtig bis `INSTALL_JARVIS.bat`, `START_JARVIS.bat`, `DIAGNOSE.bat`, `REPAIR.bat` und `UPDATE_JARVIS.bat` lokal getestet wurden |
 | Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |

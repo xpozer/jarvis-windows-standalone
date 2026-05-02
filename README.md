@@ -68,6 +68,46 @@ INSTALL_JARVIS.bat
 
 Falls Windows Skripte blockiert, starte die Batch Datei über ein Terminal mit normalen Benutzerrechten. Der Installer soll PowerShell intern mit passender Execution Policy starten.
 
+Für Endnutzer bleiben nur sechs Batch Einstiegspunkte sichtbar im Root:
+
+```text
+INSTALL_JARVIS.bat
+START_JARVIS.bat
+UPDATE_JARVIS.bat
+UNINSTALL_JARVIS.bat
+DIAGNOSE.bat
+REPAIR.bat
+```
+
+## Skriptstruktur
+
+Der Root bleibt bewusst schlank. Operative PowerShell Logik liegt unter `scripts/`.
+
+```text
+scripts/install/
+  INSTALL_JARVIS.ps1
+  FIRST_SETUP.ps1
+  PRODUCT_INSTALLER.ps1
+  REPAIR.ps1
+  JARVIS_INSTALL_CONFIG.json
+
+scripts/maintenance/
+  CHECK_GITHUB_UPDATE.ps1
+  SELF_CHECK.ps1
+  check-installer-readiness.ps1
+  setup-lifeos-config.ps1
+
+scripts/dev/
+  START_JARVIS.ps1
+  START_DEV_FRONTEND.bat
+  START_FRONTEND_CMD.bat
+
+scripts/lib/
+  Invoke-JarVISCore.ps1
+```
+
+Die Root Batch Dateien übergeben den Projekt Root explizit an die PowerShell Wrapper. Dadurch funktionieren die verschobenen Skripte weiterhin aus einem Windows Checkout und aus einer installierten Kopie.
+
 ## Systemanforderungen
 
 | Komponente | Empfehlung |

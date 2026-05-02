@@ -13,6 +13,7 @@ runner = CliRunner()
 
 # ----- jarvis ----------------------------------------------------------------
 
+
 def test_jarvis_no_args_renders_banner() -> None:
     result = runner.invoke(main_app, [])
     assert result.exit_code == 0
@@ -39,6 +40,7 @@ def test_jarvis_banner_command() -> None:
 
 
 # ----- jarvis-diagnose -------------------------------------------------------
+
 
 def test_diagnose_smoke_quiet_exits_zero_or_warn() -> None:
     """Smoke check should not crash; warnings are allowed but no Python errors."""

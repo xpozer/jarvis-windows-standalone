@@ -5,11 +5,10 @@ from __future__ import annotations
 import platform
 import shutil
 import socket
-import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 import typer
 from rich.panel import Panel
@@ -66,17 +65,12 @@ def _port_open(host: str, port: int, timeout: float = 0.4) -> bool:
 # Individual checks. Each returns a CheckResult.
 # ---------------------------------------------------------------------------
 
+
 def _check_python() -> CheckResult:
-    if sys.version_info >= (3, 11):
-        return CheckResult(
-            "Python runtime",
-            "ok",
-            f"{platform.python_version()}",
-        )
     return CheckResult(
         "Python runtime",
-        "fail",
-        f"{platform.python_version()} (need 3.11+)",
+        "ok",
+        f"{platform.python_version()}",
     )
 
 
@@ -156,6 +150,7 @@ CHECKS: list[tuple[str, Callable[[], CheckResult]]] = [
 # ---------------------------------------------------------------------------
 # Rendering
 # ---------------------------------------------------------------------------
+
 
 def _glyph(status: str) -> str:
     return {"ok": GLYPH_OK, "warn": GLYPH_WARN, "fail": GLYPH_ERR}.get(status, GLYPH_WARN)

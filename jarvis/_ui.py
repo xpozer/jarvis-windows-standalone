@@ -12,19 +12,19 @@ from rich.theme import Theme
 # Mirror the palette used by docs/index.html (the HUD dashboard)
 THEME = Theme(
     {
-        "j.cyan":   "bold #00d4ff",
-        "j.green":  "bold #00ff88",
-        "j.amber":  "bold #ffb800",
-        "j.red":    "bold #ff3b5c",
+        "j.cyan": "bold #00d4ff",
+        "j.green": "bold #00ff88",
+        "j.amber": "bold #ffb800",
+        "j.red": "bold #ff3b5c",
         "j.violet": "bold #b48cff",
-        "j.dim":    "#5b6b82",
-        "j.muted":  "#8aa1bd",
-        "j.text":   "#e6f1ff",
-        "j.label":  "italic #8aa1bd",
-        "j.ok":     "bold #00ff88",
-        "j.warn":   "bold #ffb800",
-        "j.err":    "bold #ff3b5c",
-        "j.hdr":    "bold #00d4ff on grey3",
+        "j.dim": "#5b6b82",
+        "j.muted": "#8aa1bd",
+        "j.text": "#e6f1ff",
+        "j.label": "italic #8aa1bd",
+        "j.ok": "bold #00ff88",
+        "j.warn": "bold #ffb800",
+        "j.err": "bold #ff3b5c",
+        "j.hdr": "bold #00d4ff on grey3",
     }
 )
 
