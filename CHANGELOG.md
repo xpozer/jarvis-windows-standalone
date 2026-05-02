@@ -4,6 +4,15 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.31] - 2026-05-02
+
+### Changed
+
+- Dependabot PR #11 gemergt.
+- Frontend Dependency `three` von `0.160.1` auf `0.184.0` aktualisiert.
+- Frontend Dependency `@types/three` von `0.160.0` auf `0.184.0` aktualisiert.
+- CI fuer PR #11 war vor dem Merge gruen: TypeScript Check, Frontend Build, Python Tests und Python Lint.
+
 ## [B6.6.30] - 2026-05-02
 
 ### Added
