@@ -300,7 +300,11 @@ Invoke-Checked "Installiere Backend Dependencies" $VenvPython @("-m","pip","inst
 $npm = Get-NpmCmd
 Jv-Ok "npm: $npm"
 
-Invoke-Checked "Installiere Frontend Dependencies" $npm @("install") "npm-install.log" $Frontend
+if(Test-Path (Join-Path $Frontend "package-lock.json")){
+  Invoke-Checked "Installiere Frontend Dependencies aus Lockfile" $npm @("ci") "npm-install.log" $Frontend
+} else {
+  Invoke-Checked "Installiere Frontend Dependencies" $npm @("install") "npm-install.log" $Frontend
+}
 
 $Dist = Join-Path $Frontend "dist"
 if(Test-Path $Dist){ Remove-Item $Dist -Recurse -Force }

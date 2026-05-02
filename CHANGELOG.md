@@ -4,6 +4,17 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.30] - 2026-05-02
+
+### Added
+
+- `frontend/package-lock.json` wird jetzt versioniert, damit Frontend Dependencies reproduzierbar installiert werden.
+
+### Changed
+
+- `FIRST_SETUP.ps1` nutzt bei vorhandenem Lockfile `npm ci` und faellt nur ohne Lockfile auf `npm install` zurueck.
+- Frontend Paketmetadaten auf B6.6.30 aktualisiert.
+
 ## [B6.6.29] - 2026-05-02
 
 ### Changed

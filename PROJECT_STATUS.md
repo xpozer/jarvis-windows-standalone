@@ -50,9 +50,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Installer | erledigt | Frischer Release ZIP Test laeuft mit Setup, Frontend Build, Backend Start und Health Check durch |
 | Release ZIP Packager | erledigt | Runtime Quellcode wird korrekt gepackt; lokale Runtime Daten bleiben ausgeschlossen |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
-| Tests und CI | erledigt | CI nutzt Node.js 24, Python Tests installieren Projektdeps, Ruff/Black/Pytest sind lokal gruen |
+| Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.30
+
+- `frontend/package-lock.json` ist jetzt Teil des Repositorys.
+- `FIRST_SETUP.ps1` nutzt mit Lockfile `npm ci` fuer reproduzierbare Frontend Installationen.
+- Frontend Paketmetadaten wurden auf B6.6.30 aktualisiert.
 
 ### B6.6.29
 
