@@ -87,9 +87,17 @@ async function boot() {
   try {
     const params = new URLSearchParams(location.search);
     const safe = params.has("safe") || localStorage.getItem("jarvis_safe_mode") === "1";
-    addJarvisLog("info", "boot", safe ? "Safe Mode" : "Normale App");
+    const stackPreview = params.has("stackPreview");
+    addJarvisLog("info", "boot", safe ? "Safe Mode" : stackPreview ? "Stack Preview" : "Normale App");
     if (safe) {
       createRoot(root).render(<StrictMode><AppProviders><SafeMode /><DiagnosticsOverlay /></AppProviders></StrictMode>);
+      setTimeout(markMounted, 50);
+      return;
+    }
+    if (stackPreview) {
+      const mod = await import("./components/dashboard/StackMigrationPreview");
+      const StackMigrationPreview = mod.StackMigrationPreview;
+      createRoot(root).render(<StrictMode><AppProviders><StackMigrationPreview /><DiagnosticsOverlay /></AppProviders></StrictMode>);
       setTimeout(markMounted, 50);
       return;
     }
