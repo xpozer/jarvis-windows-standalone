@@ -36,6 +36,23 @@ Inter Tight und JetBrains Mono lokal geladen
 cn Utility plus Test angelegt
 ```
 
+## Aufgabe 5.2 Stand
+
+Erledigt:
+
+```text
+frontend/src/api/client.ts          typisierter API Client mit Timeout und Fehlerobjekt
+frontend/src/api/queryClient.ts     TanStack Query Default Client
+frontend/src/api/providers.tsx      AppProviders fuer React Query
+frontend/src/store/useDashboardStore.ts  zentraler Dashboard State mit Zustand
+frontend/src/components/ui/         shadcn kompatible UI Basisstruktur
+frontend/src/components/dashboard/  Cockpit Komponentenstruktur
+frontend/src/components/sidebar/    KI Sidebar Komponentenstruktur
+frontend/src/hooks/                 Custom Hooks Struktur
+frontend/src/hooks/useReducedMotion.ts  Reduced Motion Hook
+frontend/src/themes/                Theme Struktur
+```
+
 ## Lokale Pruefung
 
 ```powershell
@@ -48,4 +65,4 @@ npm run build
 
 ## Naechster Schritt
 
-Aufgabe 5.2 legt die neue Projektstruktur fuer Komponenten, Sidebar, API, Hooks und Themes an.
+Aufgabe 5.3 migriert das bestehende Design schrittweise in gekapselte React Komponenten, ohne `docs/index.html` zu ersetzen.
