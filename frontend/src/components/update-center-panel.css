@@ -140,6 +140,102 @@
   padding: 16px;
 }
 
+.addon-visibility-panel {
+  grid-template-columns: 1fr;
+}
+
+.addon-visibility-copy {
+  margin: -6px 0 0;
+  color: #8db6c7;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.addon-visibility-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.addon-visibility-option {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px 10px;
+  align-items: start;
+  min-height: 94px;
+  border: 1px solid rgba(126, 231, 255, .14);
+  border-radius: 14px;
+  background: rgba(4, 16, 30, .68);
+  color: #dff8ff;
+  cursor: pointer;
+  padding: 12px;
+  text-align: left;
+  transition: .18s;
+}
+
+.addon-visibility-option:hover,
+.addon-visibility-option.active {
+  border-color: rgba(5, 216, 255, .5);
+  box-shadow: 0 0 22px rgba(5, 216, 255, .12);
+}
+
+.addon-visibility-option.inactive {
+  opacity: .48;
+  border-style: dashed;
+  background: rgba(1, 6, 12, .42);
+}
+
+.addon-toggle-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: #45e89b;
+  box-shadow: 0 0 14px rgba(69, 232, 155, .4);
+}
+
+.addon-visibility-option.inactive .addon-toggle-dot {
+  background: #6c7882;
+  box-shadow: none;
+}
+
+.addon-visibility-option b,
+.addon-visibility-option em {
+  display: block;
+  min-width: 0;
+}
+
+.addon-visibility-option b {
+  color: #eafcff;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.addon-visibility-option em {
+  grid-column: 2;
+  color: #8db6c7;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.addon-visibility-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.addon-visibility-actions button {
+  border: 1px solid rgba(126, 231, 255, .2);
+  border-radius: 999px;
+  background: rgba(5, 28, 50, .58);
+  color: #dff8ff;
+  cursor: pointer;
+  padding: 10px 14px;
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+
 .update-theme-title {
   display: flex;
   justify-content: space-between;
@@ -250,7 +346,7 @@
   display: grid;
   grid-template-columns: minmax(250px, .72fr) 1fr;
   gap: 20px;
-  height: calc(100% - 300px);
+  height: calc(100% - 520px);
 }
 
 .update-component-list,
@@ -468,7 +564,8 @@
   .update-theme-panel,
   .update-theme-list,
   .update-facts,
-  .update-action-list {
+  .update-action-list,
+  .addon-visibility-grid {
     grid-template-columns: 1fr;
   }
 }
