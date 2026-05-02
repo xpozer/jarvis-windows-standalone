@@ -52,9 +52,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Release ZIP Packager | erledigt | Runtime Quellcode wird korrekt gepackt; lokale Runtime Daten bleiben ausgeschlossen |
 | Frontend Dependencies | erledigt | Dependabot PR #11 wurde gemergt; `three` und `@types/three` stehen auf `0.184.0` |
 | Backend Integration | erledigt | Backend Health, DiagCenter, Automation Audit und CLI Smoke Checks sind angebunden |
+| Backend Struktur | in Arbeit | Erster Monolith-Schnitt erledigt: Backup, Restore und Diagnose-Paket liegen in `backend/services/runtime_packages.py` |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.33
+
+- Backup, Restore und Diagnose-Paket Logik aus `backend/services/_runtime.py` herausgezogen.
+- Neue Datei `backend/services/runtime_packages.py` kapselt lokale ZIP-Pakete.
+- Bestehende Runtime-Funktionsnamen bleiben als Kompatibilitaetsschicht erhalten.
 
 ### B6.6.32
 
@@ -102,7 +109,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Offene Updates und Todos
 
-Keine aktiven Repo-Todos. Neue Arbeit startet ab jetzt als kleiner, konkreter Branch mit klarer Akzeptanzliste.
+Keine aktiven Repo-Todos. Strukturelle Verbesserungen laufen nur in kleinen Schnitten mit gruenen Tests.
 
 ## Roadmap Dokumente
 
@@ -131,7 +138,7 @@ Keine aktiven Repo-Todos. Neue Arbeit startet ab jetzt als kleiner, konkreter Br
 
 ## Nächster sinnvoller Schritt
 
-Aktuell gibt es keine offenen Sammel-Todos. Der nächste Schritt sollte bewusst neu gewählt werden, zum Beispiel Installer Smoke Test, ein kleiner Backend-Fix oder ein gezielter UI-Check auf dem aktuellen `main`.
+Naechster sinnvoller Struktur-Schnitt: `backend/services/_runtime.py` weiter entflechten, aber nur blockweise. Gute Kandidaten sind Voice Runtime, Tool-Ausfuehrung oder Automation.
 
 ## Pflege Ablauf
 

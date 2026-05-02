@@ -4,6 +4,13 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.33] - 2026-05-02
+
+### Changed
+
+- Backup, Restore und Diagnose-Paket Logik aus `backend/services/_runtime.py` in `backend/services/runtime_packages.py` ausgelagert.
+- Bestehende Backup- und Diagnose-Routen bleiben kompatibel und delegieren weiter ueber die bekannten Runtime-Funktionen.
+
 ## [B6.6.32] - 2026-05-02
 
 ### Added
