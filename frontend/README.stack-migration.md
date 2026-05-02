@@ -14,6 +14,7 @@ Lucide Icons
 TanStack Query
 Zustand
 Vitest plus Testing Library
+Storybook fuer isolierte Komponentenentwicklung
 ```
 
 ## Grundsatz
@@ -67,10 +68,34 @@ frontend/src/components/dashboard/MetricCard.test.tsx        erster Komponenten 
 frontend/src/main.tsx                                        Preview per ?stackPreview=1 erreichbar
 ```
 
+## Aufgabe 5.4 Stand
+
+Erledigt:
+
+```text
+frontend/src/components/dashboard/HotkeyBadge.tsx       Tastatur Shortcut Anzeige
+frontend/src/components/dashboard/LogList.tsx           Audit und System Log Liste
+frontend/src/components/dashboard/SparkLine.tsx         kleine Datenlinie ohne Deko Effekt
+frontend/src/components/dashboard/LogList.test.tsx      LogList Test
+frontend/src/components/dashboard/HotkeyBadge.test.tsx  HotkeyBadge Test
+frontend/src/components/dashboard/MetricCard.stories.tsx Storybook Story
+frontend/src/components/dashboard/LogList.stories.tsx   Storybook Story
+frontend/.storybook/main.ts                             Storybook Vite Konfiguration
+frontend/.storybook/preview.ts                          Storybook Token Preview
+frontend/src/components/dashboard/StackMigrationPreview.tsx zeigt die neuen Komponenten
+```
+
 Lokaler Preview Start:
 
 ```text
 http://127.0.0.1:5173/?stackPreview=1
+```
+
+Storybook Start:
+
+```powershell
+cd frontend
+npm run storybook
 ```
 
 ## Lokale Pruefung
@@ -81,8 +106,9 @@ npm install
 npm run typecheck
 npm run test
 npm run build
+npm run build-storybook
 ```
 
 ## Naechster Schritt
 
-Aufgabe 5.4 baut die Komponenten Bibliothek weiter aus: LogList, SparkLine, HotkeyBadge und erste Storybook Vorbereitung.
+Aufgabe 5.5 bereitet Routing und 13 Page Slots vor, ohne die alte App zu ersetzen.
