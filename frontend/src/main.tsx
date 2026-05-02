@@ -6,6 +6,7 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/600.css";
 import "./styles/tokens.css";
 import "./diagnostics/logger";
+import { AppProviders } from "./api/providers";
 import { addJarvisLog } from "./diagnostics/logger";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { DiagnosticsOverlay } from "./components/DiagnosticsOverlay";
@@ -88,18 +89,18 @@ async function boot() {
     const safe = params.has("safe") || localStorage.getItem("jarvis_safe_mode") === "1";
     addJarvisLog("info", "boot", safe ? "Safe Mode" : "Normale App");
     if (safe) {
-      createRoot(root).render(<StrictMode><SafeMode /><DiagnosticsOverlay /></StrictMode>);
+      createRoot(root).render(<StrictMode><AppProviders><SafeMode /><DiagnosticsOverlay /></AppProviders></StrictMode>);
       setTimeout(markMounted, 50);
       return;
     }
     await runBootSequence();
     const mod = await import("./App");
     const App = mod.App;
-    createRoot(root).render(<StrictMode><ErrorBoundary><App /></ErrorBoundary><DiagnosticsOverlay /></StrictMode>);
+    createRoot(root).render(<StrictMode><AppProviders><ErrorBoundary><App /></ErrorBoundary><DiagnosticsOverlay /></AppProviders></StrictMode>);
     setTimeout(markMounted, 50);
   } catch (error) {
     addJarvisLog("error", "boot", error);
-    createRoot(root).render(<StrictMode><FatalBootError error={error} /><DiagnosticsOverlay /></StrictMode>);
+    createRoot(root).render(<StrictMode><AppProviders><FatalBootError error={error} /><DiagnosticsOverlay /></AppProviders></StrictMode>);
     setTimeout(markMounted, 50);
   }
 }
