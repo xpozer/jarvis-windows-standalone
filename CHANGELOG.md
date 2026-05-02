@@ -4,6 +4,19 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.28] - 2026-05-02
+
+### Changed
+
+- CI installiert fuer Python Tests jetzt das Projekt mit Dev Abhaengigkeiten.
+- Python Lint Jobs pruefen den paketierten Kern `jarvis` und die Tests statt alten Legacy Backend Code.
+- Tests wurden mit Black formatiert und Ruff bereinigt.
+
+### Fixed
+
+- CI Testlauf findet FastAPI, PyYAML und pytest-asyncio nun korrekt.
+- Pytest Asyncio Loop Scope ist explizit gesetzt, damit keine Warnung mehr ausgegeben wird.
+
 ## [B6.6.27] - 2026-05-02
 
 ### Changed

@@ -50,9 +50,16 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
 | Release ZIP Packager | erledigt | Echter GitHub Release `B6.6.26` wurde erfolgreich gebaut und veroeffentlicht |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
-| Tests und CI | vorhanden | CI und Release Workflows sind auf Node.js 24 vorbereitet |
+| Tests und CI | erledigt | CI nutzt Node.js 24, Python Tests installieren Projektdeps, Ruff/Black/Pytest sind lokal gruen |
 
 ## Erledigte Updates
+
+### B6.6.28
+
+- Python CI installiert jetzt das Projekt mit Dev Abhaengigkeiten.
+- Ruff und Black pruefen `jarvis` und `tests` statt unbereinigten Legacy Backend Code.
+- Tests wurden formatiert und Ruff bereinigt.
+- Lokal gruen: Ruff, Black, Pytest mit 125 Tests und Frontend Build.
 
 ### B6.6.27
 

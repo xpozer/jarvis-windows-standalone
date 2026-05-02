@@ -2,12 +2,13 @@
 Tests fuer das Skill-System
 Prueft Parsing, Matching und Kontext-Injektion.
 """
+
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 from skill_system import SkillManager, parse_skill_md
-
 
 EXAMPLE_SKILL_MD = """\
 ---

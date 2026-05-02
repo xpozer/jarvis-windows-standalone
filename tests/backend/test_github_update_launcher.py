@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -22,7 +21,9 @@ def test_github_update_launcher_exists_and_never_embeds_token():
 
 
 def test_system_center_exposes_private_github_update_actions():
-    text = (ROOT / "frontend" / "src" / "components" / "SystemCenterPage.tsx").read_text(encoding="utf-8")
+    text = (ROOT / "frontend" / "src" / "components" / "SystemCenterPage.tsx").read_text(
+        encoding="utf-8"
+    )
 
     assert "/update/github/check" in text
     assert "/update/github/stage" in text

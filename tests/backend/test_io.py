@@ -2,10 +2,11 @@
 Tests fuer read_json / write_json
 Prueft atomares Schreiben und Fehlertoleranz.
 """
-import sys
+
 import json
-import tempfile
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
 from main import read_json, write_json
@@ -31,7 +32,7 @@ class TestReadJson:
 
     def test_liste(self, tmp_path):
         f = tmp_path / "list.json"
-        f.write_text('[1, 2, 3]', encoding="utf-8")
+        f.write_text("[1, 2, 3]", encoding="utf-8")
         assert read_json(f, []) == [1, 2, 3]
 
 

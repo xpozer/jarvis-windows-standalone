@@ -1,35 +1,56 @@
 """Block 3 Tests — Work Agent, Knowledge Index"""
+
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 
-import work_agent
 import knowledge
+import work_agent
+
 
 class TestWorkAgent:
     def test_aufwandsangebot(self):
-        r = work_agent.generate("aufwandsangebot", {"leistung": "LED-Umbau", "ort": "E41", "normen": ["DIN VDE 0100-600"]})
+        r = work_agent.generate(
+            "aufwandsangebot",
+            {"leistung": "LED-Umbau", "ort": "E41", "normen": ["DIN VDE 0100-600"]},
+        )
         assert r["ok"]
         assert "E41" in r["text"]
         assert "LED-Umbau" in r["text"]
 
     def test_sap_kurztext_max_laenge(self):
-        r = work_agent.generate("sap_kurztext", {"leistung": "LED-Umbau Bürobeleuchtung", "ort": "E41", "art": "Instandhaltung"})
+        r = work_agent.generate(
+            "sap_kurztext",
+            {"leistung": "LED-Umbau Bürobeleuchtung", "ort": "E41", "art": "Instandhaltung"},
+        )
         assert r["ok"]
         assert len(r["text"]) <= 80
 
     def test_sap_langtext(self):
-        r = work_agent.generate("sap_langtext", {"leistung": "Steckdosen erneuern", "ort": "E41", "pruefung": True, "normen": ["DIN VDE 0100-600"]})
+        r = work_agent.generate(
+            "sap_langtext",
+            {
+                "leistung": "Steckdosen erneuern",
+                "ort": "E41",
+                "pruefung": True,
+                "normen": ["DIN VDE 0100-600"],
+            },
+        )
         assert r["ok"]
         assert "DIN VDE 0100-600" in r["text"]
 
     def test_lnw(self):
-        r = work_agent.generate("lnw", {"leistung": "Prüfung Betriebsmittel", "ort": "E41", "ergebnis": "bestanden"})
+        r = work_agent.generate(
+            "lnw", {"leistung": "Prüfung Betriebsmittel", "ort": "E41", "ergebnis": "bestanden"}
+        )
         assert r["ok"]
         assert "bestanden" in r["text"]
 
     def test_kostenuebersicht(self):
-        r = work_agent.generate("kostenuebersicht", {"stunden": 8, "stundensatz": 85, "material": 200})
+        r = work_agent.generate(
+            "kostenuebersicht", {"stunden": 8, "stundensatz": 85, "material": 200}
+        )
         assert r["ok"]
         assert "680.00" in r["text"]  # 8×85
         assert "880.00" in r["text"]  # + 200
@@ -54,11 +75,21 @@ class TestWorkAgent:
     def test_alle_types_vorhanden(self):
         types = work_agent.list_types()
         ids = [t["id"] for t in types]
-        for expected in ["sap_kurztext", "sap_langtext", "lnw", "vde_hinweis", "dguv_hinweis", "mail", "kostenuebersicht"]:
+        for expected in [
+            "sap_kurztext",
+            "sap_langtext",
+            "lnw",
+            "vde_hinweis",
+            "dguv_hinweis",
+            "mail",
+            "kostenuebersicht",
+        ]:
             assert expected in ids, f"{expected} fehlt"
 
     def test_mail_mit_ton(self):
-        r = work_agent.generate("mail", {"empfaenger": "Volker", "inhalt": "Auftrag erledigt", "ton": "locker"})
+        r = work_agent.generate(
+            "mail", {"empfaenger": "Volker", "inhalt": "Auftrag erledigt", "ton": "locker"}
+        )
         assert r["ok"]
         assert "Hallo Volker" in r["text"]
 
@@ -87,7 +118,9 @@ class TestKnowledge:
 
     def test_auto_kategorie_vde(self, tmp_path, monkeypatch):
         self._patch(monkeypatch, tmp_path)
-        result = knowledge.import_text("DIN VDE 0100-600 Erstprüfung elektrischer Anlagen", "VDE Notiz")
+        result = knowledge.import_text(
+            "DIN VDE 0100-600 Erstprüfung elektrischer Anlagen", "VDE Notiz"
+        )
         assert result["category"] == "VDE"
 
     def test_auto_kategorie_sap(self, tmp_path, monkeypatch):

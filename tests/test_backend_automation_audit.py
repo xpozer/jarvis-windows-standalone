@@ -14,9 +14,15 @@ from services import _runtime as runtime  # noqa: E402
 def test_pending_action_writes_automation_audit(monkeypatch, tmp_path) -> None:
     audit_events: list[dict] = []
     monkeypatch.setattr(runtime, "ACTIONS_FILE", tmp_path / "actions.json")
-    monkeypatch.setattr(runtime.audit, "log_action", lambda action, **kwargs: audit_events.append({"action": action, **kwargs}))
+    monkeypatch.setattr(
+        runtime.audit,
+        "log_action",
+        lambda action, **kwargs: audit_events.append({"action": action, **kwargs}),
+    )
 
-    action = runtime.create_pending_action("write_text_file", {"path": "downloads/test.txt", "content": "ok"}, "confirm")
+    action = runtime.create_pending_action(
+        "write_text_file", {"path": "downloads/test.txt", "content": "ok"}, "confirm"
+    )
 
     assert action["status"] == "pending"
     assert audit_events

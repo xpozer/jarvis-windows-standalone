@@ -16,7 +16,9 @@ def test_agents_registry_exposes_productive_status_fields(client):
 
 
 def test_tools_run_alias_executes_registry_safe_file_search(client):
-    response = client.post("/tools/run", json={"tool_id": "file_search", "args": {"query": "jarvis", "limit": 2}})
+    response = client.post(
+        "/tools/run", json={"tool_id": "file_search", "args": {"query": "jarvis", "limit": 2}}
+    )
     assert response.status_code == 200
     data = response.json()
     assert data.get("ok") is True
@@ -25,7 +27,10 @@ def test_tools_run_alias_executes_registry_safe_file_search(client):
 
 
 def test_tools_run_prepares_pending_action_for_risky_write(client):
-    response = client.post("/tools/run", json={"tool_id": "text_file_write", "args": {"filename": "pytest.txt", "content": "hello"}})
+    response = client.post(
+        "/tools/run",
+        json={"tool_id": "text_file_write", "args": {"filename": "pytest.txt", "content": "hello"}},
+    )
     assert response.status_code == 200
     data = response.json()
     assert data.get("ok") is True
@@ -72,7 +77,10 @@ def test_pending_action_can_be_cancelled(client, tmp_path, monkeypatch):
     from services import _runtime as core
 
     monkeypatch.setattr(core, "ACTIONS_FILE", tmp_path / "actions.json")
-    prepared = client.post("/actions/prepare", json={"type": "write_text_file", "payload": {"path": "downloads/x.txt", "content": "x"}})
+    prepared = client.post(
+        "/actions/prepare",
+        json={"type": "write_text_file", "payload": {"path": "downloads/x.txt", "content": "x"}},
+    )
     assert prepared.status_code == 200
 
     cancelled = client.post("/actions/cancel", json={"action_id": prepared.json()["id"]})

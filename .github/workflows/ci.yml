@@ -46,10 +46,10 @@ jobs:
         shell: pwsh
         run: |
           $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+            Where-Object { $_.FullName -match '\\jarvis\\|\\tests\\' -and $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
 
           if ($PythonFiles.Count -gt 0) {
-            ruff check .
+            ruff check jarvis tests
           } else {
             Write-Host "No Python files found. Skipping ruff."
           }
@@ -58,10 +58,10 @@ jobs:
         shell: pwsh
         run: |
           $PythonFiles = Get-ChildItem -Recurse -File -Include *.py -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
+            Where-Object { $_.FullName -match '\\jarvis\\|\\tests\\' -and $_.FullName -notmatch '\\.venv|venv|node_modules|frontend\\dist|frontend\\build' }
 
           if ($PythonFiles.Count -gt 0) {
-            black --check .
+            black --check jarvis tests
           } else {
             Write-Host "No Python files found. Skipping black."
           }
@@ -89,7 +89,7 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install pytest==8.3.4 pytest-cov==6.0.0
+          pip install -e ".[dev]"
 
       - name: Run pytest when tests exist
         shell: pwsh

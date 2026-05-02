@@ -1,9 +1,12 @@
 """Block 2 Tests — Diagnostic Agent, Log-Analyse"""
+
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend"))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "backend" / "agents"))
 from diagnostic_agent import analyze_log_text, check_port
+
 
 class TestLogAnalysis:
     def test_erkennt_modulenotfounderror(self):
@@ -21,7 +24,10 @@ class TestLogAnalysis:
     def test_erkennt_alter_pfad(self):
         text = "Loading config from C:\\Projekte\\jarvis\\config.json"
         findings = analyze_log_text(text)
-        assert any("alter Projektpfad" in f["description"].lower() or "pfad" in f["description"].lower() for f in findings)
+        assert any(
+            "alter Projektpfad" in f["description"].lower() or "pfad" in f["description"].lower()
+            for f in findings
+        )
 
     def test_keine_false_positives_bei_ok_log(self):
         text = "[INFO] Backend gestartet\n[INFO] Ollama erreichbar\n[OK] Alle Checks bestanden"
@@ -46,6 +52,7 @@ class TestLogAnalysis:
         text = "normale Zeile\nModuleNotFoundError: No module named 'xyz'\nnoch eine Zeile"
         findings = analyze_log_text(text)
         assert findings[0]["line_no"] == 2
+
 
 class TestCheckPort:
     def test_port_nicht_belegt_gibt_false(self):
