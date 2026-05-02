@@ -1,29 +1,53 @@
-# JARVIS Windows Standalone
+<p align="center">
+  <img src="docs/assets/jarvis-hero.svg" alt="JARVIS Windows Standalone — Local-First Operator Console" width="100%" />
+</p>
 
-![Build](https://github.com/xpozer/jarvis-windows-standalone/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-B6.5.1-00d4ff.svg)
-![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-green.svg)
+<p align="center">
+  <a href="https://github.com/xpozer/jarvis-windows-standalone/actions/workflows/ci.yml"><img src="https://github.com/xpozer/jarvis-windows-standalone/actions/workflows/ci.yml/badge.svg" alt="Build"></a>
+  <img src="https://img.shields.io/badge/version-B6.6.29-00d4ff.svg" alt="Version">
+  <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-00ff88.svg" alt="Python">
+  <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-e6f1ff.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/license-MIT-8aa1bd.svg" alt="License">
+</p>
 
-JARVIS ist ein modularer Windows Standalone Assistent für den beruflichen Einsatz in der Chemieindustrie im Bereich Elektro Arbeitsplanung. Er unterstützt bei SAP, FSM, Mail, Leistungsnachweisen, technischen Berechnungen, VDE und DGUV Recherche, Diagnose und lokaler Wissensverwaltung.
+<p align="center">
+  <b>Modularer Windows-Standalone-Assistent für Elektro-Arbeitsplanung in der Chemieindustrie.</b><br/>
+  SAP · FSM · Mail · LNW · VDE · DGUV · Kosten · Knowledge · DiagCenter · Voice
+</p>
 
-JARVIS is a modular Windows standalone assistant for professional electrical work planning in the chemical industry. It helps with SAP, FSM, email workflows, service records, technical calculations, VDE and DGUV research, diagnostics and local knowledge management.
+<p align="center">
+  <a href="https://xpozer.github.io/jarvis-windows-standalone/"><b>🖥 Live-Dashboard</b></a> &nbsp;·&nbsp;
+  <a href="#quick-install"><b>⚡ Quick Install</b></a> &nbsp;·&nbsp;
+  <a href="#architektur"><b>🧭 Architektur</b></a> &nbsp;·&nbsp;
+  <a href="CHANGELOG.md"><b>📜 Changelog</b></a>
+</p>
 
-Version: B6.5.1
-Plattform: Windows 10 und Windows 11
-Betriebsart: Local first, keine externe Telemetrie
+---
+
+<table>
+<tr>
+<td width="33%" align="center">
+<h3>🛡 Local-First</h3>
+Keine externe Telemetrie.<br/>Daten bleiben auf dem Arbeitsgerät.
+</td>
+<td width="33%" align="center">
+<h3>⚖ Risk-Audited</h3>
+Jedes Tool hat ein <code>RiskLevel</code>.<br/>Aktionen laufen durch das AuditLog.
+</td>
+<td width="33%" align="center">
+<h3>🎙 Mic OFF by Default</h3>
+Voice nur nach bewusster Aktivierung.<br/>Push-to-Talk als Standard.
+</td>
+</tr>
+</table>
+
+> _JARVIS is a modular Windows standalone assistant for professional electrical work planning in the chemical industry. Local-first, zero telemetry, risk-audited tools._
 
 ## Dashboard Vorschau
 
-Das GitHub Pages Dashboard liegt unter:
+Das HUD-Dashboard läuft unter [`docs/index.html`](docs/index.html) und ist live unter [xpozer.github.io/jarvis-windows-standalone](https://xpozer.github.io/jarvis-windows-standalone/) erreichbar.
 
-```text
-docs/index.html
-```
-
-Screenshot Platzhalter:
-
-![JARVIS Dashboard](docs/assets/dashboard-placeholder.svg)
+![JARVIS Dashboard](docs/assets/jarvis-hero.svg)
 
 ## Features nach Block Roadmap
 
@@ -254,50 +278,104 @@ Gründe:
 ## Architektur
 
 ```mermaid
-flowchart TD
-    User[Benutzer] --> UI[Dashboard und UI]
-    UI --> API[FastAPI Backend]
-    API --> AgentSystem[AgentSystem]
-    API --> WorkAgent[WorkAgent Module]
-    API --> DiagCenter[DiagCenter 2.0]
-    API --> Voice[Voice Modul]
+---
+config:
+  theme: dark
+  themeVariables:
+    primaryColor: "#0a0e14"
+    primaryTextColor: "#e6f1ff"
+    primaryBorderColor: "#00d4ff"
+    lineColor: "#5b6b82"
+    secondaryColor: "#0f141c"
+    tertiaryColor: "#161c27"
+---
+flowchart TB
+    User((👤 Operator))
 
-    AgentSystem --> AgentRegistry[AgentRegistry]
-    AgentSystem --> ToolRegistry[ToolRegistry mit RiskLevel]
-    AgentSystem --> AuditLog[AuditLog]
+    subgraph Presentation["🖥️  Presentation Layer"]
+        Dashboard[GitHub Pages<br/>HUD Dashboard]
+        UI[Frontend<br/>13 UI Pages · TS]
+        CLI[CLI<br/>jarvis · jarvis-diagnose]
+    end
 
-    WorkAgent --> SAP[SAP Modul]
-    WorkAgent --> FSM[FSM Modul]
-    WorkAgent --> Mail[Mail Modul]
-    WorkAgent --> LNW[LNW Modul]
-    WorkAgent --> VDE[VDE Recherche]
-    WorkAgent --> DGUV[DGUV Recherche]
-    WorkAgent --> Kosten[Kosten und Kalkulation]
+    subgraph Core["⚙️  Core Runtime · FastAPI"]
+        API[REST API · :8000]
+        Audit[(AuditLog)]
+    end
 
-    API --> Knowledge[Knowledge Index]
-    Knowledge --> Chunks[Chunks]
-    Knowledge --> Sources[Sources]
+    subgraph Agents["🤖 Agent System"]
+        Registry[AgentRegistry<br/>Rolle · Status · Risk]
+        Tools[ToolRegistry<br/>RiskLevel-gated]
+        Work[WorkAgent]
+    end
 
-    DiagCenter --> Security[Security und Windows Allowlist]
-    DiagCenter --> Logs[Lokale Logs]
+    subgraph Modules["🔧 Work Modules"]
+        SAP[SAP]
+        FSM[FSM]
+        Mail[Mail]
+        LNW[LNW]
+        VDE[VDE]
+        DGUV[DGUV]
+        Kosten[Kosten]
+    end
 
-    Voice --> Piper[Piper TTS]
-    Voice --> Mic[Mikrofon standardmäßig aus]
+    subgraph Platform["🛡️  Platform · Local-First"]
+        Diag[DiagCenter 2.0]
+        Sec[Security<br/>Windows Allowlist]
+        Know[(Knowledge Index<br/>Chunks · Sources)]
+        Voice[Voice<br/>Piper TTS · Mic OFF]
+    end
 
-    Installer[PowerShell und Batch Installer] --> API
-    Installer --> UI
+    Installer[/PowerShell · Batch Installer/]
+
+    User --> Dashboard & UI & CLI
+    Dashboard & UI & CLI --> API
+    API --> Registry & Work & Diag & Voice & Know
+    Registry --> Tools
+    Work --> SAP & FSM & Mail & LNW & VDE & DGUV & Kosten
+    Tools -.audit.-> Audit
+    Diag --> Sec
+    SAP & FSM & Mail & LNW & VDE & DGUV -.lookup.-> Know
+    Installer ==> API & UI
+
+    classDef user fill:#ffb800,stroke:#ffb800,color:#0a0e14
+    classDef secure fill:#00ff88,stroke:#00ff88,color:#0a0e14
+    classDef store fill:#161c27,stroke:#b48cff,color:#e6f1ff
+    class User user
+    class Sec,Audit secure
+    class Know store
 ```
 
 ## Roadmap
 
+```mermaid
+---
+config:
+  theme: dark
+---
+gantt
+    title JARVIS Block Roadmap
+    dateFormat  X
+    axisFormat  %s
+    section Foundation
+    B1 Fundament              :done, b1, 0, 1
+    B2 AgentSystem            :done, b2, 1, 1
+    section Domain
+    B3 WorkAgent · Knowledge  :done, b3, 2, 1
+    B4 DiagCenter · Security  :done, b4, 3, 1
+    section Surface
+    B5 Dashboard · UI         :active, b5, 4, 1
+    B6 Installer · QA         :b6, 5, 1
+```
+
 | Status | Block | Ziel |
 |---|---|---|
-| [ ] | B1 Fundament | Stabile lokale Basis, Konfiguration, Start und Runtime |
-| [ ] | B2 AgentSystem | AgentRegistry, ToolRegistry, AuditLog und RiskLevel |
-| [ ] | B3 WorkAgent und Knowledge | SAP, FSM, Mail, LNW, VDE, DGUV, Kosten und Knowledge Index |
-| [ ] | B4 DiagCenter 2.0 und Security | Diagnose, Security, Windows Allowlist, lokale Prüfung |
-| [ ] | B5 Dashboard und UI | 13 UI Pages, Telemetrie, GitHub Pages Dashboard |
-| [ ] | B6 Installer und QA | Installer, Tests, Release ZIPs und Qualitätssicherung |
+| ✅ | **B1 Fundament** | Stabile lokale Basis, Konfiguration, Start und Runtime |
+| ✅ | **B2 AgentSystem** | AgentRegistry, ToolRegistry, AuditLog und RiskLevel |
+| ✅ | **B3 WorkAgent · Knowledge** | SAP, FSM, Mail, LNW, VDE, DGUV, Kosten und Knowledge Index |
+| ✅ | **B4 DiagCenter · Security** | Diagnose, Security, Windows Allowlist, lokale Prüfung |
+| 🚧 | **B5 Dashboard · UI** | 13 UI Pages, Telemetrie, GitHub Pages Dashboard |
+| ⏳ | **B6 Installer · QA** | Installer, Tests, Release ZIPs und Qualitätssicherung |
 
 ## Tests
 

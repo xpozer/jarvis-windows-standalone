@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="JARVIS Windows Standalone — Local-First Operator Console">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0a0e14"/>
+      <stop offset="100%" stop-color="#05080d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%"  stop-color="#00d4ff" stop-opacity="0.25"/>
+      <stop offset="60%" stop-color="#00d4ff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#00d4ff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#00d4ff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#00d4ff" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="360" fill="url(#bg)"/>
+  <rect width="1200" height="360" fill="url(#grid)"/>
+  <rect width="1200" height="360" fill="url(#glow)"/>
+
+  <!-- Top/bottom accent lines -->
+  <rect x="0" y="0"   width="1200" height="2" fill="url(#accent)"/>
+  <rect x="0" y="358" width="1200" height="2" fill="url(#accent)"/>
+
+  <!-- Corner brackets -->
+  <g stroke="#00d4ff" stroke-width="1.4" fill="none" opacity="0.7">
+    <path d="M 24 24 L 24 56 M 24 24 L 56 24"/>
+    <path d="M 1176 24 L 1176 56 M 1176 24 L 1144 24"/>
+    <path d="M 24 336 L 24 304 M 24 336 L 56 336"/>
+    <path d="M 1176 336 L 1176 304 M 1176 336 L 1144 336"/>
+  </g>
+
+  <!-- Decorative circuit traces (left side) -->
+  <g stroke="#00d4ff" stroke-opacity="0.18" fill="none" stroke-width="1">
+    <path d="M 60 80 L 200 80 L 220 100 L 320 100"/>
+    <path d="M 60 280 L 180 280 L 200 260 L 300 260"/>
+    <circle cx="60" cy="80" r="3" fill="#00d4ff" fill-opacity="0.4"/>
+    <circle cx="60" cy="280" r="3" fill="#00d4ff" fill-opacity="0.4"/>
+    <circle cx="320" cy="100" r="2" fill="#00d4ff" fill-opacity="0.6"/>
+    <circle cx="300" cy="260" r="2" fill="#00d4ff" fill-opacity="0.6"/>
+  </g>
+
+  <!-- Decorative circuit traces (right side) -->
+  <g stroke="#00d4ff" stroke-opacity="0.18" fill="none" stroke-width="1">
+    <path d="M 1140 90 L 1000 90 L 980 110 L 880 110"/>
+    <path d="M 1140 270 L 980 270 L 960 250 L 860 250"/>
+    <circle cx="1140" cy="90" r="3" fill="#00d4ff" fill-opacity="0.4"/>
+    <circle cx="1140" cy="270" r="3" fill="#00d4ff" fill-opacity="0.4"/>
+  </g>
+
+  <!-- Hex monogram (left of title) -->
+  <g transform="translate(140, 130)" filter="url(#cyanGlow)">
+    <path d="M 40 0 L 75 20 L 75 60 L 40 80 L 5 60 L 5 20 Z"
+          fill="#0a0e14" stroke="#00d4ff" stroke-width="2"/>
+    <path d="M 50 22 L 50 52 Q 50 60 40 60 Q 30 60 30 52"
+          stroke="#00d4ff" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+    <circle cx="40" cy="40" r="1.6" fill="#00d4ff"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="'Orbitron', 'Inter', system-ui, sans-serif" font-weight="700">
+    <text x="260" y="170" font-size="76" fill="#e6f1ff" letter-spacing="14" filter="url(#cyanGlow)">
+      J<tspan fill="#00d4ff">A</tspan>RVIS
+    </text>
+    <text x="260" y="208" font-size="14" fill="#8aa1bd" letter-spacing="10" font-weight="500" font-family="'JetBrains Mono', monospace">
+      WINDOWS · STANDALONE · OPERATOR CONSOLE
+    </text>
+  </g>
+
+  <!-- Tagline / status row -->
+  <g font-family="'JetBrains Mono', 'SF Mono', monospace" font-size="13">
+    <!-- Pills -->
+    <g transform="translate(260, 240)">
+      <!-- Local-first -->
+      <rect x="0" y="0" width="148" height="30" rx="15" fill="none" stroke="#00d4ff" stroke-opacity="0.4"/>
+      <circle cx="16" cy="15" r="4" fill="#00ff88"/>
+      <text x="30" y="19" fill="#e6f1ff" letter-spacing="2">LOCAL · FIRST</text>
+
+      <!-- Zero telemetry -->
+      <rect x="160" y="0" width="180" height="30" rx="15" fill="none" stroke="#00d4ff" stroke-opacity="0.4"/>
+      <circle cx="176" cy="15" r="4" fill="#00ff88"/>
+      <text x="190" y="19" fill="#e6f1ff" letter-spacing="2">ZERO · TELEMETRY</text>
+
+      <!-- Risk audited -->
+      <rect x="352" y="0" width="172" height="30" rx="15" fill="none" stroke="#00d4ff" stroke-opacity="0.4"/>
+      <circle cx="368" cy="15" r="4" fill="#ffb800"/>
+      <text x="382" y="19" fill="#e6f1ff" letter-spacing="2">RISK · AUDITED</text>
+
+      <!-- Mic off -->
+      <rect x="544" y="0" width="120" height="30" rx="15" fill="none" stroke="#ff3b5c" stroke-opacity="0.5"/>
+      <circle cx="560" cy="15" r="4" fill="#ff3b5c"/>
+      <text x="574" y="19" fill="#ff3b5c" letter-spacing="2">MIC · OFF</text>
+    </g>
+  </g>
+
+  <!-- Right-side telemetry mock -->
+  <g transform="translate(820, 110)" font-family="'JetBrains Mono', monospace" font-size="11" fill="#8aa1bd" letter-spacing="2">
+    <text x="0" y="0">VER</text>
+    <text x="60" y="0" fill="#00d4ff">B6.6.29</text>
+
+    <text x="0" y="22">RT</text>
+    <text x="60" y="22" fill="#e6f1ff">Py 3.12 · Node LTS</text>
+
+    <text x="0" y="44">API</text>
+    <text x="60" y="44" fill="#00ff88">:8000 · OK</text>
+
+    <text x="0" y="66">AGENTS</text>
+    <text x="60" y="66" fill="#e6f1ff">7 / 7 active</text>
+
+    <text x="0" y="88">RISK</text>
+    <text x="60" y="88" fill="#ffb800">2 gated</text>
+
+    <text x="0" y="110">KB</text>
+    <text x="60" y="110" fill="#e6f1ff">1,247 chunks</text>
+
+    <!-- mini sparkline -->
+    <g transform="translate(0, 140)">
+      <path d="M 0 30 L 20 18 L 40 22 L 60 10 L 80 16 L 100 8 L 120 14 L 140 4 L 160 12 L 180 6 L 200 14 L 220 10 L 240 18"
+            fill="none" stroke="#00d4ff" stroke-width="1.5" filter="url(#cyanGlow)"/>
+      <text x="0" y="56" fill="#5b6b82" letter-spacing="2">RUNTIME · LIVE</text>
+    </g>
+  </g>
+</svg>
