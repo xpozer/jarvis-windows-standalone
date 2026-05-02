@@ -203,9 +203,7 @@ def test_first_setup_runs_lifeos_config_setup():
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[2]
-    script = (root / "scripts" / "install" / "FIRST_SETUP.core.ps1").read_text(
-        encoding="utf-8"
-    )
+    script = (root / "scripts" / "install" / "FIRST_SETUP.core.ps1").read_text(encoding="utf-8")
 
     assert "setup-lifeos-config.ps1" in script
     assert "LifeOS private Konfiguration" in script
