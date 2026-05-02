@@ -53,6 +53,26 @@ frontend/src/hooks/useReducedMotion.ts  Reduced Motion Hook
 frontend/src/themes/                Theme Struktur
 ```
 
+## Aufgabe 5.3 Stand
+
+Erledigt:
+
+```text
+frontend/src/components/dashboard/Panel.tsx                  wiederverwendbares Cockpit Panel
+frontend/src/components/dashboard/StatusDot.tsx              Status Indicator fuer echte Daten
+frontend/src/components/dashboard/MetricCard.tsx             Metrik Karte fuer Telemetrie
+frontend/src/components/dashboard/DashboardShell.tsx         neues 4 Spalten Cockpit Layout
+frontend/src/components/dashboard/StackMigrationPreview.tsx  sichere Preview ohne alte App zu ersetzen
+frontend/src/components/dashboard/MetricCard.test.tsx        erster Komponenten Test
+frontend/src/main.tsx                                        Preview per ?stackPreview=1 erreichbar
+```
+
+Lokaler Preview Start:
+
+```text
+http://127.0.0.1:5173/?stackPreview=1
+```
+
 ## Lokale Pruefung
 
 ```powershell
@@ -65,4 +85,4 @@ npm run build
 
 ## Naechster Schritt
 
-Aufgabe 5.3 migriert das bestehende Design schrittweise in gekapselte React Komponenten, ohne `docs/index.html` zu ersetzen.
+Aufgabe 5.4 baut die Komponenten Bibliothek weiter aus: LogList, SparkLine, HotkeyBadge und erste Storybook Vorbereitung.
