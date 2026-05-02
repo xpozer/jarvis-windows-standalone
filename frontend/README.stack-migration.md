@@ -110,6 +110,18 @@ docs/stack-preview/README.md                  Preview Deployment Hinweis
 docs/stack-preview/DEPLOYMENT-GUARD.md        Schutzregel gegen versehentliches Ersetzen von docs/index.html
 ```
 
+## Aufgabe 5.7 Stand
+
+Erledigt:
+
+```text
+frontend/performance-budget.json              konkrete Grenzwerte fuer JS, CSS, Assets und Lighthouse
+frontend/scripts/check-performance-budget.mjs Budget Check fuer docs/stack-preview
+frontend/package.json                         budget:stack-preview Script
+.github/workflows/frontend-stack-preview.yml  CI Budget Check nach Preview Build
+frontend/PERFORMANCE.md                       Performance Regeln und Freigabekriterien
+```
+
 Lokaler Preview Start:
 
 ```text
@@ -121,6 +133,7 @@ Stack Preview Build:
 ```powershell
 cd frontend
 npm run build:stack-preview
+npm run budget:stack-preview
 ```
 
 Storybook Start:
@@ -139,9 +152,10 @@ npm run typecheck
 npm run test
 npm run build
 npm run build:stack-preview
+npm run budget:stack-preview
 npm run build-storybook
 ```
 
 ## Naechster Schritt
 
-Aufgabe 5.7 ergaenzt Performance Budget und Build Guard Checks fuer Bundle Groesse, Lighthouse Zielwerte und spaetere CI Schwellen.
+Aufgabe 5.8 ergaenzt Accessibility Guardrails, Focus Management Regeln und Reduced Motion Audits fuer neue Komponenten.
