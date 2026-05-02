@@ -6,12 +6,17 @@ Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstan
 
 ## [B6.6.32] - 2026-05-02
 
+### Added
+
+- Real Assist Roadmap unter `docs/real-assist-roadmap.md` dokumentiert.
+
 ### Changed
 
 - Root Skripte auf sechs sichtbare Batch Einstiegspunkte reduziert: `INSTALL_JARVIS.bat`, `START_JARVIS.bat`, `UPDATE_JARVIS.bat`, `UNINSTALL_JARVIS.bat`, `DIAGNOSE.bat` und `REPAIR.bat`.
 - Operative PowerShell Skripte nach `scripts/install`, `scripts/maintenance` und `scripts/dev` migriert.
 - PowerShell Wrapper nutzen nun explizite `-Root` beziehungsweise `-SourceRoot` Parameter, damit verschobene Skripte den Projekt Root sauber aufloesen.
 - README auf die neue Skriptstruktur und die aktuellen Betriebsbefehle aktualisiert.
+- Sammel-Todos und veraltete Frontend/Stack-Migration PRs wurden abgeschlossen oder archiviert.
 
 ### Removed
 

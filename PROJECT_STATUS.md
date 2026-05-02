@@ -29,14 +29,14 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Bereich | Status | Hinweis |
 |---|---|---|
 | Repository Basis | erledigt | Projektstruktur, README, Changelog, Contribution Regeln und Security Hinweise vorhanden |
-| Root Hygiene | in Review | Root ist auf sechs Batch Einstiegspunkte reduziert, PowerShell Logik liegt unter `scripts/`, Windows Smoke Test laeuft ueber PR #40 |
+| Root Hygiene | erledigt | PR #40 ist gemergt; Root ist auf sechs Batch Einstiegspunkte reduziert, PowerShell Logik liegt unter `scripts/` |
 | Launcher | erledigt | Startseite mit Global Overview, ULTRON Grid, LifeOS und DiagCenter Einstieg vorhanden |
 | Global Overview | erledigt | Stabile Weltkarten Ansicht als lokaler HUD Prototyp vorhanden |
 | ULTRON Grid | erledigt | JARVIS und ULTRON Command Grid mit Modus Umschaltung vorhanden |
 | LifeOS Command Center | erledigt | Erste sichtbare LifeOS Oberfläche vorhanden |
 | LifeOS lokale Daten | erledigt | Beispielkonfiguration vorhanden und LifeOS kann lokale JSON Werte laden |
 | LifeOS Daily Briefing | erledigt | LifeOS erzeugt eine erste Tageslage aus Prioritäten, offenen Schleifen, Energie, Fokuszeit und Work Radar |
-| LifeOS Roadmap Module | vorbereitet | Learning, Decision, Projects, Energy, Finance, Memory und Automation sind local-first im Briefing und UI sichtbar |
+| LifeOS Roadmap Module | erledigt | Learning, Decision, Projects, Energy, Finance, Memory und Automation sind local-first im Briefing und UI sichtbar |
 | LifeOS private Config | erledigt | `config/lifeos.json` wird bevorzugt geladen und über `.gitignore` aus dem Repository gehalten |
 | LifeOS Roadmap | erledigt | Ausgearbeitete Upgrade Roadmap liegt unter `docs/lifeos-roadmap.md` |
 | LifeOS persönliche Vorlage | erledigt | Skript und Anleitung zum Erzeugen der privaten `config/lifeos.json` vorhanden |
@@ -51,7 +51,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Installer | erledigt | Frischer Release ZIP Test laeuft mit Setup, Frontend Build, Backend Start und Health Check durch |
 | Release ZIP Packager | erledigt | Runtime Quellcode wird korrekt gepackt; lokale Runtime Daten bleiben ausgeschlossen |
 | Frontend Dependencies | erledigt | Dependabot PR #11 wurde gemergt; `three` und `@types/three` stehen auf `0.184.0` |
-| Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
+| Backend Integration | erledigt | Backend Health, DiagCenter, Automation Audit und CLI Smoke Checks sind angebunden |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
@@ -64,7 +64,10 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - Neue Wrapper geben `-Root` beziehungsweise `-SourceRoot` explizit weiter.
 - `JARVIS_INSTALL_CONFIG.json` nach `scripts/install` verschoben.
 - README auf die neue Skriptstruktur aktualisiert.
-- PR #40 wurde mit aktuellem `main` synchronisiert.
+- PR #40 wurde mit aktuellem `main` synchronisiert und gemergt.
+- Real Assist Roadmap wurde unter `docs/real-assist-roadmap.md` verankert.
+- Veraltete Frontend/Stack-Migration PRs #44 und #45 wurden geschlossen, damit die neue UI aus #46 erhalten bleibt.
+- Alte Sammel-Todos wurden geschlossen oder in dokumentierte Roadmap-/Backlog-Abschnitte ueberfuehrt.
 
 ### B6.6.31
 
@@ -86,20 +89,20 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - Echter Installer Endanwender Test aus frischem Release ZIP wurde erfolgreich lokal ausgefuehrt.
 - Der alte Release `B6.6.26` ist als Installationspaket ueberholt; neuer Release Tag folgt nach diesem Fix.
 
+## Abgeschlossene Todos
+
+| Thema | Abschluss |
+|---|---|
+| Root Cleanup PR #40 | Gemergt in `main` |
+| Stack Migration PR #43/#44 | Geschlossen, weil neue UI aus #46 Vorrang hat |
+| Addon Visibility PR #45 | Geschlossen, weil UI nach #46 neu bewertet werden muss |
+| Real Assist Roadmap Issue #42 | Dokumentiert in `docs/real-assist-roadmap.md` |
+| Frontend Cleanup Issue #41 | Geschlossen als veraltet nach UI Overhaul #46 |
+| Alte Architektur-Issues #16-#22 | Geschlossen als archivierter Backlog, Wiederaufnahme nur mit konkretem Branch |
+
 ## Offene Updates und Todos
 
-| Priorität | Thema | Status | Nächster Schritt |
-|---|---|---|---|
-| Hoch | Root Cleanup PR #40 | offen | PR #40 reviewen, Root Skripte prüfen, lokal INSTALL/START/DIAGNOSE testen und dann mergen oder Review anfordern |
-| Mittel | Stack Migration PR #43 | draft | Erst nach PR #40 rebasen und Maintainer Entscheidung dokumentieren |
-| Mittel | Decision Assistant | vorbereitet | echte private Entscheidungen lokal in `config/lifeos.json` eintragen |
-| Mittel | Private Project Manager | vorbereitet | echte private Projekte lokal in `config/lifeos.json` eintragen |
-| Mittel | Health und Energy Radar | vorbereitet | echte Energie- und Fokusdaten lokal pflegen |
-| Mittel | Finance und Contract Radar | vorbereitet | echte Vertrags- und Fristdaten nur lokal pflegen |
-| Mittel | Memory und Knowledge Layer | vorbereitet | lokale Regeln, Notizen und Quellen weiter ausbauen |
-| Niedrig | Voice und Push to Talk | erledigt | Browser Speech Recognition angebunden, TTS optional ueber Voice Settings |
-| Niedrig | Automation Layer | erledigt | Audit Log fuer echte Ausfuehrungen ist im Backend angebunden |
-| Niedrig | Release ZIP | erledigt | GitHub Release `B6.6.26` wurde erfolgreich erzeugt; naechster Schritt ist Installer Endanwender Test |
+Keine aktiven Repo-Todos. Neue Arbeit startet ab jetzt als kleiner, konkreter Branch mit klarer Akzeptanzliste.
 
 ## Roadmap Dokumente
 
@@ -112,6 +115,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | `docs/backend-health-check.md` | Anleitung zum Backend Health Check beim Start |
 | `docs/diagcenter.md` | Anleitung zum zentralen DiagCenter Sammel Endpunkt |
 | `docs/tidy-root-migration-notes.md` | Notizen zur Root Hygiene Migration und zur Wrapper Entscheidung |
+| `docs/real-assist-roadmap.md` | Archivierte Real Assist Produktlinie mit Privacy Regeln und Testplan |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
@@ -119,25 +123,15 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Risiko | Einschätzung | Empfehlung |
 |---|---|---|
-| Root Skript Migration bricht Windows Start | mittel | PR #40 bleibt pruefpflichtig bis `INSTALL_JARVIS.bat`, `START_JARVIS.bat`, `DIAGNOSE.bat`, `REPAIR.bat` und `UPDATE_JARVIS.bat` lokal getestet wurden |
-| Installer Fehler bei Endanwendern | reduziert | Readiness Check und Health Check vorhanden, echter Test auf frischem Windows bleibt nötig |
+| Installer Fehler bei Endanwendern | reduziert | Readiness Check, Health Check und Root Wrapper sind vorhanden; frischer Windows Smoke Test bleibt sinnvoll |
 | Browser Autoplay blockiert Sound nach Reload | reduziert | Re Unlock ist vorbereitet, muss lokal im Browser getestet werden |
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
-| Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
-| Merge Stau | hoch | PR #40 zuerst bereinigen und erst danach PR #43 rebasen |
+| Roadmap wird zu groß ohne Umsetzung | reduziert | Sammel-Todos sind geschlossen; neue Arbeit nur mit konkretem Branch |
 
 ## Nächster sinnvoller Schritt
 
-Merge Stau seriell weiter abbauen.
-
-Empfohlene Reihenfolge:
-
-```text
-1. PR #40 Root Cleanup reviewen und mergen oder konkrete Changes anfordern
-2. main lokal pullen und INSTALL_JARVIS.bat, START_JARVIS.bat und DIAGNOSE.bat prüfen
-3. PR #43 auf neuen main rebasen und Maintainer Entscheidung dokumentieren
-```
+Aktuell gibt es keine offenen Sammel-Todos. Der nächste Schritt sollte bewusst neu gewählt werden, zum Beispiel Installer Smoke Test, ein kleiner Backend-Fix oder ein gezielter UI-Check auf dem aktuellen `main`.
 
 ## Pflege Ablauf
 
