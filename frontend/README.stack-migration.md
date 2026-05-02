@@ -122,6 +122,25 @@ frontend/package.json                         budget:stack-preview Script
 frontend/PERFORMANCE.md                       Performance Regeln und Freigabekriterien
 ```
 
+## Aufgabe 5.8 Stand
+
+Erledigt:
+
+```text
+frontend/ACCESSIBILITY.md                         Accessibility Guardrails fuer Tastatur, Semantik, Motion und Kontrast
+frontend/scripts/check-accessibility-checklist.mjs Check fuer Pflichtpunkte der Accessibility Dokumentation
+frontend/package.json                             a11y:checklist Script
+frontend/src/hooks/useReducedMotion.test.tsx      Tests fuer Reduced Motion Hook
+frontend/src/routes/StackRouterApp.test.tsx       Test fuer beschriftete Stack Navigation
+```
+
+Hinweis:
+
+```text
+Der Workflow Eintrag fuer a11y:checklist wurde vom Connector blockiert.
+Der lokale Script Einstieg ist vorhanden und kann spaeter manuell in CI nachgezogen werden.
+```
+
 Lokaler Preview Start:
 
 ```text
@@ -148,6 +167,7 @@ npm run storybook
 ```powershell
 cd frontend
 npm install
+npm run a11y:checklist
 npm run typecheck
 npm run test
 npm run build
@@ -158,4 +178,4 @@ npm run build-storybook
 
 ## Naechster Schritt
 
-Aufgabe 5.8 ergaenzt Accessibility Guardrails, Focus Management Regeln und Reduced Motion Audits fuer neue Komponenten.
+Aufgabe 5.9 dokumentiert die Migrationsstrategie fuer Phase 1 bis 4 und definiert die Freigabe, wann der alte HTML Stand abgeloest werden darf.
