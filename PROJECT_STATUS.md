@@ -49,10 +49,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Dashboard Themes | erledigt | JARVIS, MATRIX und ULTRON sind als eigene Global Themes Seite und direkt unter Optionen / Updates im React Dashboard eingebunden |
 | Installer | erledigt | Frischer Release ZIP Test laeuft mit Setup, Frontend Build, Backend Start und Health Check durch |
 | Release ZIP Packager | erledigt | Runtime Quellcode wird korrekt gepackt; lokale Runtime Daten bleiben ausgeschlossen |
+| Frontend Dependencies | erledigt | Dependabot PR #11 wurde gemergt; `three` und `@types/three` stehen auf `0.184.0` |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.31
+
+- Dependabot PR #11 wurde per Squash gemergt.
+- `three` wurde im Frontend auf `0.184.0` aktualisiert.
+- `@types/three` wurde im Frontend auf `0.184.0` aktualisiert.
+- Vor dem Merge war CI gruen: TypeScript Check, Frontend Build, Python Tests und Python Lint.
 
 ### B6.6.30
 
@@ -67,184 +75,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 - Echter Installer Endanwender Test aus frischem Release ZIP wurde erfolgreich lokal ausgefuehrt.
 - Der alte Release `B6.6.26` ist als Installationspaket ueberholt; neuer Release Tag folgt nach diesem Fix.
 
-### B6.6.28
-
-- Python CI installiert jetzt das Projekt mit Dev Abhaengigkeiten.
-- Ruff und Black pruefen `jarvis` und `tests` statt unbereinigten Legacy Backend Code.
-- Tests wurden formatiert und Ruff bereinigt.
-- Lokal gruen: Ruff, Black, Pytest mit 125 Tests und Frontend Build.
-
-### B6.6.27
-
-- Echter GitHub Release `B6.6.26` wurde erfolgreich per Tag ausgeloest.
-- Release enthaelt ZIP, SHA256 Datei und Manifest.
-- GitHub Actions Workflows wurden auf Node.js 24 vorbereitet.
-- Release ZIP Todo ist damit erledigt; offen bleibt der Installer Endanwender Test.
-
-### B6.6.26
-
-- Release ZIP Packager unter `scripts/maintenance/build-release-zip.ps1` ergaenzt.
-- GitHub Release Workflow nutzt den Packager und laedt ZIP, SHA256 Datei und Manifest hoch.
-- Lokaler Release Test mit `B6.6.local` wurde erfolgreich ausgefuehrt.
-- Release Paket schliesst `node_modules`, `.venv`, Runtime Daten, Logs, Uploads und private `.env` Dateien aus.
-- Dokumentation `docs/release-zip-workflow.md` ergaenzt.
-
-### B6.6.23
-
-- Chat Mikrofon Button nutzt jetzt echte Browser Speech Recognition als Push-to-Talk.
-- Voice Status und Live Transkript sind direkt am Eingabefeld sichtbar.
-- Transkripte werden im Voice Runtime Backend gespeichert und erst bewusst in den Chat uebernommen.
-- Optionale Browser TTS fuer JARVIS Antworten nutzt vorhandene Voice Settings, bleibt aber standardmaessig aus.
-
-### B6.6.22
-
-- LifeOS Briefing liefert jetzt Decision Layer, Private Projects, Energy Profile, Finance Radar, Memory Layer und Automation Layer.
-- `config/lifeos.example.json` enthaelt sichere lokale Beispielschemata fuer die restlichen LifeOS Roadmap Module.
-- LifeOS Panel zeigt die Roadmap Module als kompakte Karten, ohne die Startseite zu ueberladen.
-- `docs/lifeos-roadmap.md` wurde passend zum Umsetzungsstand aktualisiert.
-
-### B6.6.21
-
-- `Update Center` wurde in der Sidebar zu `Optionen / Updates` umbenannt.
-- Der Theme Wechseler ist jetzt direkt im sichtbaren React Dashboard unter System eingebunden.
-- JARVIS, MATRIX und ULTRON koennen dort direkt gewechselt werden und bleiben per `localStorage` gespeichert.
-- MATRIX und ULTRON haben nun eigene staerkere Gestaltungskonzepte statt nur eingefaerbter JARVIS Oberflaeche.
-- `START_JARVIS.ps1` erkennt veraltete Frontend Builds nach einem Pull und baut automatisch neu.
-- Die Build-Erkennung nutzt nun auch den aktuellen Git Commit, damit alte `dist` Bundles sicher erneuert werden.
-
-### B6.6.20
-
-- FastAPI Static Fallback erweitert: Standalone HTML Seiten aus `frontend/public` werden jetzt direkt ausgeliefert.
-- `jarvis-global-overview-themed.html` zeigt dadurch die Theme Seite statt der React Chat Oberflaeche.
-- Regressionstest fuer Public HTML vor SPA Fallback ergaenzt.
-
-### B6.6.19
-
-- Themable Global Overview Seite `frontend/public/jarvis-global-overview-themed.html` eingebunden.
-- Launcher Einstieg `GLOBAL THEMES` fuer JARVIS, MATRIX und ULTRON Theme Switcher ergaenzt.
-- Dokumentation und Test Checkliste fuer das Dashboard Theme System ergaenzt.
-- Die stabile bestehende `GLOBAL OVERVIEW` Seite bleibt als eigener Einstieg erhalten.
-
-### B6.6.18
-
-- DiagCenter Frontend Seite `frontend/public/jarvis-diagcenter.html` ergänzt.
-- Launcher um `DIAGCENTER` Einstieg erweitert.
-- DiagCenter Frontend zeigt Checks, Sections und Raw JSON aus `/diagnostic/center`.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.17
-
-- DiagCenter Sammel Endpunkt `GET /diagnostic/center` ergänzt.
-- DiagCenter bündelt Backend Health, Self Check, Dependencies, Ports, Logs, System Status, UseJARVIS Runtime und Awareness Runtime.
-- Dokumentation `docs/diagcenter.md` ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.16
-
-- Backend Health Check im Startskript ergänzt.
-- `START_JARVIS.ps1` prüft nach Port 8000 zusätzlich `http://127.0.0.1:8000/health`.
-- Dokumentation `docs/backend-health-check.md` ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.15
-
-- Installer Readiness Check unter `scripts/maintenance/check-installer-readiness.ps1` ergänzt.
-- Dokumentation `docs/installer-readiness.md` ergänzt.
-- Vorprüfung für PowerShell, wichtige Root Dateien, Python, Node.js, npm, winget, Ollama, Ports und LifeOS Config ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.14
-
-- Sound Re Unlock im Frontend ergänzt.
-- Sound Engine setzt bei aktivem Sound und gesperrtem AudioContext automatisch Listener für den nächsten Nutzerklick oder Tastendruck.
-- Listener nutzen eine stabile Referenz und können korrekt entfernt werden.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.13
-
-- Sound Engine prüft jetzt, ob der AudioContext wirklich freigeschaltet ist, bevor Events abgespielt werden.
-- Reload Problem entschärft, bei dem Sound im HUD als aktiviert gespeichert war, der Browser AudioContext aber noch gesperrt blieb.
-- WebKit Fallback für `webkitAudioContext` ergänzt.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.12
-
-- Sound Layer v1 mit lokaler Web Audio Engine ohne externe Audio Dateien ergaenzt.
-- Sound Toggle und Lautstaerke Regler im HUD eingebaut.
-- Chat und Orb Events triggern dezente Sounds fuer Agent Routing, Memory, Provider Kontakt, Antwortstart, Abschluss, Listening und Fehlerpulse.
-- Sound ist standardmaessig aus und wird erst nach bewusster Nutzeraktion aktiviert.
-
-### B6.6.11
-
-- Work Radar 2.0 um Kategorien, Risiko Zusammenfassung, Status Zusammenfassung, Fristlage und naechste Work Aktion erweitert.
-- LifeOS Backend normalisiert Arbeitsthemen mit Kategorie, Due State und Prioritaetswert.
-- LifeOS Panel zeigt kompakte Work Kennzahlen und Kategorien im bestehenden HUD Stil.
-- `config/lifeos.example.json` enthaelt explizite Kategorien fuer LNW, FSM und Mail.
-
-### B6.6.6
-
-- Setup Skript `scripts/maintenance/setup-lifeos-config.ps1` ergänzt.
-- Dokumentation `docs/lifeos-private-config.md` ergänzt.
-- Skript kopiert `config/lifeos.example.json` nach `config/lifeos.json`.
-- Bestehende private Konfiguration wird nur mit `-Force` überschrieben.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.5
-
-- LifeOS Upgrade Roadmap unter `docs/lifeos-roadmap.md` ergänzt.
-- Roadmap enthält Daily Command Center, Work Radar 2.0, Learning Coach, Health und Energy Radar, Finance und Contract Radar, Private Project Manager, Decision Assistant, Memory und Knowledge Layer, Voice und Automation Layer.
-- PROJECT_STATUS verweist auf die Roadmap und führt die wichtigsten offenen Roadmap Punkte als Todos.
-
-### B6.6.4
-
-- `config/lifeos.json` wird als private lokale LifeOS Datei vorbereitet.
-- `.gitignore` schließt `config/lifeos.json` aus.
-- LifeOS lädt zuerst `config/lifeos.json`, danach `config/lifeos.example.json`, danach interne Fallback Daten.
-- Datenstatus unterscheidet private, Beispiel und Fallback Daten.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.3
-
-- LifeOS Daily Briefing Generator ergänzt.
-- LifeOS erzeugt eine verständliche Tageslage aus JSON Daten oder Fallback Daten.
-- Die generierte Tageslage bewertet Prioritäten, offene Schleifen, Energie, Fokuszeit und Work Radar.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.2
-
-- LifeOS Command Center lädt lokale Werte aus `config/lifeos.example.json`, wenn die Seite über einen lokalen Server läuft.
-- Interner Fallback ergänzt, falls der Browser lokales Datei Laden blockiert.
-- Daily Briefing, Work Radar, Timeline, Life Modules und Next Best Action werden dynamisch gerendert.
-- Changelog und PROJECT_STATUS gemäß Pflege Regel aktualisiert.
-
-### B6.6.1
-
-- `config/lifeos.example.json` vorbereitet.
-- LifeOS Datenstruktur für Daily Briefing, Work Radar, Life Modules, Timeline und Security ergänzt.
-- Dokumentation um lokale LifeOS Daten erweitert.
-- Hinweis ergänzt, dass echte lokale Daten nicht ins Repository gehören.
-- Verbindliche Pflege Regel für `CHANGELOG.md` und `PROJECT_STATUS.md` ergänzt.
-
-### B6.6.0
-
-- LifeOS Command Center Prototyp erstellt.
-- Launcher um LifeOS erweitert.
-- Dokumentation `docs/lifeos-global-upgrade.md` angelegt.
-- Changelog um LifeOS ergänzt.
-
-### B6.5.1
-
-- GitHub Actions CI ergänzt.
-- Release Workflow ergänzt.
-- Dependabot ergänzt.
-- Issue und Pull Request Templates ergänzt.
-- Changelog und Contribution Dokumentation ergänzt.
-
 ## Offene Updates und Todos
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Installer Endanwender Test | erledigt | Frisches Release ZIP wurde lokal entpackt und mit temporärem InstallDir erfolgreich installiert |
+| Hoch | Root Cleanup PR #40 | offen | PR #40 reviewen, Root Skripte prüfen, lokal INSTALL/START/DIAGNOSE testen und dann mergen oder Review anfordern |
+| Mittel | Stack Migration PR #43 | draft | Erst nach PR #40 rebasen und Maintainer Entscheidung dokumentieren |
 | Mittel | Decision Assistant | vorbereitet | echte private Entscheidungen lokal in `config/lifeos.json` eintragen |
 | Mittel | Private Project Manager | vorbereitet | echte private Projekte lokal in `config/lifeos.json` eintragen |
 | Mittel | Health und Energy Radar | vorbereitet | echte Energie- und Fokusdaten lokal pflegen |
@@ -276,18 +112,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Dependabot Major Updates | hoch | React, TypeScript, Vite und Actions Major Updates nicht blind mergen |
 | Private Daten im Repo | reduziert | `config/lifeos.json` ist ignoriert, trotzdem vor Commits prüfen |
 | Roadmap wird zu groß ohne Umsetzung | mittel | pro PR nur ein klarer Roadmap Punkt umsetzen |
+| Merge Stau | hoch | PR #40 zuerst bereinigen und erst danach PR #43 rebasen |
 
 ## Nächster sinnvoller Schritt
 
-Nach Release ZIP, Installer Endanwender Test und gruener CI ist der naechste sinnvolle Schritt ein neuer GitHub Release Tag fuer den korrigierten Installer Stand.
+Merge Stau seriell weiter abbauen.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. korrigierten GitHub Release Tag B6.6.29 ausloesen
-2. Installer Endanwender Test durchführen
-3. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
-4. Voice UX mit echtem Mikrofon im Browser testen
+1. PR #40 Root Cleanup reviewen und mergen oder konkrete Changes anfordern
+2. main lokal pullen und INSTALL_JARVIS.bat, START_JARVIS.bat und DIAGNOSE.bat prüfen
+3. PR #43 auf neuen main rebasen und Maintainer Entscheidung dokumentieren
 ```
 
 ## Pflege Ablauf
