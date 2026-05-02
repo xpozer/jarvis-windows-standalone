@@ -99,10 +99,28 @@ frontend/src/routes/pageRegistry.test.ts      Tests fuer 13 Slots, eindeutige ID
 frontend/src/components/dashboard/StackMigrationPreview.tsx nutzt jetzt die Router App
 ```
 
+## Aufgabe 5.6 Stand
+
+Erledigt:
+
+```text
+frontend/package.json                         Build Scripts fuer stack preview
+.github/workflows/frontend-stack-preview.yml  CI Workflow fuer Preview Build als Artefakt
+docs/stack-preview/README.md                  Preview Deployment Hinweis
+docs/stack-preview/DEPLOYMENT-GUARD.md        Schutzregel gegen versehentliches Ersetzen von docs/index.html
+```
+
 Lokaler Preview Start:
 
 ```text
 http://127.0.0.1:5173/?stackPreview=1
+```
+
+Stack Preview Build:
+
+```powershell
+cd frontend
+npm run build:stack-preview
 ```
 
 Storybook Start:
@@ -120,9 +138,10 @@ npm install
 npm run typecheck
 npm run test
 npm run build
+npm run build:stack-preview
 npm run build-storybook
 ```
 
 ## Naechster Schritt
 
-Aufgabe 5.6 bereitet Build und Deployment so vor, dass der neue Stack parallel zu `docs/index.html` getestet werden kann.
+Aufgabe 5.7 ergaenzt Performance Budget und Build Guard Checks fuer Bundle Groesse, Lighthouse Zielwerte und spaetere CI Schwellen.
