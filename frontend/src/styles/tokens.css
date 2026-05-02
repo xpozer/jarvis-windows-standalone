@@ -1,0 +1,105 @@
+/* ============================================================================
+ * JARVIS · Frontend Design Tokens
+ * ----------------------------------------------------------------------------
+ * Single source of truth for the operator-console palette.
+ * Mirrors docs/index.html (the HUD dashboard) and jarvis/_ui.py (the CLI),
+ * so the live frontend, the GitHub Pages dashboard, and the CLI all share
+ * the exact same colors.
+ *
+ * Import order: must load AFTER jarvis-dashboard.css so the legacy --jv-*
+ * aliases at the bottom of this file win over the older drift values.
+ *
+ * Do not put component-specific styles here. Tokens only.
+ * ========================================================================= */
+
+:root {
+  /* ---------- surfaces ---------- */
+  --j-bg-0: #05080d;             /* deepest background, voids around panels */
+  --j-bg-1: #0a0e14;             /* primary panel background */
+  --j-bg-2: #0f141c;             /* elevated card background */
+  --j-bg-3: #161c27;             /* hover / active card */
+  --j-line: #1f2937;             /* default border */
+  --j-line-soft: #141b25;        /* divider lines, dashed separators */
+
+  /* ---------- text ---------- */
+  --j-text:      #e6f1ff;        /* primary text */
+  --j-text-dim:  #8aa1bd;        /* secondary text, table cells */
+  --j-text-mute: #5b6b82;        /* labels, hints, captions */
+
+  /* ---------- brand & semantic ---------- */
+  --j-cyan:      #00d4ff;        /* primary brand, links, focus */
+  --j-cyan-dim:  #0a7c94;        /* cyan border accents */
+  --j-green:     #00ff88;        /* OK, online, low risk */
+  --j-amber:     #ffb800;        /* warning, medium risk, pending */
+  --j-red:       #ff3b5c;        /* error, high risk, mic-off */
+  --j-violet:    #b48cff;        /* audit log, persistent storage */
+
+  /* ---------- glow / accent helpers ---------- */
+  --j-cyan-glow:  0 0 12px rgba(0, 212, 255, 0.45);
+  --j-cyan-glow-soft: 0 0 6px rgba(0, 212, 255, 0.25);
+  --j-green-glow: 0 0 10px rgba(0, 255, 136, 0.45);
+  --j-amber-glow: 0 0 10px rgba(255, 184, 0, 0.40);
+  --j-red-glow:   0 0 10px rgba(255, 59, 92, 0.45);
+
+  /* ---------- elevation ---------- */
+  --j-shadow-card: 0 0 0 1px var(--j-line) inset, 0 8px 32px rgba(0, 0, 0, 0.5);
+  --j-shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.35);
+
+  /* ---------- typography ---------- */
+  --j-font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas, monospace;
+  --j-font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --j-font-display: "Orbitron", "Inter", system-ui, sans-serif;
+
+  /* ---------- spacing scale (4px base) ---------- */
+  --j-space-1: 4px;
+  --j-space-2: 8px;
+  --j-space-3: 12px;
+  --j-space-4: 16px;
+  --j-space-5: 20px;
+  --j-space-6: 24px;
+  --j-space-8: 32px;
+
+  /* ---------- radius ---------- */
+  --j-radius-sm: 4px;
+  --j-radius-md: 8px;
+  --j-radius-lg: 12px;
+  --j-radius-pill: 999px;
+
+  /* ---------- motion ---------- */
+  --j-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --j-dur-fast: 0.15s;
+  --j-dur-base: 0.25s;
+  --j-dur-slow: 0.45s;
+
+  /* ---------- z-index scale ---------- */
+  --j-z-base: 1;
+  --j-z-overlay: 50;
+  --j-z-modal: 100;
+  --j-z-toast: 200;
+  --j-z-boot: 999;
+}
+
+/* ============================================================================
+ * Legacy alias layer
+ * ----------------------------------------------------------------------------
+ * The existing CSS files (App.css, jarvis-dashboard.css) still reference
+ * --jv-* variables. We keep those names working but re-point them at the
+ * master tokens above. This kills the palette drift between the two files
+ * without touching a single component.
+ *
+ * Existing component CSS continues to use --jv-* — no migration required.
+ * ========================================================================= */
+
+:root {
+  --jv-bg:            var(--j-bg-1);
+  --jv-bg-deep:       var(--j-bg-0);
+  --jv-panel:         rgba(15, 20, 28, 0.72);     /* var(--j-bg-2) at 72% */
+  --jv-panel-strong:  rgba(15, 20, 28, 0.88);
+  --jv-border:        rgba(0, 212, 255, 0.20);    /* var(--j-cyan) at 20% */
+  --jv-border-strong: var(--j-cyan);
+  --jv-text:          var(--j-text);
+  --jv-text-dim:      var(--j-text-dim);
+  --jv-text-sec:      var(--j-text-mute);
+  --jv-accent:        var(--j-cyan);
+  --jv-accent-glow:   rgba(0, 212, 255, 0.55);
+}
