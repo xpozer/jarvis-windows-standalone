@@ -151,6 +151,49 @@
   line-height: 1.45;
 }
 
+.addon-preset-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.addon-preset-list button {
+  min-height: 78px;
+  border: 1px solid rgba(126, 231, 255, .18);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(5, 28, 50, .76), rgba(2, 10, 20, .72));
+  color: #dff8ff;
+  cursor: pointer;
+  padding: 12px;
+  text-align: left;
+  transition: .18s;
+}
+
+.addon-preset-list button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(5, 216, 255, .55);
+  box-shadow: 0 0 24px rgba(5, 216, 255, .14);
+}
+
+.addon-preset-list b,
+.addon-preset-list span {
+  display: block;
+}
+
+.addon-preset-list b {
+  color: #eafcff;
+  font-size: 14px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.addon-preset-list span {
+  margin-top: 7px;
+  color: #8db6c7;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .addon-visibility-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -346,7 +389,7 @@
   display: grid;
   grid-template-columns: minmax(250px, .72fr) 1fr;
   gap: 20px;
-  height: calc(100% - 520px);
+  height: calc(100% - 610px);
 }
 
 .update-component-list,
@@ -565,7 +608,8 @@
   .update-theme-list,
   .update-facts,
   .update-action-list,
-  .addon-visibility-grid {
+  .addon-visibility-grid,
+  .addon-preset-list {
     grid-template-columns: 1fr;
   }
 }
