@@ -152,6 +152,17 @@ frontend/scripts/check-migration-gate.mjs  Gate gegen versehentliches Ersetzen v
 frontend/package.json                      migration:gate Script
 ```
 
+## Aufgabe 5.10 Stand
+
+Erledigt:
+
+```text
+frontend/STACK-MIGRATION-TESTPLAN.md      lokaler Testplan, CI Erwartung und Abbruchkriterien
+frontend/STACK-MIGRATION-PR-CHECKLIST.md  Review Checkliste und Merge Bedingungen
+```
+
+Block 5 ist damit fachlich vorbereitet. Der Branch ist noch nicht als Ersatz fuer das alte Dashboard freigegeben.
+
 Lokaler Preview Start:
 
 ```text
@@ -191,4 +202,4 @@ npm run build-storybook
 
 ## Naechster Schritt
 
-Aufgabe 5.10 schliesst Block 5 mit Testplan, PR Vorbereitung und einer ehrlichen Liste offener lokaler Pruefungen ab.
+Block 1 Command Palette mit Strg K startet auf eigenem Branch, sobald der Stack Migration PR geprueft ist.
