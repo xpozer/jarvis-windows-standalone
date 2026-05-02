@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { addonVisibilityItems, defaultVisibleAddonIds, loadVisibleAddonIds, saveVisibleAddonIds } from "../features/dashboard/addonVisibility";
 import "./update-center-panel.css";
 
 type UpdateStatus = "ok" | "warn" | "error" | "unknown";
@@ -68,9 +69,23 @@ export function UpdateCenterPanel({ onSend, dashboardTheme, onThemeChange }: Pro
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState("jarvis_core");
   const [error, setError] = useState("");
+  const [visibleAddonIds, setVisibleAddonIds] = useState(loadVisibleAddonIds);
 
   const components = useMemo(() => Object.values(status?.components || {}), [status]);
   const selected = components.find((item) => item.id === selectedId) || components[0];
+  const visibleAddonSet = useMemo(() => new Set(visibleAddonIds), [visibleAddonIds]);
+  const hiddenAddonCount = addonVisibilityItems.length - visibleAddonIds.length;
+
+  function toggleAddon(id: string) {
+    const next = visibleAddonSet.has(id)
+      ? visibleAddonIds.filter((item) => item !== id)
+      : [...visibleAddonIds, id];
+    setVisibleAddonIds(saveVisibleAddonIds(next));
+  }
+
+  function resetAddons() {
+    setVisibleAddonIds(saveVisibleAddonIds(defaultVisibleAddonIds()));
+  }
 
   async function loadStatus(refresh = false) {
     setLoading(true);
@@ -118,6 +133,37 @@ export function UpdateCenterPanel({ onSend, dashboardTheme, onThemeChange }: Pro
       </div>
 
       {error && <div className="update-center-error">{error}</div>}
+
+      <div className="update-theme-panel addon-visibility-panel">
+        <div className="update-theme-title">
+          <div>
+            <small>OBERFLAECHE</small>
+            <h2>Addons einblenden</h2>
+          </div>
+          <strong>{hiddenAddonCount ? `${hiddenAddonCount} AUS` : "ALLE AN"}</strong>
+        </div>
+        <p className="addon-visibility-copy">Blende Module aus, die du gerade nicht brauchst. Die Funktionen bleiben vorhanden und koennen jederzeit wieder aktiviert werden.</p>
+        <div className="addon-visibility-grid">
+          {addonVisibilityItems.map((addon) => {
+            const enabled = visibleAddonSet.has(addon.id);
+            return (
+              <button
+                type="button"
+                key={addon.id}
+                className={`addon-visibility-option ${enabled ? "active" : "inactive"}`}
+                onClick={() => toggleAddon(addon.id)}
+              >
+                <span className="addon-toggle-dot" />
+                <b>{addon.label}</b>
+                <em>{addon.description}</em>
+              </button>
+            );
+          })}
+        </div>
+        <div className="addon-visibility-actions">
+          <button type="button" onClick={resetAddons}>ALLE STANDARDMODULE EINBLENDEN</button>
+        </div>
+      </div>
 
       <div className="update-theme-panel">
         <div className="update-theme-title">
