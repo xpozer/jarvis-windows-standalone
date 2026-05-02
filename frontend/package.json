@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:stack-preview": "vite build --mode stack-preview --outDir ../docs/stack-preview",
     "budget:stack-preview": "node scripts/check-performance-budget.mjs",
+    "a11y:checklist": "node scripts/check-accessibility-checklist.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "preview:stack": "vite preview --outDir ../docs/stack-preview --host 127.0.0.1 --port 4174",
