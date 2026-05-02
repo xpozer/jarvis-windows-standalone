@@ -26,7 +26,10 @@ $ExcludedSegments = @(
   "node_modules",
   "__pycache__",
   ".pytest_cache",
-  ".ruff_cache",
+  ".ruff_cache"
+)
+
+$ExcludedRootSegments = @(
   "logs",
   "audit",
   "data",
@@ -35,7 +38,10 @@ $ExcludedSegments = @(
   "local_data",
   "knowledge_index",
   "release",
-  "artifacts"
+  "artifacts",
+  "backups",
+  "exports",
+  "updates"
 )
 
 $ExcludedFiles = @(
@@ -59,7 +65,9 @@ function Test-ReleasePathAllowed {
   if(-not $clean){ return $false }
   if($ExcludedFiles -contains $clean){ return $false }
   if($clean -like ".env.*" -and $clean -ne ".env.example"){ return $false }
-  foreach($segment in $clean.Split("/")){
+  $segments = @($clean.Split("/"))
+  if($segments.Count -gt 0 -and ($ExcludedRootSegments -contains $segments[0])){ return $false }
+  foreach($segment in $segments){
     if($ExcludedSegments -contains $segment){ return $false }
   }
   return $true
@@ -147,7 +155,10 @@ $manifest = [ordered]@{
   zip = $ZipName
   sha256 = $hash.Hash
   files = $copied
-  excludes = $ExcludedSegments
+  excludes = @{
+    any_segment = $ExcludedSegments
+    root_segment = $ExcludedRootSegments
+  }
 }
 $manifest | ConvertTo-Json -Depth 6 | Set-Content -Path $ManifestPath -Encoding utf8
 

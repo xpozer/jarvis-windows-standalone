@@ -51,4 +51,6 @@ artifacts
 config/lifeos.json
 ```
 
+Die Laufzeitordner `data`, `runtime`, `cache`, `logs`, `backups`, `exports` und `updates` werden nur auf Root-Ebene ausgeschlossen. Quellcodeordner wie `frontend/src/features/runtime` bleiben im Paket.
+
 Dadurch landen lokale Laufzeitdaten, private LifeOS Daten und installierte Dependencies nicht im Release Paket.

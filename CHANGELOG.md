@@ -4,6 +4,20 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.29] - 2026-05-02
+
+### Changed
+
+- Installer Selbstpruefung startet das Backend jetzt wie der normale Launcher mit `python -m uvicorn main:app`.
+- Installer Selbstpruefung prueft zusaetzlich `/health` statt nur den TCP Port.
+- Release Packager unterscheidet jetzt Root Runtime Ordner von Quellcode Ordnern.
+
+### Fixed
+
+- `frontend/src/features/runtime` wird nicht mehr versehentlich aus Release ZIPs entfernt.
+- Der echte Installer Test aus einem frischen Release ZIP laeuft mit Setup, Frontend Build, Backend Start und Health Check durch.
+- Port 8000 wird im Installer nicht mehr stillschweigend als Erfolg akzeptiert, wenn bereits ein alter Prozess laeuft.
+
 ## [B6.6.28] - 2026-05-02
 
 ### Changed

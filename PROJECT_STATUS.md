@@ -47,12 +47,19 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | DiagCenter Backend | erledigt | Zentraler Sammel Endpunkt `/diagnostic/center` bündelt Health, Self Check, Dependencies, Ports, Logs und Runtime Status |
 | DiagCenter Frontend | erledigt | Lokale HUD Seite `frontend/public/jarvis-diagcenter.html` zeigt Checks, Sections und Raw JSON |
 | Dashboard Themes | erledigt | JARVIS, MATRIX und ULTRON sind als eigene Global Themes Seite und direkt unter Optionen / Updates im React Dashboard eingebunden |
-| Installer | in Arbeit | Installer selbst ist robust, zusätzlicher Vorab Check ergänzt. Lokaler echter Endanwender Test bleibt offen |
-| Release ZIP Packager | erledigt | Echter GitHub Release `B6.6.26` wurde erfolgreich gebaut und veroeffentlicht |
+| Installer | erledigt | Frischer Release ZIP Test laeuft mit Setup, Frontend Build, Backend Start und Health Check durch |
+| Release ZIP Packager | erledigt | Runtime Quellcode wird korrekt gepackt; lokale Runtime Daten bleiben ausgeschlossen |
 | Backend Integration | in Arbeit | Backend Health und DiagCenter sind angebunden, weitere Frontend Diagnose Integration folgt |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Python Tests installieren Projektdeps, Ruff/Black/Pytest sind lokal gruen |
 
 ## Erledigte Updates
+
+### B6.6.29
+
+- Release Packager schliesst Root Runtime Daten aus, aber behaelt Quellcode unter `frontend/src/features/runtime`.
+- Installer Selbstpruefung startet Backend mit Uvicorn und prueft `/health`.
+- Echter Installer Endanwender Test aus frischem Release ZIP wurde erfolgreich lokal ausgefuehrt.
+- Der alte Release `B6.6.26` ist als Installationspaket ueberholt; neuer Release Tag folgt nach diesem Fix.
 
 ### B6.6.28
 
@@ -231,7 +238,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 | Priorität | Thema | Status | Nächster Schritt |
 |---|---|---|---|
-| Hoch | Installer Endanwender Test | offen | Readiness Check, INSTALL_JARVIS.bat und START_JARVIS.bat auf frischem Windows lokal ausführen |
+| Hoch | Installer Endanwender Test | erledigt | Frisches Release ZIP wurde lokal entpackt und mit temporärem InstallDir erfolgreich installiert |
 | Mittel | Decision Assistant | vorbereitet | echte private Entscheidungen lokal in `config/lifeos.json` eintragen |
 | Mittel | Private Project Manager | vorbereitet | echte private Projekte lokal in `config/lifeos.json` eintragen |
 | Mittel | Health und Energy Radar | vorbereitet | echte Energie- und Fokusdaten lokal pflegen |
@@ -266,12 +273,12 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 
 ## Nächster sinnvoller Schritt
 
-Nach Voice, den vorbereiteten LifeOS Roadmap Modulen, dem echten Automation Audit Log und dem erfolgreichen Release ZIP ist der naechste sinnvolle Schritt der Installer Endanwender Test.
+Nach Release ZIP, Installer Endanwender Test und gruener CI ist der naechste sinnvolle Schritt ein neuer GitHub Release Tag fuer den korrigierten Installer Stand.
 
 Empfohlene Reihenfolge:
 
 ```text
-1. Release ZIP aus GitHub Release herunterladen und in frischem Ordner testen
+1. korrigierten GitHub Release Tag B6.6.29 ausloesen
 2. Installer Endanwender Test durchführen
 3. echte lokale LifeOS Daten in `config/lifeos.json` pflegen
 4. Voice UX mit echtem Mikrofon im Browser testen
