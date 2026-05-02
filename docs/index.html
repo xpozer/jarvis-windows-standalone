@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JARVIS · Standalone Operator Console</title>
+<meta name="description" content="JARVIS Windows Standalone — modularer lokaler Assistent für Elektro-Arbeitsplanung. Local-first, zero telemetry, risk-audited." />
+<meta name="theme-color" content="#0a0e14" />
+<meta property="og:title" content="JARVIS Windows Standalone" />
+<meta property="og:description" content="Local-first operator console · zero telemetry · risk-audited tools" />
+<meta property="og:type" content="website" />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+<style>
+  :root {
+    --bg-0:          #05080d;
+    --bg-1:          #0a0e14;
+    --bg-2:          #0f141c;
+    --bg-3:          #161c27;
+    --line:          #1f2937;
+    --line-soft:     #141b25;
+    --text:          #e6f1ff;
+    --text-dim:      #8aa1bd;
+    --text-mute:     #5b6b82;
+    --cyan:          #00d4ff;
+    --cyan-dim:      #0a7c94;
+    --green:         #00ff88;
+    --amber:         #ffb800;
+    --red:           #ff3b5c;
+    --violet:        #b48cff;
+    --grid:          rgba(0, 212, 255, 0.05);
+    --glow:          0 0 12px rgba(0, 212, 255, 0.45);
+    --glow-soft:     0 0 6px rgba(0, 212, 255, 0.25);
+    --shadow-card:   0 0 0 1px var(--line) inset, 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, monospace;
+    background: var(--bg-0);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      radial-gradient(ellipse at top, rgba(0, 212, 255, 0.08), transparent 60%);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+  }
+
+  ::selection { background: var(--cyan); color: var(--bg-0); }
+
+  /* ============================ Layout ============================ */
+  .frame {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    gap: 16px;
+  }
+
+  /* ============================ Top Bar =========================== */
+  .topbar {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 20px;
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .topbar::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.06), transparent);
+    pointer-events: none;
+  }
+
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark {
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    background: var(--bg-0);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 10px;
+    box-shadow: var(--glow-soft);
+  }
+  .brand-mark svg { display: block; }
+  .brand-name {
+    font-family: 'Orbitron', 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--text);
+  }
+  .brand-name span { color: var(--cyan); text-shadow: var(--glow-soft); }
+  .brand-sub {
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .ticker {
+    display: flex; gap: 28px;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker .item { display: inline-flex; align-items: center; gap: 8px; }
+  .ticker .lbl { color: var(--text-mute); }
+  .ticker .val { color: var(--text); }
+  .ticker .val.cyan { color: var(--cyan); }
+  .ticker .val.green { color: var(--green); }
+  .ticker .val.amber { color: var(--amber); }
+
+  .topright { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: var(--bg-2);
+  }
+  .badge.online { color: var(--green); border-color: rgba(0,255,136,0.35); }
+  .badge.mic-off { color: var(--red); border-color: rgba(255,59,92,0.35); }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .dot.pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.85); }
+  }
+
+  /* ============================ Grid ============================== */
+  .grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 16px;
+  }
+  @media (max-width: 1100px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+  .card .corner {
+    position: absolute;
+    width: 10px; height: 10px;
+    border: 1px solid var(--cyan);
+    opacity: 0.6;
+  }
+  .card .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .card .corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .card .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .card .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .card h3 {
+    margin: 0 0 14px;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card h3 .meta { color: var(--cyan); font-size: 10px; }
+
+  /* ============================ Agents ============================ */
+  .agent-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .agent-row:last-child { border-bottom: none; }
+  .agent-name { color: var(--text); font-size: 12px; }
+  .agent-role { color: var(--text-mute); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .risk {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+  }
+  .risk.low    { color: var(--green); }
+  .risk.med    { color: var(--amber); }
+  .risk.high   { color: var(--red); }
+  .risk.audit  { color: var(--violet); }
+
+  /* ============================ Modules =========================== */
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .mod {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .mod:hover { border-color: var(--cyan-dim); transform: translateY(-2px); }
+  .mod-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .mod-name { font-size: 12px; color: var(--text); letter-spacing: 0.05em; }
+  .mod-meta { font-size: 10px; color: var(--text-mute); margin-top: 6px; }
+  .bars { display: flex; gap: 3px; }
+  .bar { width: 4px; height: 12px; background: var(--line); border-radius: 1px; }
+  .bar.on { background: var(--cyan); box-shadow: var(--glow-soft); }
+
+  /* ============================ Telemetry ========================= */
+  .telemetry {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--bg-1);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat .lbl { font-size: 10px; color: var(--text-mute); letter-spacing: 0.18em; text-transform: uppercase; }
+  .stat .val { font-size: 26px; color: var(--cyan); font-weight: 600; margin-top: 4px; text-shadow: var(--glow-soft); font-variant-numeric: tabular-nums; }
+  .stat .delta { font-size: 11px; color: var(--green); margin-top: 2px; }
+  .stat .delta.warn { color: var(--amber); }
+
+  .chart {
+    height: 120px;
+    background: var(--bg-1);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .chart svg { width: 100%; height: 100%; display: block; }
+
+  /* ============================ Audit Feed ======================== */
+  .feed {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 360px;
+    overflow: hidden;
+    position: relative;
+  }
+  .feed::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+    background: linear-gradient(180deg, transparent, var(--bg-2));
+    pointer-events: none;
+  }
+  .feed-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 11px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line-soft);
+    animation: fadein 0.4s ease-out;
+  }
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .feed-time { color: var(--text-mute); font-variant-numeric: tabular-nums; }
+  .feed-tag {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .feed-tag.ok    { color: var(--green); background: rgba(0,255,136,0.08); }
+  .feed-tag.warn  { color: var(--amber); background: rgba(255,184,0,0.08); }
+  .feed-tag.err   { color: var(--red);   background: rgba(255,59,92,0.08); }
+  .feed-tag.info  { color: var(--cyan);  background: rgba(0,212,255,0.08); }
+  .feed-msg { color: var(--text-dim); }
+
+  /* ============================ Roadmap =========================== */
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .block {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 10px;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .block.done { border-color: rgba(0,255,136,0.35); }
+  .block.active { border-color: var(--cyan); box-shadow: var(--glow-soft); }
+  .block-id { font-size: 14px; font-weight: 700; color: var(--text); }
+  .block.done .block-id { color: var(--green); }
+  .block.active .block-id { color: var(--cyan); }
+  .block-name { font-size: 9px; letter-spacing: 0.1em; color: var(--text-mute); text-transform: uppercase; margin-top: 4px; }
+
+  /* ============================ Footer ============================ */
+  .footer {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 16px 0 8px;
+  }
+  .footer a { color: var(--text-dim); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .footer a:hover { color: var(--cyan); border-color: var(--cyan); }
+
+  /* ============================ Boot overlay ====================== */
+  .boot {
+    position: fixed; inset: 0;
+    background: var(--bg-0);
+    display: grid; place-items: center;
+    z-index: 99;
+    transition: opacity 0.6s ease 0.1s;
+  }
+  .boot.hidden { opacity: 0; pointer-events: none; }
+  .boot-inner {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--cyan);
+    text-align: left;
+    width: min(560px, 90vw);
+  }
+  .boot-line { font-size: 12px; opacity: 0; animation: bootline 0.3s ease forwards; }
+  .boot-line:nth-child(1) { animation-delay: 0.05s; }
+  .boot-line:nth-child(2) { animation-delay: 0.20s; }
+  .boot-line:nth-child(3) { animation-delay: 0.35s; }
+  .boot-line:nth-child(4) { animation-delay: 0.50s; }
+  .boot-line:nth-child(5) { animation-delay: 0.65s; }
+  .boot-line:nth-child(6) { animation-delay: 0.80s; color: var(--green); }
+  @keyframes bootline { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ============================ Scroll ============================ */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-0); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan-dim); }
+
+</style>
+</head>
+<body>
+
+<!-- Boot overlay -->
+<div class="boot" id="boot">
+  <div class="boot-inner">
+    <div class="boot-line">[BOOT] Initializing JARVIS runtime ...</div>
+    <div class="boot-line">[ OK ] AgentRegistry loaded · 7 agents</div>
+    <div class="boot-line">[ OK ] ToolRegistry loaded · risk gates active</div>
+    <div class="boot-line">[ OK ] Knowledge index · 1,247 chunks</div>
+    <div class="boot-line">[ OK ] Voice module · MIC OFF (by design)</div>
+    <div class="boot-line">[READY] B6.6.29 · operator console online</div>
+  </div>
+</div>
+
+<div class="frame">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <!-- Hexagonal J monogram -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="#00d4ff" stroke-width="1.4"/>
+          <path d="M14 7 L14 14 Q14 16 12 16 Q10 16 10 14" stroke="#00d4ff" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+          <circle cx="12" cy="12" r="0.8" fill="#00d4ff"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">J<span>A</span>RVIS</div>
+        <div class="brand-sub">Operator Console · Local-First</div>
+      </div>
+    </div>
+
+    <div class="ticker">
+      <div class="item"><span class="lbl">VER</span><span class="val cyan">B6.6.29</span></div>
+      <div class="item"><span class="lbl">RT</span><span class="val">Py 3.12 · Node LTS</span></div>
+      <div class="item"><span class="lbl">API</span><span class="val green" id="api-port">:8000</span></div>
+      <div class="item"><span class="lbl">UPTIME</span><span class="val" id="uptime">—</span></div>
+      <div class="item"><span class="lbl">NET</span><span class="val amber">LOCAL</span></div>
+    </div>
+
+    <div class="topright">
+      <span class="badge mic-off" title="Mikrofon standardmäßig deaktiviert (Datenschutz)">
+        <span class="dot"></span> MIC OFF
+      </span>
+      <span class="badge online">
+        <span class="dot pulse"></span> ONLINE
+      </span>
+    </div>
+  </header>
+
+  <!-- Main grid -->
+  <main class="grid">
+
+    <!-- Left column: Agents -->
+    <section class="card" aria-label="Agent Registry">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <h3>Agent Registry <span class="meta">7 ACTIVE</span></h3>
+
+      <div class="agent-row">
+        <span class="dot pulse" style="color: var(--green)"></span>
+        <div>
+          <div class="agent-name">WorkAgent</div>
+          <div class="agent-role">Planning · SAP / FSM / LNW</div>
+        </div>
+        <span class="risk med">MED</span>
+      </div>
+
+      <div class="agent-row">
+        <span class="dot" style="color: var(--green)"></span>
+        <div>
+          <div class="agent-name">DiagAgent</div>
+          <div class="agent-role">System Diagnostics</div>
+        </div>
+        <span class="risk low">LOW</span>
+      </div>
+
+      <div class="agent-row">
+        <span class="dot" style="color: var(--green)"></span>
+        <div>
+          <div class="agent-name">KnowledgeAgent</div>
+          <div class="agent-role">VDE · DGUV Lookup</div>
+        </div>
+        <span class="risk low">LOW</span>
+      </div>
+
+      <div class="agent-row">
+        <span class="dot pulse" style="color: var(--amber)"></span>
+        <div>
+          <div class="agent-name">MailAgent</div>
+          <div class="agent-role">Outlook Bridge</div>
+        </div>
+        <span class="risk med">MED</span>
+      </div>
+
+      <div class="agent-row">
+        <span class="dot" style="color: var(--text-mute)"></span>
+        <div>
+          <div class="agent-name">VoiceAgent</div>
+          <div class="agent-role">Piper TTS · Mic OFF</div>
+        </div>
+        <span class="risk audit">AUDIT</span>
+      </div>
+
+      <div class="agent-row">
+        <span class="dot" style="color: var(--green)"></span>
+        <div>
+          <div class="agent-name">CostAgent</div>
+          <div class="agent-role">Kalkulation</div>
+        </div>
+        <span class="risk low">LOW</span>
+      </div>
+
+      <div class="agent-row">
+        <span class="dot" style="color: var(--red)"></span>
+        <div>
+          <div class="agent-name">SecurityAgent</div>
+          <div class="agent-role">Allowlist Guard</div>
+        </div>
+        <span class="risk high">HIGH</span>
+      </div>
+    </section>
+
+    <!-- Center column: Telemetry + Modules + Roadmap -->
+    <section class="card" aria-label="Live Telemetry">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <h3>Runtime Telemetry <span class="meta" id="tick-status">● LIVE</span></h3>
+
+      <div class="telemetry">
+        <div class="stat">
+          <div class="lbl">CPU</div>
+          <div class="val" id="cpu">12<span style="color:var(--text-mute);font-size:14px">%</span></div>
+          <div class="delta">▲ stable</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Memory</div>
+          <div class="val" id="mem">412<span style="color:var(--text-mute);font-size:14px">MB</span></div>
+          <div class="delta">▼ −3 MB</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Tool Calls / min</div>
+          <div class="val" id="tps">7</div>
+          <div class="delta">▲ within budget</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Audit Events</div>
+          <div class="val" id="audit-count">1,247</div>
+          <div class="delta warn">⚠ 1 review pending</div>
+        </div>
+      </div>
+
+      <div class="chart" aria-label="Telemetry sparkline">
+        <svg id="spark" viewBox="0 0 600 100" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="gradFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="spark-fill" fill="url(#gradFill)" d=""/>
+          <path id="spark-line" fill="none" stroke="#00d4ff" stroke-width="1.5" stroke-linejoin="round" d=""/>
+        </svg>
+      </div>
+
+      <h3>Work Modules <span class="meta">7 LOADED</span></h3>
+
+      <div class="modules">
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">SAP</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i></div>
+          </div>
+          <div class="mod-meta">PM Orders · Notifications</div>
+        </div>
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">FSM</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i><i class="bar"></i></div>
+          </div>
+          <div class="mod-meta">Field Service</div>
+        </div>
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">Mail</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i></div>
+          </div>
+          <div class="mod-meta">Outlook · Drafts</div>
+        </div>
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">LNW</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i><i class="bar"></i></div>
+          </div>
+          <div class="mod-meta">Leistungsnachweise</div>
+        </div>
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">VDE</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar"></i><i class="bar"></i></div>
+          </div>
+          <div class="mod-meta">Norm Recherche</div>
+        </div>
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">DGUV</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar"></i><i class="bar"></i></div>
+          </div>
+          <div class="mod-meta">Sicherheit</div>
+        </div>
+        <div class="mod">
+          <div class="mod-head"><span class="mod-name">Kosten</span>
+            <div class="bars"><i class="bar on"></i><i class="bar on"></i><i class="bar on"></i><i class="bar"></i></div>
+          </div>
+          <div class="mod-meta">Kalkulation</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 18px;">B-Roadmap <span class="meta">B5 ACTIVE</span></h3>
+      <div class="roadmap">
+        <div class="block done"><div class="block-id">B1</div><div class="block-name">Fundament</div></div>
+        <div class="block done"><div class="block-id">B2</div><div class="block-name">Agents</div></div>
+        <div class="block done"><div class="block-id">B3</div><div class="block-name">Work · KB</div></div>
+        <div class="block done"><div class="block-id">B4</div><div class="block-name">DiagCenter</div></div>
+        <div class="block active"><div class="block-id">B5</div><div class="block-name">Dashboard</div></div>
+        <div class="block"><div class="block-id">B6</div><div class="block-name">Installer · QA</div></div>
+      </div>
+    </section>
+
+    <!-- Right column: Audit feed -->
+    <section class="card" aria-label="Audit Feed">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <h3>Audit Feed <span class="meta">LIVE</span></h3>
+      <div class="feed" id="feed">
+        <!-- populated by JS -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span style="color:var(--text-dim)">JARVIS Standalone</span>
+    &nbsp;·&nbsp; B6.6.29
+    &nbsp;·&nbsp; Local-First · Zero Telemetry
+    &nbsp;·&nbsp;
+    <a href="https://github.com/xpozer/jarvis-windows-standalone">github.com/xpozer/jarvis-windows-standalone</a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // Boot overlay
+  setTimeout(() => document.getElementById('boot').classList.add('hidden'), 1300);
+  setTimeout(() => document.getElementById('boot').remove(), 2200);
+
+  // ---------------- Sparkline ----------------
+  const W = 600, H = 100;
+  const N = 80;
+  const data = Array.from({ length: N }, () => 30 + Math.random() * 50);
+
+  function renderSpark() {
+    const step = W / (N - 1);
+    let line = '';
+    let fill = `M 0 ${H} `;
+    data.forEach((v, i) => {
+      const x = i * step;
+      const y = H - (v / 100) * H;
+      line += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+      fill += `L ${x} ${y} `;
+    });
+    fill += `L ${W} ${H} Z`;
+    document.getElementById('spark-line').setAttribute('d', line);
+    document.getElementById('spark-fill').setAttribute('d', fill);
+  }
+  renderSpark();
+
+  setInterval(() => {
+    data.shift();
+    const last = data[data.length - 1] ?? 50;
+    let next = last + (Math.random() - 0.5) * 18;
+    next = Math.max(8, Math.min(92, next));
+    data.push(next);
+    renderSpark();
+  }, 800);
+
+  // ---------------- Stats ----------------
+  const cpuEl = document.getElementById('cpu');
+  const memEl = document.getElementById('mem');
+  const tpsEl = document.getElementById('tps');
+  setInterval(() => {
+    const cpu = 8 + Math.floor(Math.random() * 18);
+    cpuEl.firstChild.nodeValue = cpu;
+    const mem = 380 + Math.floor(Math.random() * 60);
+    memEl.firstChild.nodeValue = mem;
+    const tps = 3 + Math.floor(Math.random() * 12);
+    tpsEl.textContent = tps;
+  }, 1800);
+
+  // ---------------- Uptime ----------------
+  const start = Date.now();
+  const upEl = document.getElementById('uptime');
+  setInterval(() => {
+    const s = Math.floor((Date.now() - start) / 1000);
+    const h = Math.floor(s / 3600).toString().padStart(2, '0');
+    const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+    const ss = (s % 60).toString().padStart(2, '0');
+    upEl.textContent = `${h}:${m}:${ss}`;
+  }, 1000);
+
+  // ---------------- Audit feed ----------------
+  const feedEl = document.getElementById('feed');
+  const auditCountEl = document.getElementById('audit-count');
+  let count = 1247;
+
+  const events = [
+    { tag: 'ok',   msg: 'SAP · PM order #4421 fetched' },
+    { tag: 'ok',   msg: 'LNW · entry persisted (op: tk-2-hold)' },
+    { tag: 'info', msg: 'Knowledge · 3 chunks reindexed' },
+    { tag: 'warn', msg: 'DGUV · cached source > 30d' },
+    { tag: 'ok',   msg: 'FSM · sync complete (12 items)' },
+    { tag: 'ok',   msg: 'Mail · draft saved · safety briefing' },
+    { tag: 'info', msg: 'DiagCenter · smoke check passed' },
+    { tag: 'ok',   msg: 'VDE · norm 0100-410 retrieved' },
+    { tag: 'warn', msg: 'Tool risk gate · MED requires confirm' },
+    { tag: 'ok',   msg: 'Kosten · calc snapshot exported' },
+    { tag: 'info', msg: 'AgentRegistry · WorkAgent heartbeat' },
+    { tag: 'err',  msg: 'Outlook bridge · transient timeout' },
+    { tag: 'ok',   msg: 'Outlook bridge · recovered' },
+    { tag: 'ok',   msg: 'Allowlist · op approved (low)' },
+  ];
+
+  function timeStamp() {
+    const d = new Date();
+    return [d.getHours(), d.getMinutes(), d.getSeconds()]
+      .map(n => n.toString().padStart(2, '0')).join(':');
+  }
+
+  function pushEvent() {
+    const ev = events[Math.floor(Math.random() * events.length)];
+    const row = document.createElement('div');
+    row.className = 'feed-row';
+    row.innerHTML = `
+      <span class="feed-time">${timeStamp()}</span>
+      <span class="feed-tag ${ev.tag}">${ev.tag.toUpperCase()}</span>
+      <span class="feed-msg">${ev.msg}</span>
+    `;
+    feedEl.prepend(row);
+    while (feedEl.children.length > 14) feedEl.removeChild(feedEl.lastChild);
+    count += 1;
+    auditCountEl.textContent = count.toLocaleString('de-DE');
+  }
+  // Seed
+  for (let i = 0; i < 8; i++) pushEvent();
+  setInterval(pushEvent, 2400);
+})();
+</script>
+</body>
+</html>
