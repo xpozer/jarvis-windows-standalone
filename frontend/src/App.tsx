@@ -11,6 +11,9 @@ import "./chat-window.css";
 // Master HUD tokens — must load LAST so the alias layer overrides the legacy
 // drift values still embedded in jarvis-dashboard.css. See docs/FRONTEND_VISUAL_ROADMAP.md.
 import "./styles/tokens.css";
+// HUD enhancements: corner brackets on cards, MIC OFF pill, sidebar glow,
+// pulse dots, button/scrollbar/selection polish. Additive only.
+import "./styles/hud-enhancements.css";
 
 type Role = "operator" | "jarvis";
 type Level = "ok" | "warn" | "critical" | "unknown";

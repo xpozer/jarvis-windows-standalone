@@ -1,0 +1,319 @@
+/* ============================================================================
+ * JARVIS · HUD Enhancements
+ * ----------------------------------------------------------------------------
+ * Additive layer on top of jarvis-dashboard.css. Brings the live frontend
+ * up to the visual quality of docs/index.html (the GitHub Pages dashboard):
+ *
+ *   - corner brackets on cards
+ *   - cyan glow on focus / active / hover
+ *   - persistent MIC OFF indicator (privacy promise visible)
+ *   - pulse dots on online indicators
+ *   - tighter borders, harder edges, less noise
+ *
+ * Loaded after jarvis-dashboard.css and tokens.css so it wins on cascade.
+ * No component CSS files were modified.
+ * ========================================================================= */
+
+/* ===========================================================================
+ *  GLOBAL SURFACE TWEAKS
+ * ======================================================================== */
+
+html, body, #root {
+  background: var(--j-bg-0);
+}
+
+.jarvis-screen {
+  background:
+    radial-gradient(ellipse at 64% 46%, rgba(0, 212, 255, 0.08), transparent 60%),
+    linear-gradient(var(--j-bg-1) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--j-bg-1) 1px, transparent 1px) 0 0 / 32px 32px,
+    var(--j-bg-0) !important;
+}
+
+/* ===========================================================================
+ *  CARDS · corner brackets + tighter styling
+ * ======================================================================== */
+
+.jarvis-card,
+.context-card,
+.quick-card,
+.snapshot-card,
+.schedule-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--j-bg-2), var(--j-bg-1)) !important;
+  border: 1px solid var(--j-line) !important;
+  box-shadow: var(--j-shadow-card) !important;
+  border-radius: var(--j-radius-lg) !important;
+}
+
+.jarvis-card::before,
+.jarvis-card::after,
+.context-card::before,
+.context-card::after,
+.quick-card::before,
+.quick-card::after,
+.snapshot-card::before,
+.snapshot-card::after,
+.schedule-card::before,
+.schedule-card::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  opacity: 0.7;
+  border: 1px solid var(--j-cyan);
+}
+
+/* top-left corner bracket */
+.jarvis-card::before,
+.context-card::before,
+.quick-card::before,
+.snapshot-card::before,
+.schedule-card::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* bottom-right corner bracket */
+.jarvis-card::after,
+.context-card::after,
+.quick-card::after,
+.snapshot-card::after,
+.schedule-card::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+.jarvis-card-title {
+  font-family: var(--j-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--j-text-mute) !important;
+}
+
+/* ===========================================================================
+ *  TOPBAR · MIC OFF pill + brand tightening
+ * ======================================================================== */
+
+.jarvis-topbar {
+  border-bottom: 1px solid var(--j-line);
+  backdrop-filter: blur(8px);
+}
+
+.jarvis-logo {
+  font-family: var(--j-font-display);
+  font-weight: 700;
+  letter-spacing: 0.18em !important;
+  color: var(--j-text) !important;
+  text-shadow: var(--j-cyan-glow-soft);
+}
+
+/* Persistent MIC OFF privacy indicator — injected via ::before so it's always
+   visible without touching App.tsx. The dataset.micActive flag could later
+   flip this to MIC LIVE if a live recording state exists. */
+.jarvis-topbar-right::before {
+  content: "● MIC OFF";
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  font-family: var(--j-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--j-red);
+  background: rgba(255, 59, 92, 0.08);
+  border: 1px solid rgba(255, 59, 92, 0.4);
+  border-radius: var(--j-radius-pill);
+  box-shadow: var(--j-red-glow);
+  pointer-events: all;
+  margin-right: 4px;
+}
+
+html[data-jarvis-mic="active"] .jarvis-topbar-right::before {
+  content: "● MIC LIVE";
+  color: var(--j-amber);
+  background: rgba(255, 184, 0, 0.10);
+  border-color: rgba(255, 184, 0, 0.5);
+  box-shadow: var(--j-amber-glow);
+}
+
+/* ===========================================================================
+ *  SIDEBAR · nav items with active glow + risk indicators
+ * ======================================================================== */
+
+.jarvis-sidebar {
+  border-right: 1px solid var(--j-line);
+  background: linear-gradient(180deg, var(--j-bg-1), var(--j-bg-0)) !important;
+}
+
+.jarvis-nav-item {
+  position: relative;
+  font-family: var(--j-font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  border: 1px solid transparent !important;
+  transition:
+    border-color var(--j-dur-fast) var(--j-ease),
+    background var(--j-dur-fast) var(--j-ease),
+    box-shadow var(--j-dur-base) var(--j-ease);
+}
+
+.jarvis-nav-item:hover {
+  border-color: var(--j-line) !important;
+  background: var(--j-bg-2) !important;
+}
+
+.jarvis-nav-item.active,
+.jarvis-nav-item[aria-current="true"],
+.jarvis-nav-item[data-active="true"] {
+  border-color: var(--j-cyan-dim) !important;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.10), transparent) !important;
+  color: var(--j-cyan) !important;
+  box-shadow: inset 2px 0 0 var(--j-cyan), var(--j-cyan-glow-soft);
+}
+
+/* Pulse dot for items marked as live/active workstream */
+.jarvis-nav-item[data-pulse="true"]::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--j-green);
+  box-shadow: 0 0 6px var(--j-green);
+  animation: j-pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* Risk badges on sidebar items via data-risk attribute */
+.jarvis-nav-item[data-risk]::before {
+  content: attr(data-risk);
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.jarvis-nav-item[data-risk="low"]::before  { color: var(--j-green); }
+.jarvis-nav-item[data-risk="med"]::before  { color: var(--j-amber); }
+.jarvis-nav-item[data-risk="high"]::before { color: var(--j-red); }
+
+/* ===========================================================================
+ *  BUTTONS
+ * ======================================================================== */
+
+.send-btn,
+.plus-btn,
+.voice-btn,
+.jarvis-link-btn {
+  border: 1px solid var(--j-line) !important;
+  border-radius: var(--j-radius-md) !important;
+  background: var(--j-bg-2) !important;
+  color: var(--j-text) !important;
+  transition: all var(--j-dur-fast) var(--j-ease);
+}
+
+.send-btn:hover,
+.plus-btn:hover,
+.voice-btn:hover,
+.jarvis-link-btn:hover {
+  border-color: var(--j-cyan) !important;
+  color: var(--j-cyan) !important;
+  box-shadow: var(--j-cyan-glow-soft);
+}
+
+/* ===========================================================================
+ *  STATE / STATUS BLOBS
+ * ======================================================================== */
+
+.jv-state .dot,
+.state-dot,
+[data-status="online"]::before {
+  animation: j-pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes j-pulse-dot {
+  0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+  50%      { opacity: 0.45; transform: translateY(-50%) scale(0.85); }
+}
+
+/* For dots that are not absolutely positioned (no translateY needed) */
+.jarvis-state-dot,
+.j-dot.pulse {
+  animation: j-pulse-dot-static 1.6s ease-in-out infinite;
+}
+
+@keyframes j-pulse-dot-static {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.85); }
+}
+
+/* ===========================================================================
+ *  SCROLLBARS
+ * ======================================================================== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--j-bg-0);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--j-line);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--j-cyan-dim);
+}
+
+/* ===========================================================================
+ *  SELECTION
+ * ======================================================================== */
+
+::selection {
+  background: var(--j-cyan);
+  color: var(--j-bg-0);
+}
+
+/* ===========================================================================
+ *  TYPOGRAPHY POLISH
+ * ======================================================================== */
+
+body {
+  font-family: var(--j-font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+code,
+pre,
+.jarvis-mono,
+.jv-mono,
+[data-mono] {
+  font-family: var(--j-font-mono);
+}
+
+/* ===========================================================================
+ *  FOCUS STATES (accessibility)
+ * ======================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--j-cyan);
+  outline-offset: 2px;
+  border-radius: var(--j-radius-sm);
+}
