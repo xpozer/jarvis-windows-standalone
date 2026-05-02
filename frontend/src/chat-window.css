@@ -782,3 +782,76 @@
     width: 300px;
   }
 }
+
+.jarvis-sidebar {
+  overflow-y: auto;
+  padding-bottom: 1.2vh;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(5, 216, 255, .38) rgba(5, 18, 32, .4);
+}
+
+.jarvis-user-card {
+  position: sticky;
+  left: auto;
+  right: auto;
+  bottom: 0;
+  width: 100%;
+  min-height: 74px;
+  height: auto;
+  margin-top: 1.2vh;
+  padding: 12px 4px 4px;
+  background: linear-gradient(180deg, rgba(5, 18, 32, .08), rgba(5, 18, 32, .96) 30%, rgba(2, 8, 16, .98));
+  z-index: 3;
+}
+
+.jarvis-user-card > div:nth-child(2) {
+  min-width: 0;
+}
+
+.jarvis-user-card strong,
+.jarvis-user-card p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-file {
+  min-height: 58px;
+  height: auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.jarvis-file > div {
+  min-width: 0;
+}
+
+.jarvis-file b,
+.jarvis-file small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jarvis-file button {
+  min-width: 32px;
+}
+
+.jarvis-input-panel {
+  height: auto;
+  min-height: 9.6vh;
+}
+
+.jarvis-chip-row {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.jarvis-chip-row button {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

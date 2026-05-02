@@ -513,7 +513,7 @@ export function App() {
       setMessages((prev) => [...prev, {
         role: "jarvis",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: `GesprÃ¤ch konnte nicht geladen werden: ${error instanceof Error ? error.message : String(error)}`,
+        text: `Gespräch konnte nicht geladen werden: ${error instanceof Error ? error.message : String(error)}`,
       }]);
     } finally {
       setSessionLoading(false);
@@ -533,7 +533,7 @@ export function App() {
       setMessages((prev) => [...prev, {
         role: "jarvis",
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        text: `GesprÃ¤ch konnte nicht gelÃ¶scht werden: ${error instanceof Error ? error.message : String(error)}`,
+        text: `Gespräch konnte nicht gelöscht werden: ${error instanceof Error ? error.message : String(error)}`,
       }]);
     }
   }
@@ -643,7 +643,7 @@ export function App() {
           return;
         }
         if (item.event === "memory") {
-          updatePhase("GedÃ¤chtnis geprÃ¼ft", `${item.data.facts_used || 0} relevante Memory-Bloecke`, "memory");
+          updatePhase("Gedächtnis geprüft", `${item.data.facts_used || 0} relevante Memory-Blöcke`, "memory");
           return;
         }
         if (item.event === "delta") {
@@ -786,7 +786,7 @@ export function App() {
           <div className="jarvis-conversation-head">
             <div>
               <h1>Dialog mit JARVIS</h1>
-              <p><span />Online&nbsp;&nbsp;Ã¢â‚¬Â¢&nbsp;&nbsp;Bereit</p>
+              <p><span />Online&nbsp;&nbsp;•&nbsp;&nbsp;Bereit</p>
             </div>
             <div className="jarvis-head-actions">
               <button className={pinned ? "active" : ""} onClick={() => setPinned(!pinned)}>ANHEFTEN</button>
@@ -796,7 +796,7 @@ export function App() {
           <div className="jarvis-message-list" ref={messageListRef}>
             {messages.map((message, index) => (
               <article key={message.streamId || `${message.time}-${index}-${message.text}`} className={`jarvis-message-card ${message.streaming ? "streaming-card" : ""} ${message.phase ? "has-phase" : ""}`} data-pulse={message.pulse || 0}>
-                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "Ã¢â€”Â" : ""}</div>
+                <div className={`jarvis-avatar ${message.role === "jarvis" ? "jarvis" : "operator"}`}>{message.role === "operator" ? "•" : ""}</div>
                 <div className="jarvis-message-body">
                   <div className="jarvis-message-meta"><b className={message.role === "jarvis" ? "cyan" : ""}>{message.role === "jarvis" ? "JARVIS" : "BEDIENER"}</b><span>{message.time}</span></div>
                   {message.phase && (
@@ -817,7 +817,7 @@ export function App() {
                     </div>
                   )}
                   {message.link && <button className="jarvis-link-btn" onClick={() => quickAction(message.link!)}>{message.link}<span>&gt;</span></button>}
-                  {message.file && <div className="jarvis-file"><span>Ã¢â€“Â£</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB Ã¢â‚¬Â¢ PDF Dokument</small></div><button>Ã¢â€ â€œ</button><button>Ã¢â€ â€”</button></div>}
+                  {message.file && <div className="jarvis-file"><span>▣</span><div><b>system_optimierung_bericht.pdf</b><small>2.4 MB • PDF Dokument</small></div><button>↧</button><button>↗</button></div>}
                 </div>
                 <button className="jarvis-dots">...</button>
               </article>
@@ -830,14 +830,14 @@ export function App() {
           <div className="jarvis-legacy-orb-wrap">
             <Orb state={orbState} typingActivity={typingActivity} heatmapActive={thinking || orbState === "speaking"} eventSignal={orbSignal} />
           </div>
-          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><small>{orbStatus}</small><p>Anpassungsfaehig&nbsp;&nbsp;Ã¢â‚¬Â¢&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;Ã¢â‚¬Â¢&nbsp;&nbsp;Zuverlaessig</p><div /></div>
+          <div className="jarvis-core-label"><h2>JARVIS KERN</h2><small>{orbStatus}</small><p>Anpassungsfähig&nbsp;&nbsp;•&nbsp;&nbsp;Proaktiv&nbsp;&nbsp;•&nbsp;&nbsp;Zuverlässig</p><div /></div>
         </section>
       </main>
 
       <aside className="jarvis-right-panel">
         <TodayScheduleCard onSend={sendMessage} />
         <section className="jarvis-card context-card">
-          <div className="jarvis-card-title"><h2>GESPRÃ„CHE</h2><button onClick={() => void loadSessions()}>{sessionLoading ? "LÃ„DT" : "AKTIV"}</button></div>
+          <div className="jarvis-card-title"><h2>GESPRÄCHE</h2><button onClick={() => void loadSessions()}>{sessionLoading ? "LÄDT" : "AKTIV"}</button></div>
           <div className="jarvis-session-list">
             {sessions.slice(0, 4).map((session) => (
               <div className={`jarvis-session-row ${activeSessionId === session.id ? "active" : ""}`} key={session.id}>
@@ -854,11 +854,11 @@ export function App() {
         </section>
         <section className="jarvis-card quick-card">
           <div className="jarvis-card-title"><h2>SCHNELLAKTIONEN</h2></div>
-          {[ ["Ã¢â€“Â£", "Systemdiagnose starten", "Vollstaendiger Systemcheck"], ["S", "Datenstrom analysieren", "Analyse in Echtzeit"], ["W", "Wissensbasis durchsuchen", "Informationen schnell finden"], ["B", "Bericht erzeugen", "Detaillierten Bericht erstellen"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
+          {[ ["▣", "Systemdiagnose starten", "Vollständiger Systemcheck"], ["S", "Datenstrom analysieren", "Analyse in Echtzeit"], ["W", "Wissensbasis durchsuchen", "Informationen schnell finden"], ["B", "Bericht erzeugen", "Detaillierten Bericht erstellen"] ].map(([icon, label, sub]) => <button className="quick-action" key={label} onClick={() => quickAction(label)}><span>{icon}</span><em><b>{label}</b><small>{sub}</small></em></button>)}
           <button className="custom-command" onClick={() => quickAction("Eigener Befehl")}>EIGENER BEFEHL <span>&gt;</span></button>
         </section>
         <section className="jarvis-card snapshot-card">
-          <div className="jarvis-card-title"><h2>SYSTEMMOMENT</h2><button>Ã¢â‚¬Â¢ AKTIV</button></div>
+          <div className="jarvis-card-title"><h2>SYSTEMMOMENT</h2><button>• AKTIV</button></div>
           <div className="snapshot-grid">
             <div className={metricClass(metrics.cpu.level)}><span>CPU</span><b>{fmtPercent(metrics.cpu.percent)}</b></div>
             <div className={metricClass(metrics.memory.level)}><span>Speicher</span><b>{fmtPercent(metrics.memory.percent)}</b></div>
@@ -885,7 +885,7 @@ export function App() {
           </button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Befehl oder Frage eingeben..." />
           <button className="plus-btn">+</button>
-          <button className="send-btn" onClick={() => sendMessage()}>Ã¢Å¾Â¤</button>
+          <button className="send-btn" onClick={() => sendMessage()}>➤</button>
         </div>
         <div className={`jarvis-voice-status ${listening ? "active" : ""} ${voiceSupported ? "" : "unsupported"}`}>
           <span>{listening ? "LIVE" : voiceSupported ? "VOICE" : "OFF"}</span>
