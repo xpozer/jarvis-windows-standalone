@@ -42,7 +42,7 @@ export function DashboardModules({ activeNav, onSend, dashboardTheme = "jarvis",
   const [visibleAddonIds, setVisibleAddonIds] = useState(loadVisibleAddonIds);
 
   const addon = findAddonByNav(activeNav);
-  const addonHidden = Boolean(addon) && !visibleAddonIds.includes(addon.id);
+  const addonHidden = addon ? !visibleAddonIds.includes(addon.id) : false;
   const visible = Boolean(module) && activeNav !== "Dialog";
 
   useEffect(() => {
