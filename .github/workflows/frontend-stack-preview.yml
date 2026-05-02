@@ -38,6 +38,10 @@ jobs:
         working-directory: frontend
         run: npm run build:stack-preview
 
+      - name: Check performance budget
+        working-directory: frontend
+        run: npm run budget:stack-preview
+
       - name: Upload stack preview artifact
         uses: actions/upload-artifact@v4
         with:
