@@ -1,5 +1,8 @@
 # Frontend Visual Roadmap
 
+> ⚠️ **Superseded by [`FRONTEND_F_ROADMAP.md`](FRONTEND_F_ROADMAP.md)** (B6.6.36).
+> Dieses Dokument bleibt als Inspirations- und Detail-Referenz erhalten, ist aber nicht mehr massgeblich fuer Block-Reihenfolge, Tabu-Liste oder Akzeptanzkriterien. Track A (Tokens) bleibt jedoch verbindliche Foundation und wird in F1 vorausgesetzt.
+
 > Ziel: Das echte App-Frontend (`frontend/src/`) auf das gleiche visuelle Niveau heben wie das HUD-Dashboard (`docs/index.html`) — **ohne** die fragile Logik (Orb, SSE-Parser, Voice, LocalStorage) anzufassen.
 
 **Branding-Anker:** HUD-Style · Cyan / Anthrazit · Operator-Console · industrial-serious, kein Marvel-Cosplay.

@@ -1,5 +1,8 @@
 # JARVIS · Living UI Vision (2026 → 2050)
 
+> ⚠️ **Superseded by [`FRONTEND_F_ROADMAP.md`](FRONTEND_F_ROADMAP.md)** (B6.6.36).
+> Dieses Dokument bleibt als Inspirations- und Detail-Referenz erhalten. Die DO-Liste wird selektiv in die F-Bloecke integriert (siehe Mapping in der F-Roadmap). LU-1..LU-10 sind nicht mehr die verbindliche Block-Struktur.
+
 > Diese Datei ist gleichzeitig **Vision-Dokument** und **wieder­verwend­barer Prompt**. Kopier sie in eine neue Claude-Session, und der Agent versteht das Ziel ohne Kontext.
 
 ## Leitsatz

@@ -4,6 +4,18 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.36] - 2026-05-03
+
+### Added
+
+- `docs/FRONTEND_F_ROADMAP.md` als Master-Plan fuer den Iron-Man-Style-Frontend-Redesign in sechs Bloecken (F1 Foundation, F2 Orb, F3 HUD-WS, F4 Command, F5 Voice, F6 Modals).
+- Mapping zwischen F-Bloecken und den frueheren Tracks A-E sowie der Living-UI-Vision dokumentiert.
+
+### Changed
+
+- `docs/FRONTEND_VISUAL_ROADMAP.md` und `docs/FRONTEND_LIVING_UI_VISION.md` mit Hinweis-Banner versehen, dass die F-Roadmap die neue verbindliche Quelle ist.
+- Tabu-Liste der Visual-Roadmap explizit aktualisiert: Orb, `App.tsx`-SSE-Parser, sound-engine und Voice duerfen unter der F-Roadmap kontrolliert angefasst werden.
+
 ## [B6.6.35] - 2026-05-03
 
 ### Added

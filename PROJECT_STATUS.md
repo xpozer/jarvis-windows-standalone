@@ -53,11 +53,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Frontend Dependencies | erledigt | Dependabot PR #11 wurde gemergt; `three` und `@types/three` stehen auf `0.184.0` |
 | Backend Integration | erledigt | Backend Health, DiagCenter, Automation Audit und CLI Smoke Checks sind angebunden |
 | Living UI Vision | erledigt | Vision-Dokument `docs/FRONTEND_LIVING_UI_VISION.md` mit DO/DONT-Prinzipien und LU-Tracks; PR #51 in `main` gemergt |
+| Frontend F-Roadmap | erledigt | Master-Plan unter `docs/FRONTEND_F_ROADMAP.md`; F1-F6 sind die neuen verbindlichen Bloecke fuer den Iron-Man-Style-Redesign |
 | Auto-Update Launcher | erledigt | `START_JARVIS` prueft GitHub Releases vor dem Start; Skip ueber `--skip-update`, `-SkipUpdate` oder `JARVIS_SKIP_UPDATE=1` |
 | Backend Struktur | in Arbeit | Erster Monolith-Schnitt erledigt: Backup, Restore und Diagnose-Paket liegen in `backend/services/runtime_packages.py` |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.36
+
+- `docs/FRONTEND_F_ROADMAP.md` als Single Source of Truth fuer den Frontend-Redesign veroeffentlicht.
+- Bloecke F1 bis F6 mit Akzeptanzkriterien, Branch-Naming und Tabu-Update definiert.
+- Aeltere Roadmap-Dokumente mit Supersede-Banner versehen.
 
 ### B6.6.35
 
@@ -140,6 +147,7 @@ Keine aktiven Repo-Todos. Strukturelle Verbesserungen laufen nur in kleinen Schn
 | `docs/tidy-root-migration-notes.md` | Notizen zur Root Hygiene Migration und zur Wrapper Entscheidung |
 | `docs/real-assist-roadmap.md` | Archivierte Real Assist Produktlinie mit Privacy Regeln und Testplan |
 | `docs/FRONTEND_LIVING_UI_VISION.md` | Living UI Vision mit Leitsatz, DO/DONT-Prinzipien, 10 LU-Tracks, Tabu-Liste und Performance-Budget fuer Frontend-Iterationen |
+| `docs/FRONTEND_F_ROADMAP.md` | Master-Plan fuer den Frontend-Redesign in sechs Bloecken (F1-F6) mit Akzeptanzkriterien und Mapping zu den frueheren Tracks |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 
