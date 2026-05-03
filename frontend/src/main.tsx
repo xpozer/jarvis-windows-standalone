@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
+import { RootLayout } from "./layout/RootLayout";
 import "./styles/globals.css";
 import "./styles/vignette.css";
 
@@ -12,6 +12,6 @@ if (!root) {
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <RootLayout />
   </StrictMode>,
 );
