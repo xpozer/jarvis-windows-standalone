@@ -1,6 +1,7 @@
 param(
   [switch]$DevFrontend,
   [switch]$NoBrowser,
+  [switch]$SkipUpdate,
   [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 )
 

@@ -53,10 +53,17 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Frontend Dependencies | erledigt | Dependabot PR #11 wurde gemergt; `three` und `@types/three` stehen auf `0.184.0` |
 | Backend Integration | erledigt | Backend Health, DiagCenter, Automation Audit und CLI Smoke Checks sind angebunden |
 | Living UI Vision | erledigt | Vision-Dokument `docs/FRONTEND_LIVING_UI_VISION.md` mit DO/DONT-Prinzipien und LU-Tracks; PR #51 in `main` gemergt |
+| Auto-Update Launcher | erledigt | `START_JARVIS` prueft GitHub Releases vor dem Start; Skip ueber `--skip-update`, `-SkipUpdate` oder `JARVIS_SKIP_UPDATE=1` |
 | Backend Struktur | in Arbeit | Erster Monolith-Schnitt erledigt: Backup, Restore und Diagnose-Paket liegen in `backend/services/runtime_packages.py` |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.35
+
+- `START_JARVIS` ruft `CHECK_GITHUB_UPDATE.ps1 -Apply -SkipIfSameVersion` vor dem Start auf.
+- Auto-Update ist Default; Opt-out via `--skip-update`, `-SkipUpdate` oder `JARVIS_SKIP_UPDATE=1`.
+- Fehlende GitHub-Env-Variablen oder Netzfehler fuehren nicht zum Abbruch, sondern zu einer Warnung im Log.
 
 ### B6.6.34
 
@@ -149,6 +156,7 @@ Keine aktiven Repo-Todos. Strukturelle Verbesserungen laufen nur in kleinen Schn
 ## Nächster sinnvoller Schritt
 
 Naechster sinnvoller Struktur-Schnitt: `backend/services/_runtime.py` weiter entflechten, aber nur blockweise. Gute Kandidaten sind Voice Runtime, Tool-Ausfuehrung oder Automation.
+Auto-Update setzt `JARVIS_GITHUB_OWNER`, `JARVIS_GITHUB_REPO` und `JARVIS_GITHUB_TOKEN` als User-Env voraus. Ohne Token startet JARVIS weiterhin lokal, aktualisiert sich aber nicht selbststaendig.
 
 ## Pflege Ablauf
 

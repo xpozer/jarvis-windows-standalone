@@ -1,6 +1,7 @@
 param(
   [switch]$DevFrontend,
-  [switch]$NoBrowser
+  [switch]$NoBrowser,
+  [switch]$SkipUpdate
 )
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -354,6 +355,72 @@ function Ensure-FrontendBuildFresh {
   if($currentCommit){ Set-Content -Path $FrontendBuildMarker -Value $currentCommit -Encoding UTF8 }
 }
 
+
+function Invoke-AutoUpdate {
+  param([string]$RepoRoot)
+
+  if($SkipUpdate){
+    Jv-Info "Auto-Update uebersprungen (-SkipUpdate)."
+    return $false
+  }
+  $envSkip = [Environment]::GetEnvironmentVariable("JARVIS_SKIP_UPDATE", "Process")
+  if([string]::IsNullOrWhiteSpace($envSkip)){ $envSkip = [Environment]::GetEnvironmentVariable("JARVIS_SKIP_UPDATE", "User") }
+  if($envSkip -and $envSkip -ne "0"){
+    Jv-Info "Auto-Update uebersprungen (JARVIS_SKIP_UPDATE=$envSkip)."
+    return $false
+  }
+
+  $checker = Join-Path $RepoRoot "scripts\maintenance\CHECK_GITHUB_UPDATE.ps1"
+  if(-not (Test-Path $checker)){
+    Jv-Warn "Update-Checker nicht gefunden: $checker"
+    return $false
+  }
+
+  $required = "JARVIS_GITHUB_OWNER","JARVIS_GITHUB_REPO","JARVIS_GITHUB_TOKEN"
+  foreach($name in $required){
+    $v = [Environment]::GetEnvironmentVariable($name, "Process")
+    if([string]::IsNullOrWhiteSpace($v)){ $v = [Environment]::GetEnvironmentVariable($name, "User") }
+    if([string]::IsNullOrWhiteSpace($v)){
+      Jv-Warn "Auto-Update uebersprungen ($name nicht gesetzt). Setze JARVIS_GITHUB_OWNER, JARVIS_GITHUB_REPO und JARVIS_GITHUB_TOKEN als User-Env, um Auto-Update zu aktivieren."
+      return $false
+    }
+  }
+
+  $manifestPath = Join-Path $RepoRoot "data\update_manifest.json"
+  $beforeStaged = ""
+  if(Test-Path $manifestPath){
+    try { $beforeStaged = (Get-Content -Raw -Path $manifestPath | ConvertFrom-Json).release } catch {}
+  }
+
+  Jv-Step "Pruefe auf neue JARVIS Version"
+  try {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $checker -Apply -SkipIfSameVersion -Root $RepoRoot
+    if($LASTEXITCODE -ne 0){
+      Jv-Warn "Update-Check ExitCode $LASTEXITCODE. Starte trotzdem mit aktueller Version."
+      return $false
+    }
+  } catch {
+    Jv-Warn "Update-Check fehlgeschlagen: $($_.Exception.Message). Starte trotzdem mit aktueller Version."
+    return $false
+  }
+
+  $afterStaged = ""
+  if(Test-Path $manifestPath){
+    try { $afterStaged = (Get-Content -Raw -Path $manifestPath | ConvertFrom-Json).release } catch {}
+  }
+
+  if($afterStaged -and $afterStaged -ne $beforeStaged){
+    Jv-Ok "Update auf $afterStaged installiert. Bitte START_JARVIS.bat erneut starten."
+    return $true
+  }
+
+  Jv-Info "Keine neue Version oder Update-Check uebersprungen."
+  return $false
+}
+
+if(Invoke-AutoUpdate -RepoRoot $Root){
+  exit 0
+}
 
 Jv-Step "JARVIS Start beginnt"
 Jv-Info "Root: $Root"

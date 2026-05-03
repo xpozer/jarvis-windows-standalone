@@ -4,6 +4,23 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.35] - 2026-05-03
+
+### Added
+
+- `START_JARVIS` prueft beim Start automatisch auf neue GitHub Releases und installiert sie ueber `CHECK_GITHUB_UPDATE.ps1 -Apply -SkipIfSameVersion`, wenn `JARVIS_GITHUB_OWNER`, `JARVIS_GITHUB_REPO` und `JARVIS_GITHUB_TOKEN` gesetzt sind.
+- Opt-out ueber `START_JARVIS.bat --skip-update`, Schalter `-SkipUpdate` oder Umgebungsvariable `JARVIS_SKIP_UPDATE=1`.
+- Nach erfolgreichem Update beendet sich `START_JARVIS` mit Hinweis, damit der naechste Start sauber mit der neuen Version laeuft.
+
+### Changed
+
+- `START_JARVIS.bat` reicht `--skip-update` und `-SkipUpdate` an die PowerShell-Schicht durch.
+- `scripts/dev/START_JARVIS.ps1` und `scripts/dev/START_JARVIS.core.ps1` akzeptieren den neuen `-SkipUpdate` Switch.
+
+### Security
+
+- Bei fehlenden GitHub-Env-Variablen oder Netzfehlern startet JARVIS weiterhin lokal; das Update wird nur uebersprungen, nicht erzwungen.
+
 ## [B6.6.34] - 2026-05-03
 
 ### Added
