@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Orb, type OrbEventSignal, type OrbState } from "./components/Orb";
+import { useLayoutMode } from "./hooks/useLayoutMode";
+import { IronManShell } from "./components/IronManShell";
 import { DashboardModules } from "./components/DashboardModules";
 import { DayStartCard } from "./components/DayStartCard";
 import { TodayScheduleCard } from "./components/TodayScheduleCard";
@@ -719,6 +721,26 @@ export function App() {
       jarvisSound.configure(true, soundVolume / 100);
       jarvisSound.play("ui_toggle");
     }
+  }
+
+  const layoutMode = useLayoutMode();
+  if (layoutMode.mode === "iron-man") {
+    return (
+      <IronManShell
+        orbState={orbState}
+        orbSignal={orbSignal}
+        typingActivity={typingActivity}
+        thinking={thinking}
+        onSwitchToClassic={() => layoutMode.setMode("classic")}
+        onSubmit={async (command) => {
+          // Naive Bridge fuer F1: Text-Eingaben gehen durch die bestehende sendMessage.
+          // F4 ersetzt das durch echtes Slash-Routing.
+          if (typeof sendMessage === "function") {
+            await sendMessage(command.raw);
+          }
+        }}
+      />
+    );
   }
 
   return (
