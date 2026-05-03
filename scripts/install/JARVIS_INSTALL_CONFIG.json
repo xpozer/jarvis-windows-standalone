@@ -1,6 +1,6 @@
 {
   "app_name": "JARVIS Windows Standalone",
-  "version": "B6.5.1",
+  "version": "B6.6.36",
   "default_install_dir": "%LOCALAPPDATA%\\JARVIS_WINDOWS_STANDALONE",
   "model": "qwen3:8b",
   "winget_dependencies": [
@@ -27,7 +27,7 @@
     "Bestehende Installationen werden vor Clean Install in ein Backupverzeichnis verschoben."
   ],
   "productization": {
-    "update_system": "local staged zip with plan and product installer",
+    "update_system": "GitHub Release ZIP staging with optional token and product installer apply",
     "installer_modes": [
       "Install",
       "Repair",
@@ -51,15 +51,19 @@
       "EXPORT_JARVIS_DATA.bat"
     ]
   },
-  "private_github_updates": {
-    "mode": "private_github_release",
+  "github_updates": {
+    "mode": "github_release",
     "required_environment": [
       "JARVIS_GITHUB_OWNER",
-      "JARVIS_GITHUB_REPO",
-      "JARVIS_GITHUB_TOKEN"
+      "JARVIS_GITHUB_REPO"
+    ],
+    "optional_environment": [
+      "JARVIS_GITHUB_TOKEN",
+      "JARVIS_GITHUB_RELEASE",
+      "JARVIS_GITHUB_PACKAGE_ASSET"
     ],
     "package_asset": "Release ZIP asset, usually JARVIS_Bx_y_PRODUCTION_INSTALLER.zip",
-    "token_rule": "Token is read from the local environment and must never be committed into this package."
+    "token_rule": "Token is optional for public repositories and required only for private repositories or higher API limits. It is read from the local environment and must never be committed into this package."
   },
   "production_installer": {
     "execution_policy_bypass": true,
@@ -94,9 +98,9 @@
     "fix": "ProcessStartInfo.ArgumentList removed for Windows PowerShell compatibility; uses ProcessStartInfo.Arguments with explicit quoting",
     "affected": [
       "FIRST_SETUP.ps1",
+      "REPAIR.ps1",
       "INSTALL_JARVIS.ps1",
-      "START_JARVIS.ps1",
-      "REPAIR.ps1"
+      "START_JARVIS.ps1"
     ]
   },
   "installer_hotfix_3": {
@@ -121,7 +125,11 @@
     "reason": "winget can emit non-fatal stderr/progress output; installer should fail only on native ExitCode."
   },
   "installer_hotfix_7": {
-    "fix": "Added CHECK_GITHUB_UPDATE.ps1/.bat for private GitHub Release download, staging and optional PRODUCT_INSTALLER update apply.",
-    "reason": "Installed systems need a stable local bootstrapper that can fetch the latest private release without storing tokens in the package."
+    "fix": "Added CHECK_GITHUB_UPDATE.ps1/.bat for GitHub Release download, staging and optional PRODUCT_INSTALLER update apply.",
+    "reason": "Installed systems need a stable local bootstrapper that can fetch the latest release without storing tokens in the package."
+  },
+  "installer_hotfix_8": {
+    "fix": "GitHub release updates now support public repositories without JARVIS_GITHUB_TOKEN. Token remains optional for private repositories and higher API limits.",
+    "reason": "The public xpozer/jarvis-windows-standalone release flow should not require every user to create a GitHub token."
   }
 }
