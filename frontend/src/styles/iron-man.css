@@ -1,0 +1,131 @@
+/* F1 Iron-Man Shell Skeleton — siehe docs/FRONTEND_F_ROADMAP.md */
+.iron-man-shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr) minmax(220px, 1fr);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "tl    .     tr"
+    ".     orb   ."
+    "bl    input br";
+  background: radial-gradient(ellipse at center, #05080d 0%, #000 100%);
+  color: var(--jv-text, #e6f1ff);
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  overflow: hidden;
+}
+
+.iron-man-corner {
+  padding: 16px 20px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--jv-text-mute, #5b6b82);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.iron-man-corner.tl { grid-area: tl; }
+.iron-man-corner.tr { grid-area: tr; align-items: flex-end; text-align: right; }
+.iron-man-corner.bl { grid-area: bl; align-self: end; }
+.iron-man-corner.br { grid-area: br; align-self: end; align-items: flex-end; text-align: right; }
+
+.iron-man-corner-label {
+  color: var(--jv-cyan, #00d4ff);
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.iron-man-orb-area {
+  grid-area: orb;
+  display: grid;
+  place-items: center;
+  position: relative;
+  padding: 24px;
+}
+
+.iron-man-orb-frame {
+  width: clamp(280px, 50vh, 720px);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+}
+
+.iron-man-input-area {
+  grid-area: input;
+  padding: 18px 24px 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.iron-man-input-frame {
+  width: min(720px, 90%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(10, 14, 20, 0.55);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 22px rgba(0, 212, 255, 0.08);
+}
+
+.iron-man-input-frame input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--jv-text, #e6f1ff);
+  font: inherit;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.iron-man-input-frame input::placeholder {
+  color: var(--jv-text-mute, #5b6b82);
+}
+
+.iron-man-input-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--jv-text-mute, #5b6b82);
+}
+
+.iron-man-mode-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  background: rgba(10, 14, 20, 0.6);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  color: var(--jv-cyan, #00d4ff);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.iron-man-mode-toggle:hover {
+  background: rgba(0, 212, 255, 0.12);
+}
+
+@media (max-width: 720px) {
+  .iron-man-shell {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "tl    tr"
+      "orb   orb"
+      "bl    br"
+      "input input";
+  }
+  .iron-man-orb-frame { width: 80vw; }
+}
