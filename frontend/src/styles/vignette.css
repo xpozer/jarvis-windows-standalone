@@ -1,0 +1,22 @@
+.jarvis-v18-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, rgba(0, 212, 255, 0.08) 0%, rgba(0, 0, 0, 0) 34%),
+    radial-gradient(circle at center, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+.jarvis-v18-root::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(rgba(255,255,255,0.018) 50%, rgba(0,0,0,0.03) 50%);
+  background-size: 100% 4px;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+}
