@@ -52,10 +52,18 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Release ZIP Packager | erledigt | Runtime Quellcode wird korrekt gepackt; lokale Runtime Daten bleiben ausgeschlossen |
 | Frontend Dependencies | erledigt | Dependabot PR #11 wurde gemergt; `three` und `@types/three` stehen auf `0.184.0` |
 | Backend Integration | erledigt | Backend Health, DiagCenter, Automation Audit und CLI Smoke Checks sind angebunden |
+| Living UI Vision | erledigt | Vision-Dokument `docs/FRONTEND_LIVING_UI_VISION.md` mit DO/DONT-Prinzipien und LU-Tracks; PR #51 in `main` gemergt |
 | Backend Struktur | in Arbeit | Erster Monolith-Schnitt erledigt: Backup, Restore und Diagnose-Paket liegen in `backend/services/runtime_packages.py` |
 | Tests und CI | erledigt | CI nutzt Node.js 24, Frontend Lockfile ist versioniert, Ruff/Black/Pytest sind gruen |
 
 ## Erledigte Updates
+
+### B6.6.34
+
+- PR #51 (Living UI Vision) wurde in `main` gemergt.
+- Neues Vision-Dokument `docs/FRONTEND_LIVING_UI_VISION.md` mit 9 DO-Prinzipien, 10 DON'T-Regeln und 10 LU-Tracks.
+- Performance-Budget (60 FPS, prefers-reduced-motion) und Tabu-Liste sind verbindlich fuer kuenftige Frontend-Tracks.
+- Naechster vorgeschlagener Einstieg: LU-1 (Heartbeat-System), risikoarm, ~3h Aufwand.
 
 ### B6.6.33
 
@@ -106,6 +114,7 @@ Kein größerer Projektstand gilt als sauber abgeschlossen, wenn `PROJECT_STATUS
 | Real Assist Roadmap Issue #42 | Dokumentiert in `docs/real-assist-roadmap.md` |
 | Frontend Cleanup Issue #41 | Geschlossen als veraltet nach UI Overhaul #46 |
 | Alte Architektur-Issues #16-#22 | Geschlossen als archivierter Backlog, Wiederaufnahme nur mit konkretem Branch |
+| Living UI Vision PR #51 | Gemergt in `main` |
 
 ## Offene Updates und Todos
 
@@ -123,6 +132,7 @@ Keine aktiven Repo-Todos. Strukturelle Verbesserungen laufen nur in kleinen Schn
 | `docs/diagcenter.md` | Anleitung zum zentralen DiagCenter Sammel Endpunkt |
 | `docs/tidy-root-migration-notes.md` | Notizen zur Root Hygiene Migration und zur Wrapper Entscheidung |
 | `docs/real-assist-roadmap.md` | Archivierte Real Assist Produktlinie mit Privacy Regeln und Testplan |
+| `docs/FRONTEND_LIVING_UI_VISION.md` | Living UI Vision mit Leitsatz, DO/DONT-Prinzipien, 10 LU-Tracks, Tabu-Liste und Performance-Budget fuer Frontend-Iterationen |
 | `CHANGELOG.md` | Versionierte Änderungen |
 | `PROJECT_STATUS.md` | Projektstand, offene Todos, Risiken und nächster sinnvoller Schritt |
 

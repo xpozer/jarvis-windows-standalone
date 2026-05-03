@@ -4,6 +4,15 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 Das Format orientiert sich an Keep a Changelog. Versionen folgen dem Projektstand B1 bis B6 und den Build Versionen von JARVIS.
 
+## [B6.6.34] - 2026-05-03
+
+### Added
+
+- Living UI Vision Dokument unter `docs/FRONTEND_LIVING_UI_VISION.md` (PR #51 gemergt).
+- Beschreibt Heartbeat-System, Cursor- und Daten-Reaktivitaet, Sound x Visual, raeumliche Tiefe, Persoenlichkeit, Time-of-Day und Spatial Audio als 9 DO-Prinzipien.
+- Definiert 10 LU-Tracks (LU-1 bis LU-10) von risikoarm bis invasiv, eine Tabu-Liste (Orb, SSE-Parser, Sound) und ein Performance-Budget (60 FPS, prefers-reduced-motion).
+- Dient als wiederverwendbarer Implementierungsprompt fuer kommende Frontend-Iterationen, beginnend mit LU-1 (Heartbeat-System).
+
 ## [B6.6.33] - 2026-05-02
 
 ### Changed
