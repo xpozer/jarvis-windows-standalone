@@ -23,15 +23,33 @@ function Log($Level, $Message){
 
 function Fail($Message){ Log "ERROR" $Message; throw $Message }
 
-function Require-Env($Name){
+function Get-EnvValue($Name){
   $value = [Environment]::GetEnvironmentVariable($Name, "Process")
   if([string]::IsNullOrWhiteSpace($value)){
     $value = [Environment]::GetEnvironmentVariable($Name, "User")
   }
+  if([string]::IsNullOrWhiteSpace($value)){ return "" }
+  return $value.Trim()
+}
+
+function Require-Env($Name){
+  $value = Get-EnvValue $Name
   if([string]::IsNullOrWhiteSpace($value)){
     Fail "$Name fehlt. Bitte als Umgebungsvariable setzen."
   }
-  return $value.Trim()
+  return $value
+}
+
+function New-GitHubHeaders([string]$Token, [string]$Accept){
+  $headers = @{
+    "Accept" = $Accept
+    "X-GitHub-Api-Version" = "2022-11-28"
+    "User-Agent" = "JARVIS-Windows-Standalone-Updater"
+  }
+  if(-not [string]::IsNullOrWhiteSpace($Token)){
+    $headers["Authorization"] = "Bearer $Token"
+  }
+  return $headers
 }
 
 function Get-LocalVersion {
@@ -58,10 +76,10 @@ function Test-JarvisZip($ZipPath){
 
 $owner = Require-Env "JARVIS_GITHUB_OWNER"
 $repo = Require-Env "JARVIS_GITHUB_REPO"
-$token = Require-Env "JARVIS_GITHUB_TOKEN"
-$release = [Environment]::GetEnvironmentVariable("JARVIS_GITHUB_RELEASE", "Process")
+$token = Get-EnvValue "JARVIS_GITHUB_TOKEN"
+$release = Get-EnvValue "JARVIS_GITHUB_RELEASE"
 if([string]::IsNullOrWhiteSpace($release)){ $release = "latest" }
-$assetName = [Environment]::GetEnvironmentVariable("JARVIS_GITHUB_PACKAGE_ASSET", "Process")
+$assetName = Get-EnvValue "JARVIS_GITHUB_PACKAGE_ASSET"
 
 $releaseUrl = if($release -eq "latest"){
   "https://api.github.com/repos/$owner/$repo/releases/latest"
@@ -69,14 +87,10 @@ $releaseUrl = if($release -eq "latest"){
   "https://api.github.com/repos/$owner/$repo/releases/tags/$release"
 }
 
-$headers = @{
-  "Accept" = "application/vnd.github+json"
-  "Authorization" = "Bearer $token"
-  "X-GitHub-Api-Version" = "2022-11-28"
-  "User-Agent" = "JARVIS-Windows-Standalone-Updater"
-}
+$headers = New-GitHubHeaders -Token $token -Accept "application/vnd.github+json"
+$authMode = if([string]::IsNullOrWhiteSpace($token)){ "public" } else { "token" }
 
-Log "STEP" "Pruefe privates GitHub Release: $owner/$repo ($release)"
+Log "STEP" "Pruefe GitHub Release: $owner/$repo ($release, auth: $authMode)"
 $remote = Invoke-RestMethod -Uri $releaseUrl -Headers $headers -TimeoutSec 30
 $remoteVersion = [string]$remote.tag_name
 $localVersion = [string](Get-LocalVersion)
@@ -99,18 +113,22 @@ if($assetName){
 $safeName = ([string]$asset.name) -replace '[^a-zA-Z0-9._-]', '_'
 $target = Join-Path $Staging ((Get-Date -Format "yyyyMMdd_HHmmss") + "_" + $safeName)
 Log "STEP" "Lade Update ZIP: $($asset.name)"
-Invoke-WebRequest -Uri $asset.url -Headers @{
-  "Accept" = "application/octet-stream"
-  "Authorization" = "Bearer $token"
-  "X-GitHub-Api-Version" = "2022-11-28"
-  "User-Agent" = "JARVIS-Windows-Standalone-Updater"
-} -OutFile $target -TimeoutSec 120
+
+$downloadHeaders = New-GitHubHeaders -Token $token -Accept "application/octet-stream"
+$downloadUri = if([string]::IsNullOrWhiteSpace($token) -and $asset.browser_download_url){
+  [string]$asset.browser_download_url
+} else {
+  [string]$asset.url
+}
+
+Invoke-WebRequest -Uri $downloadUri -Headers $downloadHeaders -OutFile $target -TimeoutSec 120
 
 if(-not (Test-JarvisZip $target)){ Fail "Geladenes ZIP hat keine gueltige JARVIS Struktur: $target" }
 
 $manifest = @{
   staged_at = (Get-Date).ToString("s")
-  source = "private_github_release"
+  source = "github_release"
+  auth = $authMode
   release = $remoteVersion
   filename = $asset.name
   path = $target
