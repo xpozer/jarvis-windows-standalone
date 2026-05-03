@@ -1,5 +1,108 @@
 # Frontend Changelog
 
+## v18_F2_ORB
+
+### Added
+
+- State reactive Canvas Orb replaces the F1 SVG placeholder.
+- New Orb renderer files:
+  - `frontend/src/components/Orb/Orb.tsx`
+  - `frontend/src/components/Orb/OrbCanvas.ts`
+  - `frontend/src/components/Orb/OrbStates.ts`
+  - `frontend/src/components/Orb/useOrbAnimation.ts`
+  - `frontend/src/components/Orb/useOrbState.ts`
+  - `frontend/src/components/Orb/useAudioReactive.ts`
+- Five Orb states:
+  - idle
+  - listening
+  - thinking
+  - speaking
+  - error
+- Smooth interpolation for color, glow, rotation speed, particle behavior and pulse cycle over 600ms.
+- DPR aware canvas resize with minimum 2x render scale.
+- Adaptive particle count:
+  - desktop 200
+  - mobile 80
+- Hidden tab animation throttling through `document.hidden`.
+- Generic `useWebSocket` hook with reconnect backoff.
+- Orb state channel service for `/orb-state`.
+- Backend WebSocket stub at `/orb-state` that sends idle on connect.
+
+### Changed
+
+- `OrbSlot` now renders `Orb` instead of `OrbPlaceholder`.
+- `orbStore` now tracks `state`, `audioLevel` and `intensity`.
+- `CommandBus.execute` now drives Orb states:
+  - command start: thinking
+  - successful stub response: speaking
+  - after 1.5s: idle
+  - errors: error
+- Orb sizing updated:
+  - desktop landscape: 50vh
+  - portrait/tablet: 45vh
+  - mobile below 640px: 60vw
+- `frontend/package.json` version updated to `v18_F2_ORB`.
+
+### Removed
+
+- `frontend/src/components/Orb/OrbPlaceholder.tsx`
+
+### Migration from `docs/index.html`
+
+The exact GitHub Pages dashboard file remains unchanged. F2 does not render the page directly. The visual behavior was migrated into a React compatible Canvas renderer:
+
+- retained black/cyan HUD visual identity
+- retained soft radial glow
+- retained particle/orb energy effect
+- retained local-only frontend behavior
+- adapted into `OrbCanvas` class with explicit lifecycle methods
+- added stateful visual parameters and interpolation
+- added DPR and ResizeObserver handling for React runtime
+
+### Backend
+
+- Added `backend/routes/orb_state.py`
+- Registered `orb_state_router` in `backend/main.py`
+- The endpoint is intentionally minimal and only sends idle keepalive messages. Real backend state push comes later.
+
+### Test checklist
+
+- [ ] Orb renders centered, correct size around 50vh on desktop
+- [ ] Idle state visually matches the existing cyan GitHub Pages identity
+- [ ] Resize browser window: Orb scales smoothly without pixel blur
+- [ ] DPR scaling on Retina or 4K looks sharp
+- [ ] Dev console state switch works through `useOrbStore.getState().setState('thinking')`
+- [ ] All five states are visually distinct
+- [ ] Error state resets to idle after 3 seconds
+- [ ] WebSocket `/orb-state` connects and receives idle
+- [ ] Disconnect triggers temporary error state and reconnect backoff
+- [ ] Slash command submit moves thinking, then speaking, then idle
+- [ ] Mobile 375px shows Orb at 60vw without overflow
+- [ ] Hidden tab pauses render work via `document.hidden`
+- [ ] Unmount cleans ResizeObserver, animation frame and renderer
+- [ ] Desktop Chrome performance remains around 60fps
+
+### ZIP build
+
+```powershell
+cd frontend
+npm install
+npm run typecheck
+npm run build
+New-Item -ItemType Directory -Force -Path ..\release | Out-Null
+Compress-Archive -Path .\* -DestinationPath ..\release\jarvis-v18_F2_ORB-frontend.zip -Force
+```
+
+Backend patch ZIP:
+
+```powershell
+New-Item -ItemType Directory -Force -Path .\release\backend-orb-state | Out-Null
+Copy-Item .\backend\main.py .\release\backend-orb-state\main.py -Force
+New-Item -ItemType Directory -Force -Path .\release\backend-orb-state\routes | Out-Null
+Copy-Item .\backend\routes\orb_state.py .\release\backend-orb-state\routes\orb_state.py -Force
+Compress-Archive -Path .\release\backend-orb-state\* -DestinationPath .\release\jarvis-v18_F2_ORB-backend-orb-state.zip -Force
+```
+
 ## v18_F1_FOUNDATION
 
 ### Added
