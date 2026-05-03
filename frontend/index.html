@@ -1,32 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JARVIS Windows</title>
-    <style>
-      html,body,#root{margin:0;width:100%;min-height:100%;background:#02040a;color:#e8f6ff;}
-      body{font-family:Consolas,"Courier New",monospace;}
-      #bootdiag{position:fixed;right:12px;bottom:12px;z-index:2147483647;background:rgba(0,12,24,.94);border:1px solid rgba(0,190,255,.35);border-radius:12px;padding:10px 12px;font-size:12px;color:#8ee8ff;box-shadow:0 0 24px rgba(0,180,255,.18)}
-      #bootdiag button{margin-left:8px;background:rgba(0,180,255,.18);color:#e8f6ff;border:1px solid rgba(0,180,255,.35);border-radius:8px;padding:4px 8px;cursor:pointer}
-    </style>
-    <script>
-      (function(){
-        const logs=[]; window.__JARVIS_BOOT_LOGS__=logs; window.__JARVIS_REACT_MOUNTED__=false;
-        function log(t,m){const line='['+new Date().toLocaleTimeString()+'] ['+t+'] '+m; logs.push(line); try{localStorage.setItem('jarvis_boot_log',logs.join('\n'))}catch(e){}}
-        window.__JARVIS_BOOT_LOG__=log; log('INFO','index.html geladen');
-        window.addEventListener('error',e=>log('ERROR',(e.message||'error')+' '+(e.filename||'')+':'+(e.lineno||'')));
-        window.addEventListener('unhandledrejection',e=>log('PROMISE',(e.reason&&e.reason.stack)||String(e.reason)));
-        window.__JARVIS_COPY_BOOT_LOG__=function(){navigator.clipboard&&navigator.clipboard.writeText(localStorage.getItem('jarvis_boot_log')||logs.join('\n'))}
-      })();
-    </script>
+    <meta name="theme-color" content="#000000" />
+    <title>JARVIS v18 F1 Foundation</title>
   </head>
   <body>
     <div id="root"></div>
-    <div id="bootdiag">JARVIS lädt <button onclick="location.href='/diagnose.html'">Diagnose</button><button onclick="window.__JARVIS_COPY_BOOT_LOG__&&window.__JARVIS_COPY_BOOT_LOG__()">Log kopieren</button></div>
-    <script type="module" src="/src/upload-bridge.ts"></script>
-    <script type="module" src="/src/diagnostics-bridge.ts"></script>
-    <script type="module" src="/src/knowledge-bridge.ts"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
