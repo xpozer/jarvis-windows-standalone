@@ -66,6 +66,13 @@ input {
   pointer-events: none;
 }
 
+.orb-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.22));
+}
+
 .orb-placeholder {
   width: 100%;
   height: 100%;
@@ -258,10 +265,18 @@ input {
   50% { opacity: 1; transform: scale(1.012); }
 }
 
-@media (max-width: 700px) {
+@media (orientation: portrait) and (min-width: 641px) {
   .orb-slot {
-    width: 62vw;
-    height: 62vw;
+    width: 45vh;
+    height: 45vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .orb-slot {
+    width: 60vw;
+    height: 60vw;
+    top: 46%;
   }
 
   .dialog-slot {

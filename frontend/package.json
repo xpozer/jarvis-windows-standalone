@@ -1,7 +1,7 @@
 {
   "name": "jarvis-windows-standalone",
-  "version": "v18_F1_FOUNDATION",
-  "description": "JARVIS v18 F1 Foundation - Iron Man suit interface shell with command bus",
+  "version": "v18_F2_ORB",
+  "description": "JARVIS v18 F2 Orb - state reactive canvas orb with websocket state channel",
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",

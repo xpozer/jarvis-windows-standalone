@@ -1,3 +1,4 @@
+import { useOrbStore } from "../state/orbStore";
 import type { CommandHandler, CommandObject, CommandResult, ParsedCommand, Suggestion } from "./types";
 
 export class CommandBus {
@@ -33,21 +34,40 @@ export class CommandBus {
   }
 
   async execute(input: string, source: CommandObject["source"] = "text"): Promise<CommandResult> {
-    const parsed = this.parse(input, source);
-    const handler = this.handlers.get(parsed.command);
+    const orb = useOrbStore.getState();
+    orb.setState("thinking");
 
-    if (!handler) {
+    try {
+      const parsed = this.parse(input, source);
+      const handler = this.handlers.get(parsed.command);
+
+      if (!handler) {
+        const result = {
+          ok: false,
+          command: parsed.command,
+          message: parsed.isSlashCommand
+            ? `Unknown command: ${parsed.command}`
+            : "Text input captured. Backend binding follows in a later block.",
+          payload: parsed,
+        };
+        orb.setState("error");
+        return result;
+      }
+
+      const result = await handler(parsed);
+      orb.setState(result.ok ? "speaking" : "error");
+      if (result.ok) {
+        window.setTimeout(() => useOrbStore.getState().setState("idle"), 1500);
+      }
+      return result;
+    } catch (error) {
+      orb.setState("error");
       return {
         ok: false,
-        command: parsed.command,
-        message: parsed.isSlashCommand
-          ? `Unknown command: ${parsed.command}`
-          : "Text input captured. Backend binding follows in a later block.",
-        payload: parsed,
+        command: "error",
+        message: error instanceof Error ? error.message : String(error),
       };
     }
-
-    return handler(parsed);
   }
 
   getSuggestions(partial: string): Suggestion[] {
